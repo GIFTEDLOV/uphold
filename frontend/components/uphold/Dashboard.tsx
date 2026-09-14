@@ -1,0 +1,28 @@
+"use client";
+
+import Link from "next/link";
+import { ArrowUpRight, ClipboardCheck, Clock3, Coins, Plus, ShieldAlert, WalletCards } from "lucide-react";
+import { useMemo } from "react";
+import { useWallet } from "@/lib/genlayer/wallet";
+import { getUpholdContractAddress } from "@/lib/uphold/config";
+import { formatCount, formatDate, formatStake } from "@/lib/uphold/format";
+import { useCommitments, useLedger } from "@/lib/uphold/hooks";
+import { AddressChip, Button, EmptyState, Metric, PageHeader, SetupState, StatusBadge } from "./ui";
+
+export function Dashboard() {
+  const wallet = useWallet();
+  const { data: ledger, isLoading: ledgerLoading } = useLedger();
+  const { data: commitments } = useCommitments();
+  const mine = useMemo(() => (commitments ?? []).filter((item) => wallet.address && (item.promisor.toLowerCase() === wallet.address.toLowerCase() || item.beneficiary.toLowerCase() === wallet.address.toLowerCase())), [commitments, wallet.address]);
+  const attention = mine.filter((item) => item.status === "BREACH_CLAIMED" || (item.status === "ACTIVE" && new Date(item.expires_at) < new Date()));
+  const openClaims = (commitments ?? []).filter((item) => item.status === "BREACH_CLAIMED" || item.status === "CONTESTED");
+
+  return <><PageHeader eyebrow="Overview" title="What needs your attention?" copy="A clear view of bonds, evidence checks, and the commitments connected to your wallet." action={<Link href="/app/create" className="button button-primary"><Plus size={16} /> Uphold a promise</Link>} />
+    {!getUpholdContractAddress() && <SetupState />}
+    <section className="metric-grid" aria-label="Protocol totals"><Metric label="Total bonded" value={ledgerLoading ? "…" : ledger ? formatStake(ledger.total_escrowed) : "—"} detail="Currently escrowed" /><Metric label="Active commitments" value={ledgerLoading ? "…" : ledger ? formatCount(ledger.commitments_created - ledger.commitments_completed) : "—"} detail="Across the protocol" /><Metric label="Checks run" value={ledgerLoading ? "…" : ledger ? formatCount(ledger.checks_run) : "—"} detail="Authenticated evidence" /><Metric label="Breach claims" value={ledgerLoading ? "…" : ledger ? formatCount(ledger.breach_claims) : "—"} detail="Two points required" /></section>
+    <section className="dashboard-grid"><div className="content-panel"><div className="panel-heading"><div><p className="eyebrow">Your commitments</p><h2>My commitments</h2></div><Link href="/app/explore" className="inline-link">View all <ArrowUpRight size={14} /></Link></div>{!getUpholdContractAddress() ? <EmptyState title="Your record starts on-chain" copy="Connect a deployed Uphold contract to see commitments you have bonded or benefit from." action={<Link className="button button-secondary" href="/transparency#deployment">Read deployment notes</Link>} /> : mine.length === 0 ? <EmptyState title="No commitments yet" copy="Put money behind a published promise and create the first item in your Uphold Record." action={<Link className="button button-primary" href="/app/create">Create commitment <ArrowUpRight size={15} /></Link>} /> : <div className="mini-list">{mine.slice(0, 4).map((item) => <Link key={item.commitment_id} href={`/app/commitments/${encodeURIComponent(item.commitment_id)}`} className="mini-row"><span className="mini-status"><span className={`status-dot status-dot-${item.status.toLowerCase()}`} /></span><span className="mini-main"><strong>{item.title}</strong><span>{item.commitment_id}</span></span><span className="mini-value">{formatStake(item.current_stake)}</span><StatusBadge status={item.status} /><ArrowUpRight size={15} /></Link>)}</div>}</div>
+      <div className="content-panel"><div className="panel-heading"><div><p className="eyebrow">Protocol watch</p><h2>Open breach claims</h2></div><ShieldAlert size={19} className="heading-icon" /></div>{!getUpholdContractAddress() || openClaims.length === 0 ? <EmptyState title="No open claims" copy={getUpholdContractAddress() ? "No unresolved breach claims were returned by the contract." : "Live claims appear here after the Uphold contract is configured."} /> : <div className="mini-list">{openClaims.slice(0, 4).map((item) => <Link key={item.commitment_id} href={`/app/commitments/${encodeURIComponent(item.commitment_id)}`} className="mini-row"><span className="mini-main"><strong>{item.title}</strong><span><AddressChip address={item.promisor} /> · {item.consecutive_negative_count}/2 qualified points</span></span><StatusBadge status={item.status} /><ArrowUpRight size={15} /></Link>)}</div>}</div></section>
+    <section className="attention-strip"><div className="attention-icon"><Clock3 size={18} /></div><div><p className="eyebrow">Needs attention</p><h2>{attention.length ? `${attention.length} item${attention.length === 1 ? "" : "s"} need review` : "Nothing urgent"}</h2><p>{attention.length ? "Review the latest evidence and available protocol action before a deadline passes." : "Your commitments have no immediate action surfaced from current contract state."}</p></div><Link href="/app/activity" className="inline-link">Open activity <ArrowUpRight size={14} /></Link></section>
+    <section className="dashboard-foot"><div><WalletCards size={17} /><span>Wallet</span><strong>{wallet.address ? <AddressChip address={wallet.address} link={false} /> : "Not connected"}</strong></div><div><Coins size={17} /><span>Returned to promisors</span><strong>{ledger ? formatStake(ledger.total_returned_to_promisors) : "—"}</strong></div><div><ClipboardCheck size={17} /><span>Completed intact</span><strong>{ledger ? formatCount(ledger.commitments_completed) : "—"}</strong></div></section>
+  </>;
+}

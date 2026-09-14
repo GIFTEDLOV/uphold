@@ -27,7 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </WalletProvider>
       <Toaster
         position="top-right"
-        theme="dark"
+        theme="system"
         richColors
         closeButton
         offset="80px"

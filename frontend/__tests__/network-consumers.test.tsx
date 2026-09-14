@@ -20,9 +20,9 @@ vi.mock("@genlayer/transaction-kit", async (importOriginal) => ({
   createTransactionKit: mocks.createTransactionKit,
 }));
 
-import FootballBets from "../lib/contracts/FootballBets";
 import {
   addGenLayerNetwork,
+  createGenLayerClient,
   switchToGenLayerNetwork,
 } from "../lib/genlayer/client";
 import { useTransactionKit } from "../lib/genlayer/kit";
@@ -45,17 +45,10 @@ describe("network consumers", () => {
     });
   });
 
-  it("uses the shared chain for contract clients", () => {
-    const contract = new FootballBets(account, account);
-
+  it("uses the shared chain for Uphold clients", () => {
+    createGenLayerClient(account);
     expect(mocks.createClient).toHaveBeenLastCalledWith({
       account,
-      chain: GENLAYER_CHAIN,
-    });
-
-    contract.updateAccount("0x0000000000000000000000000000000000000001");
-    expect(mocks.createClient).toHaveBeenLastCalledWith({
-      account: "0x0000000000000000000000000000000000000001",
       chain: GENLAYER_CHAIN,
     });
   });

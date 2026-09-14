@@ -11,8 +11,8 @@ import {
 const tx: SubmitInput = {
   kind: "write",
   address: "0x1234567890123456789012345678901234567890",
-  method: "create_bet",
-  args: ["2026-06-12", "Team A", "Team B", "1"],
+  method: "create_commitment",
+  args: ["upl-test", "A promise", "accountability"],
 };
 
 function renderPanel(
@@ -23,7 +23,7 @@ function renderPanel(
     <GenLayerTransactionPanel
       kit={kit}
       tx={tx}
-      network="GenLayer Studio"
+      network="GenLayer Studio Next"
       theme="dark"
       trackUntil="decided"
       onDone={onDone}

@@ -1,169 +1,75 @@
-# Sample GenLayer project
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/license/mit/)
-[![Discord](https://img.shields.io/badge/Discord-Join%20us-5865F2?logo=discord&logoColor=white)](https://discord.gg/8Jm4v89VAu)
-[![Telegram](https://img.shields.io/badge/Telegram--T.svg?style=social&logo=telegram)](https://t.me/genlayer)
-[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/yeagerai.svg?style=social&label=Follow%20%40GenLayer)](https://x.com/GenLayer)
-[![GitHub star chart](https://img.shields.io/github/stars/yeagerai/genlayer-project-boilerplate?style=social)](https://star-history.com/#yeagerai/genlayer-js)
+# Uphold
 
-## About
-This project includes the boilerplate code for a GenLayer use case implementation, specifically a football bets game.
+**Put money behind your word.**
 
-## Branching
+Uphold is a commitment-bond application for GenLayer. A promisor publishes an exact commitment, anchors it to an authenticated Internet Archive capture, and locks GEN behind it. Over time, GenLayer validators answer one bounded question: whether a later admitted document still substantially carries the original promise.
 
-See [docs/BRANCHING.md](docs/BRANCHING.md) for the release-train model used by
-this repo.
+The contract owns authorization, evidence admission, timestamps, lifecycle transitions, stake arithmetic, contests, settlement, and accounting. Validators do not choose beneficiaries, decide deadlines, or move funds. A breach claim requires two distinct consecutive qualified negative evidence points; archive or model failure never becomes breach evidence.
 
-## What's included
-- An example intelligent contract (Football Bets) with web access and LLM integration
-- **Direct mode tests** — fast, in-memory unit tests with web/LLM mocking (~ms per test)
-- **Integration tests** — full end-to-end tests against GenLayer Studio
-- **Contract linting** — static analysis to catch common contract issues before deployment
-- **CI pipeline** — GitHub Actions workflow for linting and direct tests
-- A production-ready Next.js 15 frontend with TypeScript, TanStack Query, and Radix UI
-- Configuration file template and deployment scripts
+## Current status
 
-## Requirements
-- Python >= 3.12
-- [GenLayer CLI](https://github.com/genlayerlabs/genlayer-cli) globally installed: `npm install -g genlayer`
-- GenLayer Studio (for integration tests and deployment): Install from [Docs](https://docs.genlayer.com/developers/intelligent-contracts/tooling-setup#using-the-genlayer-studio) or use the hosted [GenLayer Studio](https://studio.genlayer.com/)
+The Uphold contract and frontend are implemented locally and tested in Direct Mode. The project is **not yet deployed**. No Studio Next transaction is required for local frontend development. Before demo or production use, Phase 4 must deploy to Studio Next and verify real value transfers; Direct Mode records transfer calls but does not execute wallet balances.
 
-## Project Structure
+Target network:
 
-```
-contracts/              # Python intelligent contracts
-tests/
-  direct/               # Fast in-memory tests (no Studio required)
-    test_create_bet.py   # Bet creation logic
-    test_resolve_bet.py  # Bet resolution with web/LLM mocks
-    test_views.py        # Read-only view methods
-  integration/           # Full tests against GenLayer Studio
-    test_football_bets.py
-    fixtures.py          # Expected state fixtures
-frontend/               # Next.js 15 app (TypeScript, TanStack Query, Radix UI)
-deploy/                 # TypeScript deployment scripts
-gltest.config.yaml      # Test runner network configuration
-pyproject.toml          # Python/pytest configuration
-.github/workflows/      # CI pipeline
+- GenLayer Studio Next
+- RPC: `https://studio-next.genlayer.com/api`
+- Chain ID: `61997`
+- Explorer: `https://explorer-studio-dev.genlayer.com/`
+
+## Repository map
+
+```text
+contracts/uphold.py             Uphold intelligent contract
+tests/direct/test_uphold.py     Uphold Direct Mode coverage
+frontend/app/                   Next.js App Router application
+frontend/components/uphold/     Product UI and transaction experience
+frontend/lib/uphold/             Typed contract client and protocol helpers
+docs/UPHOLD_PROTOCOL.md          Contract trust model
+docs/UPHOLD_PHASE1_BASELINE.md  Baseline and compatibility evidence
+deploy/                          Deployment scripts, unused until Phase 4
 ```
 
-## Quick Start
+The original starter contracts and regression infrastructure remain in the repository while Uphold is developed. The checked-in `frontend/fee-profile.json` is starter-contract data and is not used for Uphold. A new profile must be measured after Uphold deployment.
 
-### 1. Set up Python environment
+## Local setup
+
+Requirements: Node 24.x, npm, Python 3.12 or 3.13 for contract tests, and the GenLayer CLI. Copy `frontend/.env.example` to `frontend/.env`; leave `NEXT_PUBLIC_CONTRACT_ADDRESS` as the placeholder until deployment.
 
 ```shell
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 2. Lint your contracts
-
-Run the GenVM linter to catch issues before deployment:
-
-```shell
-genvm-lint check contracts/football_bets.py
-```
-
-The linter catches:
-- Forbidden imports and non-deterministic calls
-- Invalid storage types (must use `TreeMap`, `DynArray`, `u256`, etc.)
-- Missing decorators and return type annotations
-- Non-deterministic operations outside equivalence principle blocks
-- And [20+ other rules](https://github.com/genlayerlabs/genvm-linter)
-
-### 3. Run direct mode tests
-
-Direct mode tests run contracts in-memory without needing GenLayer Studio. They use mocks for web requests and LLM calls, giving you fast feedback (~milliseconds per test):
-
-```shell
-pytest tests/direct/ -v
-```
-
-Direct mode features used in these tests:
-- `direct_deploy("contracts/file.py")` — deploy contract in memory
-- `direct_vm.sender = address` — set transaction sender
-- `direct_vm.mock_web(pattern, response)` — mock HTTP/render calls
-- `direct_vm.mock_llm(pattern, response)` — mock LLM responses
-- `direct_vm.expect_revert("message")` — assert expected failures
-- `direct_vm.clear_mocks()` — reset mocks between calls
-
-### 4. Deploy the contract
-
-1. Choose your network: `genlayer network`
-2. Deploy: `genlayer deploy` (runs the script in `/deploy/deployScript.ts`)
-
-### 5. Run integration tests
-
-Integration tests deploy the contract to GenLayer Studio and test with real consensus:
-
-```shell
-gltest tests/integration/ -v -s
-```
-
-These require GenLayer Studio running (local or hosted).
-
-### 6. Set up the frontend
-
-1. Copy `frontend/.env.example` to `frontend/.env`
-2. Add your deployed contract address as `NEXT_PUBLIC_CONTRACT_ADDRESS`
-3. Run:
-
-```shell
-cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-The app will be available at http://localhost:3000/.
+The frontend remains usable as an honest pre-deployment shell. It does not fabricate chain statistics, commitments, transaction hashes, or a contract address.
 
-### Fee profile (developer suggestions)
+## Contract interface
 
-The frontend uses published `@genlayer/transaction-kit` and
-`@genlayer/transaction-kit-react` version `0.1.0-rc.2`, with `genlayer-js`
-`2.0.0-rc.1`. Run `npm ci` from the repository root to install the locked releases.
+Payable writes: `create_commitment`, `increase_stake`.
 
-The default network is Studio Next (Consensus v0.6) at
-`https://studio-next.genlayer.com/api` (chain ID `61997`). Copy
-`frontend/.env.example`; change the RPC URL and chain ID together when targeting
-another deployment. Wallet, SDK, and Transaction Kit share this configuration.
+State-changing writes: `check_commitment`, `extend_commitment`, `contest_breach`, `adjudicate_contest`, `settle_breach`, `expire_commitment`.
 
-Transaction Kit uses active network fee defaults. The checked-in
-`frontend/fee-profile.json` is not wired into the application because measured
-fees are specific to a contract build, GenVM version, and network. To use a
-developer profile, regenerate it for your deployment and explicitly pass it as
-`suggestions` to `createTransactionKit` in `frontend/lib/genlayer/kit.ts`.
+Views: `get_commitment`, `get_commitment_ids`, `commitment_history`, `get_ledger`, `get_limits`, `contract_info`, and `get_address_record`.
 
-Regenerate it with `npm run test:fees` while GenLayer Studio is running. The fee profile command estimates a trusted Studio fee preset from the active fee policy, runs the measured Football Bets deploy/create-bet scenario, and writes max-observed x 1.25 headroom as decimal strings.
+## Testing
 
-Missing keys, such as time-unit allocations, fall back to network defaults.
+Frontend gates:
 
-## How the Football Bets Contract Works
+```shell
+npm test
+npm run lint
+npm run build
+```
 
-1. **Creating Bets**: Users bet on a football match by providing the game date, teams, and predicted winner.
-2. **Resolving Bets**: After the match, the contract fetches results from BBC Sport, uses an LLM to extract the score, and validates via the equivalence principle.
-3. **Points**: Correct predictions earn points. Users can query their points or the leaderboard.
+Authoritative contract gates run in WSL Ubuntu with Python 3.12.3 and GenVM v0.6.0-rc2:
 
-## Testing Strategy
+```shell
+wsl.exe -d Ubuntu --cd /mnt/c/Users/DELL/Uphold -- env GENVM_VERSION=v0.6.0-rc2 /home/dell/Uphold/.venv-genlayer/bin/python -m pytest tests/direct/ -v
+wsl.exe -d Ubuntu --cd /mnt/c/Users/DELL/Uphold -- genvm-lint check contracts/uphold.py
+```
 
-| Test Type | Command | Speed | Requires Studio |
-|-----------|---------|-------|-----------------|
-| **Lint** | `genvm-lint check contracts/*.py` | ~250ms | No |
-| **Direct** | `pytest tests/direct/ -v` | ~ms/test | No |
-| **Integration** | `gltest tests/integration/ -v -s` | ~min/test | Yes |
-
-**Recommended workflow:**
-1. Lint after every contract change
-2. Run direct tests frequently during development
-3. Run integration tests before deployment to verify consensus behavior
-
-For AI coding agents (Claude Code, Cursor, etc.), the linter and direct tests provide the fast feedback loop needed for iterative development without requiring a running Studio instance.
-
-## Community
-- **[Discord](https://discord.gg/8Jm4v89VAu)**: Discussions, support, and announcements
-- **[Telegram](https://t.me/genlayer)**: Informal chats and quick updates
-
-## Documentation
-For detailed information, see our [documentation](https://docs.genlayer.com/).
+Do not use Bradbury, stable Studionet 61999, or the obsolete Studio Dev RPC for this branch.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+The Uphold implementation in this repository remains under the repository’s existing project license. Holdfast was used as an architectural reference only; no substantial Holdfast source is copied into this phase. If source code from the Apache-2.0 Holdfast project is later reused, retain its copyright, license, and NOTICE obligations and document the derived portions.
