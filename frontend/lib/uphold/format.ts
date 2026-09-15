@@ -48,7 +48,8 @@ export function historyClassification(entry: HistoryEntry): SemanticClassificati
 export function lifecycleIndex(status: CommitmentStatus): number {
   if (status === "ACTIVE") return 1;
   if (status === "BREACH_CLAIMED" || status === "CONTESTED") return 2;
-  if (status === "BREACH_CONFIRMED" || status === "SETTLED") return 3;
+  if (status === "BREACH_CONFIRMED") return 3;
+  if (status === "PAYOUT_PENDING") return 3;
   return 4;
 }
 

@@ -26,7 +26,7 @@ export function Button({
 }
 
 export function StatusBadge({ status }: { status: CommitmentStatus }) {
-  const label = status === "BREACH_CLAIMED" ? "Breach claimed" : status === "BREACH_CONFIRMED" ? "Breach confirmed" : status.charAt(0) + status.slice(1).toLowerCase();
+  const label = status === "BREACH_CLAIMED" ? "Breach claimed" : status === "BREACH_CONFIRMED" ? "Breach confirmed" : status === "PAYOUT_PENDING" ? "Payout pending" : status === "REFUND_PENDING" ? "Refund pending" : status.charAt(0) + status.slice(1).toLowerCase();
   return <span className={`status-badge status-${status.toLowerCase()}`}><span className="status-dot" />{label}</span>;
 }
 

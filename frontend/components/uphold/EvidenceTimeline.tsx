@@ -6,12 +6,12 @@ import type { HistoryEntry } from "@/lib/uphold/types";
 import { ClassificationBadge } from "./ui";
 
 function eventTitle(event: string): string {
-  return ({ CREATED: "Baseline admitted", CHECK: "Evidence check", CHECK_FAILURE: "Check did not produce a judgment", BREACH_CLAIMED: "Breach claimed", CONTEST_FILED: "Contest filed", CONTEST_UPHELD: "Contest upheld", CONTEST_REJECTED: "Contest rejected", BREACH_CONFIRMED: "Breach confirmed", SETTLED: "Stake settled", COMPLETED: "Commitment completed", STAKE_INCREASED: "Stake increased", EXTENDED: "Expiry extended" } as Record<string, string>)[event] ?? event.replaceAll("_", " ");
+  return ({ CREATED: "Baseline admitted", CHECK: "Evidence check", CHECK_FAILURE: "Check did not produce a judgment", BREACH_CLAIMED: "Breach claimed", CONTEST_FILED: "Contest filed", CONTEST_UPHELD: "Contest upheld", CONTEST_REJECTED: "Contest rejected", BREACH_CONFIRMED: "Breach confirmed", PAYOUT_REQUESTED: "Beneficiary payout requested", REFUND_REQUESTED: "Promisor refund requested", SETTLED: "Beneficiary payout confirmed", COMPLETED: "Commitment completed", STAKE_INCREASED: "Stake increased", EXTENDED: "Expiry extended" } as Record<string, string>)[event] ?? event.replaceAll("_", " ");
 }
 
 function EventIcon({ entry }: { entry: HistoryEntry }) {
   if (entry.event === "CHECK_FAILURE") return <FileWarning size={16} />;
-  if (entry.event === "SETTLED" || entry.event === "COMPLETED") return <LockKeyhole size={16} />;
+  if (entry.event === "SETTLED" || entry.event === "COMPLETED" || entry.event === "PAYOUT_REQUESTED" || entry.event === "REFUND_REQUESTED") return <LockKeyhole size={16} />;
   if (entry.event === "BREACH_CLAIMED" || entry.event === "BREACH_CONFIRMED") return <CircleAlert size={16} />;
   if (entry.event === "CHECK" || entry.event === "CREATED") return <Archive size={16} />;
   return <CheckCircle2 size={16} />;

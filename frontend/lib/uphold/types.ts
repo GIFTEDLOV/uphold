@@ -3,6 +3,8 @@ export const COMMITMENT_STATUSES = [
   "BREACH_CLAIMED",
   "CONTESTED",
   "BREACH_CONFIRMED",
+  "PAYOUT_PENDING",
+  "REFUND_PENDING",
   "SETTLED",
   "COMPLETED",
 ] as const;
@@ -62,6 +64,10 @@ export interface Commitment {
   contest_result: string;
   final_settlement_at: string;
   final_settlement_amount: bigint;
+  pending_transfer_recipient: string;
+  pending_transfer_amount: bigint;
+  pending_transfer_kind: string;
+  pending_transfer_requested_at: string;
   extensions_count: number;
   stake_additions_count: number;
 }
@@ -86,6 +92,9 @@ export interface Ledger {
   total_deposited: bigint;
   total_paid_to_beneficiaries: bigint;
   total_returned_to_promisors: bigint;
+  total_pending_outflows: bigint;
+  total_pending_payouts: bigint;
+  total_pending_refunds: bigint;
   commitments_created: number;
   checks_run: number;
   breach_claims: number;
@@ -93,6 +102,7 @@ export interface Ledger {
   contests_upheld: number;
   contests_rejected: number;
   commitments_completed: number;
+  pending_commitments: number;
 }
 
 export interface Limits {
@@ -115,6 +125,9 @@ export interface ContractInfo {
   semantic_classifications: SemanticClassification[];
   evidence_provider: string;
   breach_rule: string;
+  semantic_verification?: string;
+  transfer_mechanism?: string;
+  settlement_confirmation?: string;
 }
 
 export interface AddressRecord {

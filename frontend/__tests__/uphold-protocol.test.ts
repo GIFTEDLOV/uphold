@@ -13,7 +13,7 @@ const beneficiary = "0x2222222222222222222222222222222222222222";
 
 function commitment(overrides: Partial<Commitment> = {}): Commitment {
   return {
-    commitment_id: "upl-test", title: "Monthly report", category: "accountability", promisor: actor, beneficiary, source_url: "https://example.com/promise", commitment_text: "I will publish a monthly report.", baseline_archive_timestamp: "20260101000000", baseline_digest: "digest", baseline_body_digest: "body", baseline_excerpt: "I will publish…", created_at: "2026-01-01T00:00:00Z", expires_at: "2027-01-01T00:00:00Z", contest_window_seconds: 86400, original_stake: 100n, current_stake: 100n, total_stake_added: 0n, status: "ACTIVE", last_checked_at: "2026-01-01T00:00:00Z", last_observed_archive_timestamp: "20260101000000", last_qualified_archive_timestamp: "", last_qualified_digest: "", checks_run: 0, consecutive_negative_count: 0, breach_claimed_at: "", contest_deadline: "", breach_capture_1: "", breach_capture_2: "", contest_evidence_url: "", contest_evidence_timestamp: "", contest_evidence_digest: "", contest_result: "", final_settlement_at: "", final_settlement_amount: 0n, extensions_count: 0, stake_additions_count: 0, ...overrides,
+    commitment_id: "upl-test", title: "Monthly report", category: "accountability", promisor: actor, beneficiary, source_url: "https://example.com/promise", commitment_text: "I will publish a monthly report.", baseline_archive_timestamp: "20260101000000", baseline_digest: "digest", baseline_body_digest: "body", baseline_excerpt: "I will publish…", created_at: "2026-01-01T00:00:00Z", expires_at: "2027-01-01T00:00:00Z", contest_window_seconds: 86400, original_stake: 100n, current_stake: 100n, total_stake_added: 0n, status: "ACTIVE", last_checked_at: "2026-01-01T00:00:00Z", last_observed_archive_timestamp: "20260101000000", last_qualified_archive_timestamp: "", last_qualified_digest: "", checks_run: 0, consecutive_negative_count: 0, breach_claimed_at: "", contest_deadline: "", breach_capture_1: "", breach_capture_2: "", contest_evidence_url: "", contest_evidence_timestamp: "", contest_evidence_digest: "", contest_result: "", final_settlement_at: "", final_settlement_amount: 0n, pending_transfer_recipient: "", pending_transfer_amount: 0n, pending_transfer_kind: "", pending_transfer_requested_at: "", extensions_count: 0, stake_additions_count: 0, ...overrides,
   };
 }
 
@@ -51,12 +51,15 @@ describe("Uphold contract boundary", () => {
     expect(result.original_stake).toBe(100n);
     expect(result.current_stake).toBe(80n);
     expect(normalizeHistory([new Map([["event", "CHECK"], ["classification", "HOLDS"]])])[0].classification).toBe("HOLDS");
+    expect(normalizeCommitment({ status: "PAYOUT_PENDING", pending_transfer_amount: "100", pending_transfer_kind: "PAYOUT" }).pending_transfer_amount).toBe(100n);
   });
 
   it("exposes only state-valid contextual actions", () => {
     expect(allowedActions({ commitment: commitment(), actor })).toEqual(["check", "increase_stake", "extend"]);
     expect(allowedActions({ commitment: commitment(), actor: beneficiary })).toEqual(["check"]);
     expect(allowedActions({ commitment: commitment({ status: "BREACH_CLAIMED", consecutive_negative_count: 2, contest_deadline: "2026-01-02T00:00:00Z" }), actor })).toEqual(["settle"]);
+    expect(allowedActions({ commitment: commitment({ status: "PAYOUT_PENDING", pending_transfer_amount: 100n }), actor })).toEqual([]);
+    expect(allowedActions({ commitment: commitment({ status: "REFUND_PENDING", pending_transfer_amount: 100n }), actor })).toEqual([]);
     expect(allowedActions({ commitment: commitment({ status: "COMPLETED" }), actor })).toEqual([]);
   });
 

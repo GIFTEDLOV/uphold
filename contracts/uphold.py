@@ -38,6 +38,8 @@ CONTESTED = "CONTESTED"
 BREACH_CONFIRMED = "BREACH_CONFIRMED"
 SETTLED = "SETTLED"
 COMPLETED = "COMPLETED"
+PAYOUT_PENDING = "PAYOUT_PENDING"
+REFUND_PENDING = "REFUND_PENDING"
 
 HOLDS = "HOLDS"
 WEAKENED = "WEAKENED"
@@ -45,6 +47,17 @@ ABSENT = "ABSENT"
 INDETERMINATE = "INDETERMINATE"
 
 QUALIFIED_NEGATIVES = (WEAKENED, ABSENT)
+
+
+@gl.evm.contract_interface
+class _Recipient:
+    """Native-value external-message interface for an EOA recipient."""
+
+    class View:
+        pass
+
+    class Write:
+        pass
 
 
 @allow_storage
@@ -86,6 +99,10 @@ class Commitment:
     contest_result: str
     final_settlement_at: str
     final_settlement_amount: gl.u256
+    pending_transfer_recipient: gl.Address
+    pending_transfer_amount: gl.u256
+    pending_transfer_kind: str
+    pending_transfer_requested_at: str
     extensions_count: gl.u256
     stake_additions_count: gl.u256
 
@@ -347,7 +364,35 @@ def _authenticated_capture(
         return {"ok": False, "domain": "TRANSIENT", "reason": "archive_consensus_unavailable"}
 
 
-def _semantic_leader(commitment_text: str, document: str) -> str:
+def _decode_semantic_output(raw) -> dict | None:
+    """Return only bounded semantic fields from an LLM response."""
+    parsed = raw
+    for _ in range(2):
+        if not isinstance(parsed, str):
+            break
+        try:
+            parsed = json.loads(parsed)
+        except (TypeError, ValueError):
+            return None
+    if not isinstance(parsed, dict):
+        return None
+    classification = parsed.get("classification")
+    excerpt = parsed.get("excerpt", "")
+    short_reason = parsed.get("short_reason", "")
+    if not isinstance(classification, str):
+        return None
+    if not isinstance(excerpt, str) or not isinstance(short_reason, str):
+        return None
+    if len(excerpt) > MAX_EXCERPT_LENGTH or len(short_reason) > MAX_REASON_LENGTH:
+        return None
+    return {
+        "classification": classification,
+        "excerpt": excerpt,
+        "short_reason": short_reason,
+    }
+
+
+def _semantic_leader(commitment_text: str, document: str) -> dict:
     prompt = f"""
 You are the Uphold semantic adjudicator. Answer only the bounded question below.
 Does the authenticated archived document still substantially carry the original
@@ -367,41 +412,48 @@ authorization, admissibility, or settlement.
     try:
         raw = gl.nondet.exec_prompt(prompt, response_format="json")
     except Exception:
-        return json.dumps(
-            {"classification": "__MODEL_ERROR__", "excerpt": "", "short_reason": ""},
-            sort_keys=True,
-            separators=(",", ":"),
-        )
-    if isinstance(raw, str):
-        return raw
-    if isinstance(raw, dict):
-        return json.dumps(raw, sort_keys=True, separators=(",", ":"))
-    return ""
+        return {"classification": "__MODEL_ERROR__", "excerpt": "", "short_reason": ""}
+    parsed = _decode_semantic_output(raw)
+    return parsed or {"classification": "__MALFORMED__", "excerpt": "", "short_reason": ""}
 
 
 def _semantic_judgment(commitment_text: str, document: str) -> dict:
-    def semantic_leader() -> str:
+    def semantic_leader() -> dict:
         return _semantic_leader(commitment_text, document)
 
+    def semantic_validator(result) -> bool:
+        if not isinstance(result, gl.vm.Return):
+            return False
+        leader = _decode_semantic_output(result.calldata)
+        if leader is None or leader.get("classification") not in (
+            HOLDS,
+            WEAKENED,
+            ABSENT,
+            INDETERMINATE,
+        ):
+            return False
+        validator = _decode_semantic_output(_semantic_leader(commitment_text, document))
+        if validator is None or validator.get("classification") not in (
+            HOLDS,
+            WEAKENED,
+            ABSENT,
+            INDETERMINATE,
+        ):
+            return False
+        return validator["classification"] == leader["classification"]
+
     try:
-        raw = gl.eq_principle.strict_eq(semantic_leader)
+        parsed = gl.vm.run_nondet(semantic_leader, semantic_validator)
     except Exception:
         return {"ok": False, "domain": "TRANSIENT", "reason": "validator_disagreement"}
-    try:
-        parsed = json.loads(raw)
-    except (TypeError, ValueError):
+    parsed = _decode_semantic_output(parsed)
+    if parsed is None:
         return {"ok": False, "domain": "LLM", "reason": "malformed_model_output"}
-    if not isinstance(parsed, dict):
-        return {"ok": False, "domain": "LLM", "reason": "model_output_not_object"}
-    classification = parsed.get("classification")
-    excerpt = parsed.get("excerpt", "")
-    short_reason = parsed.get("short_reason", "")
+    classification = parsed["classification"]
+    excerpt = parsed["excerpt"]
+    short_reason = parsed["short_reason"]
     if classification not in (HOLDS, WEAKENED, ABSENT, INDETERMINATE):
         return {"ok": False, "domain": "LLM", "reason": "unknown_classification"}
-    if not isinstance(excerpt, str) or not isinstance(short_reason, str):
-        return {"ok": False, "domain": "LLM", "reason": "unbounded_model_fields"}
-    if len(excerpt) > MAX_EXCERPT_LENGTH or len(short_reason) > MAX_REASON_LENGTH:
-        return {"ok": False, "domain": "LLM", "reason": "model_fields_too_long"}
     return {
         "ok": True,
         "classification": classification,
@@ -421,6 +473,9 @@ class Uphold(gl.contract.Contract):
     total_deposited: gl.u256
     total_paid_to_beneficiaries: gl.u256
     total_returned_to_promisors: gl.u256
+    total_pending_outflows: gl.u256
+    total_pending_payouts: gl.u256
+    total_pending_refunds: gl.u256
     commitments_created: gl.u256
     checks_run: gl.u256
     breach_claims: gl.u256
@@ -428,6 +483,7 @@ class Uphold(gl.contract.Contract):
     contests_upheld: gl.u256
     contests_rejected: gl.u256
     commitments_completed: gl.u256
+    pending_commitments: gl.u256
 
     def __init__(self):
         self.commitment_ids_json = "[]"
@@ -435,6 +491,9 @@ class Uphold(gl.contract.Contract):
         self.total_deposited = gl.u256(0)
         self.total_paid_to_beneficiaries = gl.u256(0)
         self.total_returned_to_promisors = gl.u256(0)
+        self.total_pending_outflows = gl.u256(0)
+        self.total_pending_payouts = gl.u256(0)
+        self.total_pending_refunds = gl.u256(0)
         self.commitments_created = gl.u256(0)
         self.checks_run = gl.u256(0)
         self.breach_claims = gl.u256(0)
@@ -442,6 +501,7 @@ class Uphold(gl.contract.Contract):
         self.contests_upheld = gl.u256(0)
         self.contests_rejected = gl.u256(0)
         self.commitments_completed = gl.u256(0)
+        self.pending_commitments = gl.u256(0)
 
     def _require(self, condition: bool, message: str) -> None:
         if not condition:
@@ -621,6 +681,10 @@ class Uphold(gl.contract.Contract):
             contest_result="",
             final_settlement_at="",
             final_settlement_amount=gl.u256(0),
+            pending_transfer_recipient=gl.Address.ZERO,
+            pending_transfer_amount=gl.u256(0),
+            pending_transfer_kind="",
+            pending_transfer_requested_at="",
             extensions_count=gl.u256(0),
             stake_additions_count=gl.u256(0),
         )
@@ -883,8 +947,50 @@ class Uphold(gl.contract.Contract):
             )
         self._require(commitment.status == BREACH_CONFIRMED, "breach is not settleable")
 
-    def _pay(self, recipient: gl.Address, amount: int) -> None:
-        gl.chain.Account(recipient).emit_transfer(gl.u256(amount), on="finalized")
+    def _pay(self, recipient: gl.Address, amount: gl.u256) -> None:
+        """Request one finalized native-value transfer to an EOA."""
+        self._require(recipient != gl.Address.ZERO, "invalid transfer recipient")
+        self._require(int(amount) > 0, "transfer amount must be positive")
+        _Recipient(recipient).emit_transfer(value=gl.u256(int(amount)))
+
+    def _request_transfer(
+        self,
+        commitment: Commitment,
+        recipient: gl.Address,
+        amount: int,
+        kind: str,
+        status: str,
+    ) -> str:
+        self._require(commitment.pending_transfer_amount == gl.u256(0), "transfer already pending")
+        self._require(amount > 0, "transfer amount must be positive")
+        now = _now_iso()
+        commitment.current_stake = gl.u256(0)
+        commitment.pending_transfer_recipient = recipient
+        commitment.pending_transfer_amount = gl.u256(amount)
+        commitment.pending_transfer_kind = kind
+        commitment.pending_transfer_requested_at = now
+        commitment.status = status
+        self.pending_commitments = gl.u256(int(self.pending_commitments) + 1)
+        self.total_escrowed = gl.u256(int(self.total_escrowed) - amount)
+        self.total_pending_outflows = gl.u256(int(self.total_pending_outflows) + amount)
+        if kind == "PAYOUT":
+            self.total_pending_payouts = gl.u256(int(self.total_pending_payouts) + amount)
+            event = "PAYOUT_REQUESTED"
+        else:
+            self.total_pending_refunds = gl.u256(int(self.total_pending_refunds) + amount)
+            event = "REFUND_REQUESTED"
+        self._record_history(
+            commitment.commitment_id,
+            {
+                "event": event,
+                "at": now,
+                "amount": amount,
+                "recipient": recipient.as_hex,
+                "status": status,
+            },
+        )
+        self._pay(recipient, gl.u256(amount))
+        return status
 
     @gl.public.write
     def settle_breach(self, commitment_id: str) -> str:
@@ -892,20 +998,13 @@ class Uphold(gl.contract.Contract):
         self._confirm_breach_if_due(commitment)
         amount = int(commitment.current_stake)
         self._require(amount > 0, "nothing to settle")
-        now = _now_iso()
-        commitment.current_stake = gl.u256(0)
-        commitment.final_settlement_amount = gl.u256(amount)
-        commitment.final_settlement_at = now
-        commitment.status = SETTLED
-        self.total_escrowed = gl.u256(int(self.total_escrowed) - amount)
-        self.total_paid_to_beneficiaries = gl.u256(int(self.total_paid_to_beneficiaries) + amount)
-        self._add_address_amount(commitment.beneficiary, "gen_received", amount)
-        self._record_history(
-            commitment_id,
-            {"event": "SETTLED", "at": now, "amount": amount, "recipient": commitment.beneficiary.as_hex},
+        return self._request_transfer(
+            commitment,
+            commitment.beneficiary,
+            amount,
+            "PAYOUT",
+            PAYOUT_PENDING,
         )
-        self._pay(commitment.beneficiary, amount)
-        return SETTLED
 
     @gl.public.write
     def expire_commitment(self, commitment_id: str) -> str:
@@ -915,22 +1014,13 @@ class Uphold(gl.contract.Contract):
         self._require(expiry is not None and _now() >= expiry, "commitment has not expired")
         amount = int(commitment.current_stake)
         self._require(amount > 0, "commitment already completed")
-        now = _now_iso()
-        commitment.current_stake = gl.u256(0)
-        commitment.final_settlement_amount = gl.u256(amount)
-        commitment.final_settlement_at = now
-        commitment.status = COMPLETED
-        self.total_escrowed = gl.u256(int(self.total_escrowed) - amount)
-        self.total_returned_to_promisors = gl.u256(int(self.total_returned_to_promisors) + amount)
-        self.commitments_completed = gl.u256(int(self.commitments_completed) + 1)
-        self._add_address_amount(commitment.promisor, "gen_returned", amount)
-        self._increment_address(commitment.promisor, "completed_intact")
-        self._record_history(
-            commitment_id,
-            {"event": "COMPLETED", "at": now, "amount": amount, "recipient": commitment.promisor.as_hex},
+        return self._request_transfer(
+            commitment,
+            commitment.promisor,
+            amount,
+            "REFUND",
+            REFUND_PENDING,
         )
-        self._pay(commitment.promisor, amount)
-        return COMPLETED
 
     def _commitment_view(self, commitment: Commitment) -> dict:
         return {
@@ -968,6 +1058,10 @@ class Uphold(gl.contract.Contract):
             "contest_result": commitment.contest_result,
             "final_settlement_at": commitment.final_settlement_at,
             "final_settlement_amount": int(commitment.final_settlement_amount),
+            "pending_transfer_recipient": commitment.pending_transfer_recipient.as_hex,
+            "pending_transfer_amount": int(commitment.pending_transfer_amount),
+            "pending_transfer_kind": commitment.pending_transfer_kind,
+            "pending_transfer_requested_at": commitment.pending_transfer_requested_at,
             "extensions_count": int(commitment.extensions_count),
             "stake_additions_count": int(commitment.stake_additions_count),
         }
@@ -993,6 +1087,9 @@ class Uphold(gl.contract.Contract):
             "total_deposited": int(self.total_deposited),
             "total_paid_to_beneficiaries": int(self.total_paid_to_beneficiaries),
             "total_returned_to_promisors": int(self.total_returned_to_promisors),
+            "total_pending_outflows": int(self.total_pending_outflows),
+            "total_pending_payouts": int(self.total_pending_payouts),
+            "total_pending_refunds": int(self.total_pending_refunds),
             "commitments_created": int(self.commitments_created),
             "checks_run": int(self.checks_run),
             "breach_claims": int(self.breach_claims),
@@ -1000,6 +1097,7 @@ class Uphold(gl.contract.Contract):
             "contests_upheld": int(self.contests_upheld),
             "contests_rejected": int(self.contests_rejected),
             "commitments_completed": int(self.commitments_completed),
+            "pending_commitments": int(self.pending_commitments),
         }
 
     @gl.public.view
@@ -1022,10 +1120,13 @@ class Uphold(gl.contract.Contract):
     def contract_info(self) -> dict:
         return {
             "name": "Uphold",
-            "version": "phase2-v1",
+            "version": "phase3.5-v1",
             "semantic_classifications": [HOLDS, WEAKENED, ABSENT, INDETERMINATE],
             "evidence_provider": "Internet Archive Wayback CDX and pinned replay",
             "breach_rule": "two distinct consecutive qualified negative captures",
+            "semantic_verification": "independent validator re-runs the classification over the same admitted evidence",
+            "transfer_mechanism": "finalized EOA external message",
+            "settlement_confirmation": "external Studio/client observation; no contract-level receipt is available",
         }
 
     @gl.public.view

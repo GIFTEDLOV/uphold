@@ -88,6 +88,10 @@ export function normalizeCommitment(value: unknown): Commitment {
     contest_result: stringValue(item.contest_result),
     final_settlement_at: stringValue(item.final_settlement_at),
     final_settlement_amount: bigintValue(item.final_settlement_amount),
+    pending_transfer_recipient: stringValue(item.pending_transfer_recipient),
+    pending_transfer_amount: bigintValue(item.pending_transfer_amount),
+    pending_transfer_kind: stringValue(item.pending_transfer_kind),
+    pending_transfer_requested_at: stringValue(item.pending_transfer_requested_at),
     extensions_count: numberValue(item.extensions_count),
     stake_additions_count: numberValue(item.stake_additions_count),
   };
@@ -118,6 +122,9 @@ export function normalizeLedger(value: unknown): Ledger {
     total_deposited: bigintValue(item.total_deposited),
     total_paid_to_beneficiaries: bigintValue(item.total_paid_to_beneficiaries),
     total_returned_to_promisors: bigintValue(item.total_returned_to_promisors),
+    total_pending_outflows: bigintValue(item.total_pending_outflows),
+    total_pending_payouts: bigintValue(item.total_pending_payouts),
+    total_pending_refunds: bigintValue(item.total_pending_refunds),
     commitments_created: numberValue(item.commitments_created),
     checks_run: numberValue(item.checks_run),
     breach_claims: numberValue(item.breach_claims),
@@ -125,6 +132,7 @@ export function normalizeLedger(value: unknown): Ledger {
     contests_upheld: numberValue(item.contests_upheld),
     contests_rejected: numberValue(item.contests_rejected),
     commitments_completed: numberValue(item.commitments_completed),
+    pending_commitments: numberValue(item.pending_commitments),
   };
 }
 
@@ -159,6 +167,9 @@ export function normalizeContractInfo(value: unknown): ContractInfo {
     semantic_classifications: classifications,
     evidence_provider: stringValue(item.evidence_provider),
     breach_rule: stringValue(item.breach_rule),
+    ...(item.semantic_verification ? { semantic_verification: stringValue(item.semantic_verification) } : {}),
+    ...(item.transfer_mechanism ? { transfer_mechanism: stringValue(item.transfer_mechanism) } : {}),
+    ...(item.settlement_confirmation ? { settlement_confirmation: stringValue(item.settlement_confirmation) } : {}),
   };
 }
 

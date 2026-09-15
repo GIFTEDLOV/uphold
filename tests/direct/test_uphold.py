@@ -1,6 +1,7 @@
 """Direct Mode coverage for the Uphold commitment-bond contract."""
 
 import json
+import sys
 
 import pytest
 
@@ -20,14 +21,26 @@ BASELINE_BODY = (
 
 def _deploy(direct_deploy, monkeypatch):
     contract = direct_deploy("contracts/uphold.py")
-    import genlayer as gl
-
     sent = []
 
-    def record_transfer(self, value, *, on="finalized"):
-        sent.append((self.address.as_hex, int(value), on))
+    class _ImmediateResult:
+        def get(self):
+            return None
 
-    monkeypatch.setattr(gl.chain.Account, "emit_transfer", record_transfer)
+    def record_external_message(request, _decoder):
+        sent.append(request)
+        return _ImmediateResult()
+
+    import genlayer._internal.on_chain.gl_call as gl_call
+
+    original_gl_call_generic = gl_call.gl_call_generic
+
+    def record_or_delegate(request, decoder):
+        if isinstance(request, dict) and "EthSend" in request:
+            return record_external_message(request, decoder)
+        return original_gl_call_generic(request, decoder)
+
+    monkeypatch.setattr(gl_call, "gl_call_generic", record_or_delegate)
     return contract, sent
 
 
@@ -135,6 +148,7 @@ def _assert_ledger_invariant(contract):
     assert (
         ledger["total_deposited"]
         == ledger["total_escrowed"]
+        + ledger["total_pending_outflows"]
         + ledger["total_paid_to_beneficiaries"]
         + ledger["total_returned_to_promisors"]
     )
@@ -246,7 +260,7 @@ def test_stake_cannot_decrease_and_terminal_commitments_cannot_receive_topup(
     contract, _ = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob, expiry="2026-01-11T00:00:00Z")
     _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:00:00Z", value=0)
-    assert contract.expire_commitment("commitment-1") == "COMPLETED"
+    assert contract.expire_commitment("commitment-1") == "REFUND_PENDING"
     _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:00:00Z", value=1)
     with direct_vm.expect_revert("commitment is not active"):
         contract.increase_stake("commitment-1")
@@ -336,6 +350,51 @@ def test_malformed_model_response_fails_closed(
     assert view["consecutive_negative_count"] == 0
     assert view["status"] == "ACTIVE"
     direct_vm.clear_mocks()
+
+
+@pytest.mark.parametrize("classification", ["HOLDS", "WEAKENED", "ABSENT", "INDETERMINATE"])
+def test_semantic_validator_independently_agrees_on_each_decision(
+    direct_vm, direct_deploy, monkeypatch, classification
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    module = sys.modules["_contract_uphold"]
+    direct_vm.clear_validators()
+    _semantic_mock(direct_vm, classification)
+    result = module._semantic_judgment(COMMITMENT_TEXT, BASELINE_BODY)
+    assert result["ok"] is True
+    direct_vm.clear_mocks()
+    _semantic_mock(direct_vm, classification, excerpt="independent excerpt", reason="independent reason")
+    assert direct_vm.run_validator() is True
+
+
+def test_semantic_validator_rejects_schema_valid_but_substantively_different_decision(
+    direct_vm, direct_deploy, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    module = sys.modules["_contract_uphold"]
+    direct_vm.clear_validators()
+    _semantic_mock(direct_vm, "HOLDS")
+    result = module._semantic_judgment(COMMITMENT_TEXT, BASELINE_BODY)
+    assert result["classification"] == "HOLDS"
+    direct_vm.clear_mocks()
+    _semantic_mock(direct_vm, "WEAKENED", excerpt="different substance", reason="different conclusion")
+    assert direct_vm.run_validator() is False
+    assert contract.get_ledger()["total_deposited"] == 0
+
+
+def test_malformed_leader_output_is_rejected_by_independent_validator(
+    direct_vm, direct_deploy, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    module = sys.modules["_contract_uphold"]
+    direct_vm.clear_validators()
+    mock_json_llm(direct_vm, r".*Uphold semantic adjudicator.*", "not-json")
+    result = module._semantic_judgment(COMMITMENT_TEXT, BASELINE_BODY)
+    assert result == {"ok": False, "domain": "LLM", "reason": "unknown_classification"}
+    direct_vm.clear_mocks()
+    _semantic_mock(direct_vm, "HOLDS")
+    assert direct_vm.run_validator() is False
+    assert contract.get_ledger()["total_deposited"] == 0
 
 
 def test_duplicate_capture_does_not_increment_streak(
@@ -465,11 +524,22 @@ def test_rejected_contest_confirms_breach_and_settlement_pays_beneficiary(
     _semantic_mock(direct_vm, "ABSENT")
     assert contract.adjudicate_contest("commitment-1") == "BREACH_CONFIRMED"
     direct_vm.clear_mocks()
-    assert contract.settle_breach("commitment-1") == "SETTLED"
-    assert sent == [(to_hex(direct_bob), 100, "finalized")]
-    assert contract.get_commitment("commitment-1")["current_stake"] == 0
-    assert contract.get_ledger()["total_paid_to_beneficiaries"] == 100
-    assert contract.get_address_record(to_hex(direct_bob))["gen_received"] == 100
+    assert contract.settle_breach("commitment-1") == "PAYOUT_PENDING"
+    assert len(sent) == 1
+    assert sent[0]["EthSend"]["address"].as_hex == to_hex(direct_bob)
+    assert sent[0]["EthSend"]["calldata"] == b""
+    assert int(sent[0]["EthSend"]["value"]) == 100
+    view = contract.get_commitment("commitment-1")
+    assert view["current_stake"] == 0
+    assert view["pending_transfer_recipient"] == to_hex(direct_bob)
+    assert view["pending_transfer_amount"] == 100
+    assert view["pending_transfer_kind"] == "PAYOUT"
+    assert view["pending_transfer_requested_at"]
+    ledger = contract.get_ledger()
+    assert ledger["total_pending_outflows"] == 100
+    assert ledger["total_pending_payouts"] == 100
+    assert ledger["total_paid_to_beneficiaries"] == 0
+    assert contract.get_address_record(to_hex(direct_bob))["gen_received"] == 0
     assert contract.get_address_record(to_hex(direct_alice))["contests_lost"] == 1
     _assert_ledger_invariant(contract)
     with direct_vm.expect_revert("breach is not settleable"):
@@ -486,8 +556,10 @@ def test_no_contest_elapsed_claim_pays_and_early_settlement_rejected(
     with direct_vm.expect_revert("contest window is still open"):
         contract.settle_breach("commitment-1")
     _tx(direct_vm, direct_alice, timestamp="2026-01-20T01:00:00Z")
-    assert contract.settle_breach("commitment-1") == "SETTLED"
-    assert sent[0] == (to_hex(direct_bob), 100, "finalized")
+    assert contract.settle_breach("commitment-1") == "PAYOUT_PENDING"
+    assert sent[0]["EthSend"]["address"].as_hex == to_hex(direct_bob)
+    assert int(sent[0]["EthSend"]["value"]) == 100
+    assert "on" not in sent[0]["EthSend"]
 
 
 def test_clean_expiry_returns_stake_and_pending_breach_cannot_bypass_settlement(
@@ -499,10 +571,15 @@ def test_clean_expiry_returns_stake_and_pending_breach_cannot_bypass_settlement(
     with direct_vm.expect_revert("commitment has not expired"):
         contract.expire_commitment("commitment-1")
     _tx(direct_vm, direct_alice, timestamp="2026-01-11T00:00:00Z")
-    assert contract.expire_commitment("commitment-1") == "COMPLETED"
-    assert sent == [(to_hex(direct_alice), 100, "finalized")]
-    assert contract.get_ledger()["total_returned_to_promisors"] == 100
-    assert contract.get_address_record(to_hex(direct_alice))["gen_returned"] == 100
+    assert contract.expire_commitment("commitment-1") == "REFUND_PENDING"
+    assert sent[0]["EthSend"]["address"].as_hex == to_hex(direct_alice)
+    assert int(sent[0]["EthSend"]["value"]) == 100
+    assert "on" not in sent[0]["EthSend"]
+    view = contract.get_commitment("commitment-1")
+    assert view["pending_transfer_kind"] == "REFUND"
+    assert contract.get_ledger()["total_pending_refunds"] == 100
+    assert contract.get_ledger()["total_returned_to_promisors"] == 0
+    assert contract.get_address_record(to_hex(direct_alice))["gen_returned"] == 0
     with direct_vm.expect_revert("commitment is not cleanly active"):
         contract.expire_commitment("commitment-1")
 
@@ -519,6 +596,57 @@ def test_pending_breach_cannot_bypass_settlement_through_expiry(
         contract.expire_commitment("commitment-1")
 
 
+def test_pending_payout_is_single_use_and_blocks_topup_extension_and_expiry(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, sent = _deploy(direct_deploy, monkeypatch)
+    _create(direct_vm, contract, direct_alice, direct_bob, window=3600)
+    _claim_breach(direct_vm, contract, direct_alice)
+    _tx(direct_vm, direct_alice, timestamp="2026-01-20T01:00:00Z")
+    assert contract.settle_breach("commitment-1") == "PAYOUT_PENDING"
+    with direct_vm.expect_revert("breach is not settleable"):
+        contract.settle_breach("commitment-1")
+    with direct_vm.expect_revert("commitment is not cleanly active"):
+        contract.expire_commitment("commitment-1")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-20T01:00:00Z", value=1)
+    with direct_vm.expect_revert("commitment is not active"):
+        contract.increase_stake("commitment-1")
+    with direct_vm.expect_revert("commitment is not active"):
+        contract.extend_commitment("commitment-1", "2026-03-01T00:00:00Z")
+    assert len(sent) == 1
+
+
+def test_pending_refund_is_single_use_and_blocks_topup_and_extension(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, sent = _deploy(direct_deploy, monkeypatch)
+    _create(direct_vm, contract, direct_alice, direct_bob, expiry="2026-01-11T00:00:00Z")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:00:00Z")
+    assert contract.expire_commitment("commitment-1") == "REFUND_PENDING"
+    with direct_vm.expect_revert("commitment is not cleanly active"):
+        contract.expire_commitment("commitment-1")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:00:00Z", value=1)
+    with direct_vm.expect_revert("commitment is not active"):
+        contract.increase_stake("commitment-1")
+    with direct_vm.expect_revert("commitment is not active"):
+        contract.extend_commitment("commitment-1", "2026-03-01T00:00:00Z")
+    assert len(sent) == 1
+
+
+def test_transfer_helper_rejects_zero_and_invalid_recipients(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, sent = _deploy(direct_deploy, monkeypatch)
+    instance = contract._instance
+    import genlayer as gl
+
+    with direct_vm.expect_revert("transfer amount must be positive"):
+        instance._pay(gl.Address(direct_bob), gl.u256(0))
+    with direct_vm.expect_revert("invalid transfer recipient"):
+        instance._pay(gl.Address.ZERO, gl.u256(1))
+    assert sent == []
+
+
 def test_accounting_topup_refund_and_address_history(
     direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
 ):
@@ -533,7 +661,9 @@ def test_accounting_topup_refund_and_address_history(
     ledger = contract.get_ledger()
     assert ledger["total_deposited"] == 325
     assert ledger["total_escrowed"] == 0
-    assert ledger["total_returned_to_promisors"] == 325
+    assert ledger["total_pending_outflows"] == 325
+    assert ledger["total_pending_refunds"] == 325
+    assert ledger["total_returned_to_promisors"] == 0
     _assert_ledger_invariant(contract)
 
 
