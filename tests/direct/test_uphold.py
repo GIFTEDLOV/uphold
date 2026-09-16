@@ -36,12 +36,24 @@ def _deploy(direct_deploy, monkeypatch):
     original_gl_call_generic = gl_call.gl_call_generic
 
     def record_or_delegate(request, decoder):
-        if isinstance(request, dict) and "EthSend" in request:
+        if isinstance(request, dict) and "EmitExternalMessage" in request:
             return record_external_message(request, decoder)
         return original_gl_call_generic(request, decoder)
 
     monkeypatch.setattr(gl_call, "gl_call_generic", record_or_delegate)
     return contract, sent
+
+
+def _assert_external_transfer(sent, recipient, amount):
+    assert len(sent) == 1
+    request = sent[0]
+    assert set(request) == {"EmitExternalMessage"}
+    message = request["EmitExternalMessage"]
+    assert message["address"].as_hex == to_hex(recipient)
+    assert message["calldata"] == b""
+    assert int(message["value"]) == amount
+    assert "on" not in message
+    return message
 
 
 def _tx(vm, sender, *, value=0, timestamp=BASELINE_NOW):
@@ -525,10 +537,7 @@ def test_rejected_contest_confirms_breach_and_settlement_pays_beneficiary(
     assert contract.adjudicate_contest("commitment-1") == "BREACH_CONFIRMED"
     direct_vm.clear_mocks()
     assert contract.settle_breach("commitment-1") == "PAYOUT_PENDING"
-    assert len(sent) == 1
-    assert sent[0]["EthSend"]["address"].as_hex == to_hex(direct_bob)
-    assert sent[0]["EthSend"]["calldata"] == b""
-    assert int(sent[0]["EthSend"]["value"]) == 100
+    _assert_external_transfer(sent, direct_bob, 100)
     view = contract.get_commitment("commitment-1")
     assert view["current_stake"] == 0
     assert view["pending_transfer_recipient"] == to_hex(direct_bob)
@@ -557,9 +566,7 @@ def test_no_contest_elapsed_claim_pays_and_early_settlement_rejected(
         contract.settle_breach("commitment-1")
     _tx(direct_vm, direct_alice, timestamp="2026-01-20T01:00:00Z")
     assert contract.settle_breach("commitment-1") == "PAYOUT_PENDING"
-    assert sent[0]["EthSend"]["address"].as_hex == to_hex(direct_bob)
-    assert int(sent[0]["EthSend"]["value"]) == 100
-    assert "on" not in sent[0]["EthSend"]
+    _assert_external_transfer(sent, direct_bob, 100)
 
 
 def test_clean_expiry_returns_stake_and_pending_breach_cannot_bypass_settlement(
@@ -572,9 +579,7 @@ def test_clean_expiry_returns_stake_and_pending_breach_cannot_bypass_settlement(
         contract.expire_commitment("commitment-1")
     _tx(direct_vm, direct_alice, timestamp="2026-01-11T00:00:00Z")
     assert contract.expire_commitment("commitment-1") == "REFUND_PENDING"
-    assert sent[0]["EthSend"]["address"].as_hex == to_hex(direct_alice)
-    assert int(sent[0]["EthSend"]["value"]) == 100
-    assert "on" not in sent[0]["EthSend"]
+    _assert_external_transfer(sent, direct_alice, 100)
     view = contract.get_commitment("commitment-1")
     assert view["pending_transfer_kind"] == "REFUND"
     assert contract.get_ledger()["total_pending_refunds"] == 100
@@ -631,6 +636,18 @@ def test_pending_refund_is_single_use_and_blocks_topup_and_extension(
     with direct_vm.expect_revert("commitment is not active"):
         contract.extend_commitment("commitment-1", "2026-03-01T00:00:00Z")
     assert len(sent) == 1
+
+
+def test_rc5_external_message_is_an_eoa_transfer(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, sent = _deploy(direct_deploy, monkeypatch)
+    _create(direct_vm, contract, direct_alice, direct_bob, expiry="2026-01-11T00:00:00Z")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:00:00Z")
+
+    assert contract.expire_commitment("commitment-1") == "REFUND_PENDING"
+    _assert_external_transfer(sent, direct_alice, 100)
+    assert contract.get_commitment("commitment-1")["status"] == "REFUND_PENDING"
 
 
 def test_transfer_helper_rejects_zero_and_invalid_recipients(

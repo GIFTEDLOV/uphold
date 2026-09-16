@@ -30,7 +30,7 @@ docs/UPHOLD_PHASE1_BASELINE.md  Baseline and compatibility evidence
 deploy/                          Deployment scripts, unused until Phase 4
 ```
 
-The original starter contracts and regression infrastructure remain in the repository while Uphold is developed. The checked-in `frontend/fee-profile.json` is starter-contract data and is not used for Uphold. A new profile must be measured after Uphold deployment.
+The original starter contracts and regression infrastructure remain in the repository while Uphold is developed. The retired starter-contract fee data is preserved as `frontend/fee-profile.football-legacy.json` and is not active for Uphold. The frontend uses network-default fee estimation until a new Uphold profile is measured after deployment.
 
 ## Local setup
 
