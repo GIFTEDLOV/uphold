@@ -1,12 +1,19 @@
 import { createHash } from "crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { createRequire } from "module";
 import path from "path";
-import { isSuccessful } from "genlayer-js";
 import type {
   GenLayerClient,
   GenLayerTransaction,
   TransactionHash,
 } from "genlayer-js/types";
+
+const requireFromProject = createRequire(
+  path.resolve(process.cwd(), "package.json"),
+);
+const { isSuccessful } = requireFromProject("genlayer-js") as {
+  isSuccessful: (transaction: GenLayerTransaction) => boolean;
+};
 
 export const DEPLOYMENT_CONTRACT_PATH = "contracts/uphold.py";
 export const EXPECTED_CONTRACT_SHA256 =

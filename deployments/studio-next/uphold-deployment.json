@@ -1,0 +1,148 @@
+{
+  "recordedAt": "2026-09-16T21:08:26.1676808Z",
+  "network": "GenLayer Studio Next",
+  "rpc": "https://studio-next.genlayer.com/api",
+  "chainId": 61997,
+  "gitSha": "f8345f5a32553749b363f6e8dba2eea090852920",
+  "contractPath": "contracts/uphold.py",
+  "contractSha256": "81F23002AC051165D4DE03603F6E61CD76B317CA397E57B5A0B3C290D0588320",
+  "runnerDependency": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+  "deployer": "0xcb5a845638cbc1f95d7f8343278685682c3ba13f",
+  "balanceBeforeWei": "4998898070499988243",
+  "nonceLatestBefore": 17,
+  "noncePendingBefore": 17,
+  "unknownPendingTx": false,
+  "quoteSource": "network-default",
+  "estimatedFeeValue": "100000000000010352",
+  "feeValueNonzero": true,
+  "feePolicy": {
+    "enabled": true,
+    "genPerTimeUnit": "1",
+    "storageUnitPrice": "250000000",
+    "receiptGasPrice": "250000000",
+    "executionBudgetFloor": "76548000000000",
+    "timeUnitOverlayBps": "1500"
+  },
+  "deploymentAttemptOverall": 2,
+  "rc5UpholdDeploymentAttempt": 1,
+  "txHash": "0x14c10cf845dded1cdb51aa9bcebb08e5ae11ab9c7d14740f7684c9136ffce4cc",
+  "finalStatus": "FINALIZED",
+  "consensus": {
+    "status": "FINALIZED",
+    "outcome": "accepted",
+    "receiptResult": 1
+  },
+  "executionResult": "FINISHED_WITH_RETURN",
+  "deploymentSuccess": true,
+  "contractAddress": "0x96671389548f170A6f02BC3017495d157d827599",
+  "codePresent": true,
+  "sourceReadbackMethod": "gen_getContractCode; base64 decoded to UTF-8 bytes",
+  "deployedSourceHash": "81F23002AC051165D4DE03603F6E61CD76B317CA397E57B5A0B3C290D0588320",
+  "sourceByteLength": 46080,
+  "sourceParity": "PASS",
+  "sourceByteExact": true,
+  "schema": {
+    "methodCount": 15,
+    "writeCount": 8,
+    "viewCount": 7,
+    "writes": [
+      "create_commitment",
+      "check_commitment",
+      "increase_stake",
+      "extend_commitment",
+      "contest_breach",
+      "adjudicate_contest",
+      "settle_breach",
+      "expire_commitment"
+    ],
+    "views": [
+      "get_commitment",
+      "get_commitment_ids",
+      "commitment_history",
+      "get_ledger",
+      "get_limits",
+      "contract_info",
+      "get_address_record"
+    ],
+    "verified": true,
+    "footballMethodsPresent": false
+  },
+  "freshState": {
+    "contract_info": {
+      "breach_rule": "two distinct consecutive qualified negative captures",
+      "evidence_provider": "Internet Archive Wayback CDX and pinned replay",
+      "name": "Uphold",
+      "semantic_classifications": [
+        "HOLDS",
+        "WEAKENED",
+        "ABSENT",
+        "INDETERMINATE"
+      ],
+      "semantic_verification": "independent validator re-runs the classification over the same admitted evidence",
+      "settlement_confirmation": "external Studio/client observation; no contract-level receipt is available",
+      "transfer_mechanism": "finalized EOA external message",
+      "version": "phase3.5-v1"
+    },
+    "get_limits": {
+      "max_archive_bytes": 32768,
+      "max_category_length": 48,
+      "max_checks": 128,
+      "max_commitment_length": 2000,
+      "max_commitments": 1000,
+      "max_contest_window_seconds": 2592000,
+      "max_history_entries": 64,
+      "max_id_length": 64,
+      "max_title_length": 120,
+      "max_url_length": 512,
+      "min_contest_window_seconds": 3600
+    },
+    "get_ledger": {
+      "breach_claims": 0,
+      "checks_run": 0,
+      "commitments_completed": 0,
+      "commitments_created": 0,
+      "contests_filed": 0,
+      "contests_rejected": 0,
+      "contests_upheld": 0,
+      "pending_commitments": 0,
+      "total_deposited": 0,
+      "total_escrowed": 0,
+      "total_paid_to_beneficiaries": 0,
+      "total_pending_outflows": 0,
+      "total_pending_payouts": 0,
+      "total_pending_refunds": 0,
+      "total_returned_to_promisors": 0
+    },
+    "get_commitment_ids": [],
+    "verified": true
+  },
+  "historicalFailedUphold": {
+    "txHash": "0x5f37c53acfe9af24f212f4b117067ca899bb2ad8d7461e328c0af5b6c7fc4b62",
+    "status": "FINALIZED",
+    "executionResult": "FINISHED_WITH_ERROR",
+    "error": "invalid_contract runner malformed",
+    "historicalOnly": true
+  },
+  "runnerSmoke": {
+    "txHash": "0xb6aee88fa326c7ffe3be00bb1ffeed264e3e8a7525d21f6b70366cd1b9550257",
+    "contractAddress": "0x39AAB4413bF614355b8EaBdb89c289E001688805",
+    "finalStatus": "FINALIZED",
+    "executionResult": "FINISHED_WITH_RETURN",
+    "readback": "UPHOLD_RUNNER_SMOKE"
+  },
+  "deployFeeAccountingAvailable": true,
+  "deployProfileGenerated": true,
+  "deployProfilePath": "frontend/fee-profile.uphold.json",
+  "deployProfileValues": {
+    "headroomBps": 12000,
+    "recommendedFeeValue": "615571200010352",
+    "leaderTimeunitsAllocation": "100",
+    "validatorTimeunitsAllocation": "200",
+    "executionBudgetPerRound": "153892800000000",
+    "totalMessageFees": "0",
+    "rotations": [
+      "3"
+    ]
+  },
+  "blockchainUserMethodWrites": 0
+}
