@@ -8,7 +8,7 @@ transaction was broadcast, no commit was created, and nothing was pushed.
 
 ## 1. Starting repository and immutable baseline
 
-- Repository: `C:\Users\DELL\Uphold`
+- Repository: `<local checkout>`
 - Origin: `https://github.com/genlayerlabs/genlayer-project-boilerplate.git`
 - Starting branch: `v2-dev`
 - Starting HEAD (`STARTING_HEAD`): `816f3b88175032f10242e278c0d13d75f185c882`
@@ -383,7 +383,7 @@ python -m pytest tests/direct/ -v
 It ran under:
 
 ```text
-Python 3.14.3 -- C:\Users\DELL\AppData\Local\Python\pythoncore-3.14-64\python.exe
+Python 3.14.3 -- <local Python executable>
 pytest 8.4.1
 genlayer-test 0.30.0rc2
 ```
@@ -392,7 +392,7 @@ The full run collected 45 tests and ended with 35 failures and 10 passes. The
 first complete failure was:
 
 ```text
-FileNotFoundError: runner py-genlayer:9b8kjyda2ycxyq4ea6g4yfpnydxhd52gqba5rb8dw7krkh5mn9p0 not under C:\Users\DELL\.cache\gltest-direct\trees-v2\v0.6.0-rc5
+FileNotFoundError: runner py-genlayer:9b8kjyda2ycxyq4ea6g4yfpnydxhd52gqba5rb8dw7krkh5mn9p0 not under <local GenVM test cache>
 ```
 
 The contract header pins the exact runner hash
@@ -426,7 +426,7 @@ os.dup2(fd, 0)
 ...
 os.close(fd)
 os.unlink(path)
-PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\Users\DELL\AppData\Local\Temp\tmp6yq3qd02'
+PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: '<local temp file>'
 ```
 
 This is the runner's own fd-0 replacement path: Windows will not unlink the
@@ -446,7 +446,7 @@ The usable isolated environment is:
 Environment: WSL2 Ubuntu
 Python: 3.12.3
 Python executable: /home/dell/Uphold/.venv-genlayer/bin/python
-Source tree: /mnt/c/Users/DELL/Uphold
+Source tree: <WSL checkout>
 GenVM: v0.6.0-rc2
 GenVM cache tree: /home/dell/.cache/gltest-direct/trees-v2/v0.6.0-rc2
 ```
@@ -481,7 +481,7 @@ unrelated cache was cleared.
 The exact repeatable command is:
 
 ```text
-wsl.exe -d Ubuntu --cd /mnt/c/Users/DELL/Uphold -- env GENVM_VERSION=v0.6.0-rc2 /home/dell/Uphold/.venv-genlayer/bin/python -m pytest tests/direct/ -v
+wsl.exe -d Ubuntu --cd <WSL checkout> -- env GENVM_VERSION=v0.6.0-rc2 /home/dell/Uphold/.venv-genlayer/bin/python -m pytest tests/direct/ -v
 ```
 
 Cold-cache execution:
@@ -525,7 +525,7 @@ complete runs. No contract or test source was modified to achieve this result.
 
 Future contract-edit rule: run the exact WSL command above after every contract
 change. Keep `GENVM_VERSION=v0.6.0-rc2` process-local, keep the source tree at
-`/mnt/c/Users/DELL/Uphold`, and do not change the starter contract dependency
+`<WSL checkout>`, and do not change the starter contract dependency
 header merely to accommodate a different cache.
 
 ### Phase 1.5 conclusion
@@ -542,7 +542,7 @@ Phase 2 contract work uses the same WSL runner and pinned GenVM version. The
 repeatable command is:
 
 ```text
-wsl.exe -d Ubuntu --cd /mnt/c/Users/DELL/Uphold -- env GENVM_VERSION=v0.6.0-rc2 /home/dell/Uphold/.venv-genlayer/bin/python -m pytest tests/direct/ -v
+wsl.exe -d Ubuntu --cd <WSL checkout> -- env GENVM_VERSION=v0.6.0-rc2 /home/dell/Uphold/.venv-genlayer/bin/python -m pytest tests/direct/ -v
 ```
 
 Phase 2 must preserve the original starter contracts and rerun this complete

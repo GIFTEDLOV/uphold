@@ -1,75 +1,96 @@
 # Uphold
 
-**Put money behind your word.**
+Uphold turns public promises into enforceable commitments. Users stake GEN behind a published promise; GenLayer independently captures and authenticates the public source over time and determines whether the commitment still holds.
 
-Uphold is a commitment-bond application for GenLayer. A promisor publishes an exact commitment, anchors it to an authenticated Internet Archive capture, and locks GEN behind it. Over time, GenLayer validators answer one bounded question: whether a later admitted document still substantially carries the original promise.
+## Why GenLayer
 
-The contract owns authorization, evidence admission, timestamps, lifecycle transitions, stake arithmetic, contests, settlement, and accounting. Validators do not choose beneficiaries, decide deadlines, or move funds. A breach claim requires two distinct consecutive qualified negative evidence points; archive or model failure never becomes breach evidence.
+Deterministic contracts cannot reliably interpret changing natural-language promises or fetch public web sources. Uphold uses GenLayer validators to independently capture public evidence and store authenticated snapshots immutably. Semantic judgment is bounded to `HOLDS`, `WEAKENED`, `ABSENT`, or `INDETERMINATE`; deterministic contract logic handles stake, timing, breach thresholds, contests, settlement, expiry, and accounting.
 
-## Current status
+## Evidence Architecture
 
-The Uphold contract and frontend are implemented locally and tested in Direct Mode. The project is **not yet deployed**. No Studio Next transaction is required for local frontend development. Before demo or production use, Phase 4 must deploy to Studio Next and verify real value transfers; Direct Mode records transfer calls but does not execute wallet balances.
-
-Target network:
-
-- GenLayer Studio Next
-- RPC: `https://studio-next.genlayer.com/api`
-- Chain ID: `61997`
-- Explorer: `https://explorer-studio-dev.genlayer.com/`
-
-## Repository map
+The authoritative evidence model is:
 
 ```text
-contracts/uphold.py             Uphold intelligent contract
-tests/direct/test_uphold.py     Uphold Direct Mode coverage
-frontend/app/                   Next.js App Router application
-frontend/components/uphold/     Product UI and transaction experience
-frontend/lib/uphold/             Typed contract client and protocol helpers
-docs/UPHOLD_PROTOCOL.md          Contract trust model
-docs/UPHOLD_PHASE1_BASELINE.md  Baseline and compatibility evidence
-deploy/                          Deployment scripts, unused until Phase 4
+live public source
+  -> independent validator capture
+  -> immutable authenticated snapshot
+  -> semantic assessment from the stored snapshot
 ```
 
-The original starter contracts and regression infrastructure remain in the repository while Uphold is developed. The retired starter-contract fee data is preserved as `frontend/fee-profile.football-legacy.json` and is not active for Uphold. The frontend uses network-default fee estimation until a new Uphold profile is measured after deployment.
+Wayback/CDX is **not required for normal operation**. A live public HTTPS response is captured and authenticated by the validators, then the semantic assessment is made from the stored snapshot rather than from an untrusted later fetch.
+
+## Contract
+
+- Network: GenLayer Studio Next
+- Chain: `61997`
+- Address: `0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528`
+- Deployment tx: `0x187a259c1763c762409be1c8c294b5a2b8b76b09dca7bd0a737760f16ce9a3f4`
+- Source commit: `2064950cfe1ee353772df6027e1660326e83c792`
+- Source SHA-256: `3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F`
+- Contract version: `live-snapshot-v1.0`
+
+## Core Actions
+
+The contract supports creating and checking commitments, increasing stake, extending expiry, contesting a breach, adjudicating a contest, settling a breach, and expiring a commitment.
+
+## Live Proof
+
+The real Studio Next lifecycle proof uses commitment `live-proof-20260917` against [IANA Example Domains](https://www.iana.org/help/example-domains):
+
+- Create tx: `0x651fab5959bc6228a9df3a16f4185eb7793e7bf085d7613b44dd50be492a969d`
+- Check tx: `0xcc8c1d43edad2068c79184f5da0b0fc9fe8bbeb1f177c31b2135145f31bba1b5`
+- Classification: `HOLDS`
+- Increase tx: `0xbd09e3a0cac0e3b045f0dfa8555056a1b72bc10e40312e8554feded2b19a3cbe`
+- Extend tx: `0x75788a94725bcbb134709d4478702c08321d508f711f71530e6fe2888f0eaeef`
+- Final stake: `2000000000000000 wei` (`0.002 GEN`)
+
+The complete machine-readable proof is in [evidence/studio-next/uphold-live-proof.json](evidence/studio-next/uphold-live-proof.json), with raw operation receipts under `evidence/studio-next/live-operations/`.
+
+## Tests
+
+The final verified regression counts are:
+
+- Frontend: `34/34`
+- Uphold Direct Mode: `46/46`
+- Total Direct Mode: `91/91`
+- AST lint: PASS
+- Semantic lint: PASS
+- GenVM lint: PASS
+- Typecheck/lint: PASS
+- Production build: PASS
+
+## Known Limitations
+
+- Breach path, contest, payout, and expiry/refund are not live-demonstrated in the current proof.
+- Studio Next does not fully prove production Ghost/EVM semantics.
+- External payout completion remains observed off-contract.
 
 ## Local setup
 
-Requirements: Node 24.x, npm, Python 3.12 or 3.13 for contract tests, and the GenLayer CLI. Copy `frontend/.env.example` to `frontend/.env`; leave `NEXT_PUBLIC_CONTRACT_ADDRESS` as the placeholder until deployment.
+Requirements: Node 24.x, npm, Python 3.12 or 3.13 for contract tests, and the GenLayer CLI.
 
 ```shell
 npm ci
 npm run dev
 ```
 
-The frontend remains usable as an honest pre-deployment shell. It does not fabricate chain statistics, commitments, transaction hashes, or a contract address.
+Copy `frontend/.env.example` to `frontend/.env` for local development. The public defaults target Studio Next and the canonical contract above. The frontend reads chain state; it does not fabricate statistics, commitments, transaction hashes, or evidence.
 
-## Contract interface
+## Repository map
 
-Payable writes: `create_commitment`, `increase_stake`.
-
-State-changing writes: `check_commitment`, `extend_commitment`, `contest_breach`, `adjudicate_contest`, `settle_breach`, `expire_commitment`.
-
-Views: `get_commitment`, `get_commitment_ids`, `commitment_history`, `get_ledger`, `get_limits`, `contract_info`, and `get_address_record`.
-
-## Testing
-
-Frontend gates:
-
-```shell
-npm test
-npm run lint
-npm run build
+```text
+contracts/uphold.py             Uphold intelligent contract
+tests/direct/                    Direct Mode and evidence regression tests
+frontend/app/                   Next.js App Router application
+frontend/components/uphold/     Product UI and transaction experience
+frontend/lib/uphold/             Typed contract client and protocol helpers
+evidence/studio-next/            Canonical deployment and lifecycle proof
+deployments/studio-next/         Deployment manifests and receipts
+tools/studio-next/               Lifecycle and verification tooling
+docs/UPHOLD_PROTOCOL.md          Contract trust model
+PROVENANCE.md                    Release provenance
 ```
-
-Authoritative contract gates run in WSL Ubuntu with Python 3.12.3 and GenVM v0.6.0-rc2:
-
-```shell
-wsl.exe -d Ubuntu --cd /mnt/c/Users/DELL/Uphold -- env GENVM_VERSION=v0.6.0-rc2 /home/dell/Uphold/.venv-genlayer/bin/python -m pytest tests/direct/ -v
-wsl.exe -d Ubuntu --cd /mnt/c/Users/DELL/Uphold -- genvm-lint check contracts/uphold.py
-```
-
-Do not use Bradbury, stable Studionet 61999, or the obsolete Studio Dev RPC for this branch.
 
 ## License
 
-The Uphold implementation in this repository remains under the repository’s existing project license. Holdfast was used as an architectural reference only; no substantial Holdfast source is copied into this phase. If source code from the Apache-2.0 Holdfast project is later reused, retain its copyright, license, and NOTICE obligations and document the derived portions.
+The Uphold implementation in this repository remains under the repository's existing project license. Holdfast was used as an architectural reference only; no substantial Holdfast source is copied into this phase. If source code from the Apache-2.0 Holdfast project is later reused, retain its copyright, license, and NOTICE obligations and document the derived portions.

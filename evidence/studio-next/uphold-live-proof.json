@@ -165,5 +165,441 @@
     "githubPushed": false,
     "vercelDeployed": false,
     "phase4BReadyForPublicRelease": false
+  },
+  "liveLifecycleProof": {
+    "proofVersion": 2,
+    "status": "LIVE_LIFECYCLE_PROOF_COMPLETE",
+    "release": {
+      "sourceHead": "2064950cfe1ee353772df6027e1660326e83c792",
+      "sourceCommit": "2064950cfe1ee353772df6027e1660326e83c792",
+      "contractSha256": "3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F",
+      "contractAddress": "0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528",
+      "deploymentTx": "0x187a259c1763c762409be1c8c294b5a2b8b76b09dca7bd0a737760f16ce9a3f4",
+      "rpc": "https://studio-next.genlayer.com/api",
+      "chainId": 61997,
+      "contractVersion": "live-snapshot-v1.0",
+      "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+      "sourceUnchanged": true,
+      "deployedSourceSha256": "3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F",
+      "deployedSourceBytes": 49472,
+      "byteForByteParity": true
+    },
+    "preflight": {
+      "deployer": "0xCb5a845638Cbc1f95D7f8343278685682c3bA13F",
+      "initialBalanceWei": "4870777788299902287",
+      "initialLedger": {
+        "total_escrowed": 0,
+        "total_deposited": 0,
+        "total_paid_to_beneficiaries": 0,
+        "total_returned_to_promisors": 0,
+        "total_pending_outflows": 0,
+        "total_pending_payouts": 0,
+        "total_pending_refunds": 0,
+        "commitments_created": 0,
+        "checks_run": 0,
+        "breach_claims": 0,
+        "contests_filed": 0,
+        "contests_upheld": 0,
+        "contests_rejected": 0,
+        "commitments_completed": 0,
+        "pending_commitments": 0
+      },
+      "limits": {
+        "max_id_length": 64,
+        "max_title_length": 120,
+        "max_category_length": 48,
+        "max_url_length": 512,
+        "max_commitment_length": 2000,
+        "max_snapshot_bytes": 32768,
+        "max_archive_bytes": 32768,
+        "max_history_entries": 64,
+        "max_commitments": 1000,
+        "max_checks": 128,
+        "min_contest_window_seconds": 3600,
+        "max_contest_window_seconds": 2592000
+      },
+      "latestNonceBeforeCreate": 81,
+      "pendingNonceBeforeCreate": 81,
+      "latestNonceAfterProof": 86,
+      "pendingNonceAfterProof": 86,
+      "pendingTransactionExplained": true,
+      "liveFeePolicy": {
+        "enabled": true,
+        "genPerTimeUnit": "1",
+        "storageUnitPrice": "250000000",
+        "receiptGasPrice": "250000000",
+        "executionBudgetFloor": "76548000000000",
+        "timeUnitOverlayBps": "1500"
+      }
+    },
+    "source": {
+      "url": "https://www.iana.org/help/example-domains",
+      "httpStatus": 200,
+      "redirectObserved": false,
+      "byteLength": 6639,
+      "sha256": "6FDE51FC02D67B032E17ADFE1AE5C67DAF2C01BED20F533B7754EE32E14C4BC9",
+      "selectedCommitmentText": "a number of domains such as example.com and example.org are maintained for documentation purposes.",
+      "commitmentTextPresentInBaseline": true,
+      "normalizedContentDigest": "36BDD3E13321C421FDE1C9700E918555B5F2F525B9DEDAFEF8616499AB8E675C",
+      "normalizedContentBytes": 1288,
+      "normalizedContentSummary": "IANA states that example.com and example.org are maintained for documentation purposes; the authenticated baseline excerpt contains the selected commitment verbatim.",
+      "waybackUsed": false
+    },
+    "commitment": {
+      "id": "live-proof-20260917",
+      "title": "IANA Example Domains",
+      "category": "public-infrastructure",
+      "sourceUrl": "https://www.iana.org/help/example-domains",
+      "exactCommitment": "a number of domains such as example.com and example.org are maintained for documentation purposes.",
+      "promisor": "0xCb5a845638Cbc1f95D7f8343278685682c3bA13F",
+      "beneficiary": "0x0291E33706b7cae6ad332a28f66e7f3e6f634d58",
+      "initialStakeWei": "1000000000000000",
+      "finalStakeWei": "2000000000000000",
+      "initialExpiry": "2026-09-24T12:40:01Z",
+      "finalExpiry": "2026-10-01T12:40:01Z",
+      "contestWindowSeconds": 3600,
+      "finalStatus": "ACTIVE"
+    },
+    "snapshots": [
+      {
+        "sequence": 0,
+        "snapshotId": "live-proof-20260917:0",
+        "captureTimestamp": "2026-09-17T12:40:11.952305Z",
+        "sourceUrl": "https://www.iana.org/help/example-domains",
+        "httpStatus": 200,
+        "sha256": "6fde51fc02d67b032e17adfe1ae5c67daf2c01bed20f533b7754ee32e14c4bc9",
+        "byteLength": 6639,
+        "capturedState": "AUTHENTICATED",
+        "classification": "HOLDS",
+        "normalizedContentDigest": "36BDD3E13321C421FDE1C9700E918555B5F2F525B9DEDAFEF8616499AB8E675C",
+        "normalizedContentSummary": "Baseline excerpt contains the exact selected commitment text."
+      },
+      {
+        "sequence": 1,
+        "snapshotId": "live-proof-20260917:1",
+        "captureTimestamp": "2026-09-17T12:41:49.666816Z",
+        "sourceUrl": "https://www.iana.org/help/example-domains",
+        "httpStatus": 200,
+        "sha256": "6fde51fc02d67b032e17adfe1ae5c67daf2c01bed20f533b7754ee32e14c4bc9",
+        "byteLength": 6639,
+        "capturedState": "AUTHENTICATED",
+        "classification": "HOLDS",
+        "normalizedContentDigest": "36BDD3E13321C421FDE1C9700E918555B5F2F525B9DEDAFEF8616499AB8E675C",
+        "normalizedContentSummary": "Later excerpt contains the exact commitment text; validators stored HOLDS."
+      }
+    ],
+    "snapshotHistoryCount": 2,
+    "transactions": [
+      {
+        "method": "create_commitment",
+        "operationId": "lifecycle-create-20260917",
+        "txHash": "0x651fab5959bc6228a9df3a16f4185eb7793e7bf085d7613b44dd50be492a969d",
+        "valueWei": "1000000000000000",
+        "feeQuote": {
+          "source": "Studio Next network-default estimateTransactionFees({})",
+          "feeValue": "100000000000010352",
+          "distribution": {
+            "leaderTimeunitsAllocation": "100",
+            "validatorTimeunitsAllocation": "200",
+            "appealRounds": "0",
+            "executionBudgetPerRound": "25000000000000000",
+            "totalMessageFees": "0",
+            "rotations": ["3"],
+            "maxPriceGenPerTimeUnit": "2",
+            "storageFeeMaxGasPrice": "300000000",
+            "receiptFeeMaxGasPrice": "300000000"
+          }
+        },
+        "finalStatus": "FINALIZED",
+        "consensus": "FINALIZED",
+        "execution": "FINISHED_WITH_RETURN",
+        "success": true,
+        "expectedStateReadback": "baseline snapshot :0, commitment ACTIVE, history count 1, ledger deposit/escrow 1000000000000000",
+        "rawReceiptPath": "evidence/studio-next/live-operations/lifecycle-create-20260917.json",
+        "rawFeeMeasurement": {
+          "paidFeeValue": "100000000000010352",
+          "requiredFeeValue": "100000000000010352",
+          "primaryFeeSpent": "87176500000823",
+          "totalRefunded": "99912823500009529",
+          "totalStudioMeteredFee": "87376000000000",
+          "executionFeeConsumed": "87176500000000",
+          "recommendedFeeValue": "419580000010352",
+          "paddingBps": 12000
+        }
+      },
+      {
+        "method": "check_commitment",
+        "operationId": "lifecycle-check-20260917",
+        "txHash": "0xcc8c1d43edad2068c79184f5da0b0fc9fe8bbeb1f177c31b2135145f31bba1b5",
+        "valueWei": "0",
+        "feeQuote": {
+          "source": "Studio Next network-default estimateTransactionFees({})",
+          "feeValue": "100000000000010352",
+          "distribution": {
+            "leaderTimeunitsAllocation": "100",
+            "validatorTimeunitsAllocation": "200",
+            "appealRounds": "0",
+            "executionBudgetPerRound": "25000000000000000",
+            "totalMessageFees": "0",
+            "rotations": ["3"],
+            "maxPriceGenPerTimeUnit": "2",
+            "storageFeeMaxGasPrice": "300000000",
+            "receiptFeeMaxGasPrice": "300000000"
+          }
+        },
+        "finalStatus": "FINALIZED",
+        "consensus": "FINALIZED",
+        "execution": "FINISHED_WITH_RETURN",
+        "success": true,
+        "expectedStateReadback": "snapshot :1, history count 2, baseline unchanged, classification HOLDS",
+        "rawReceiptPath": "evidence/studio-next/live-operations/lifecycle-check-20260917.json",
+        "rawFeeMeasurement": {
+          "paidFeeValue": "100000000000010352",
+          "requiredFeeValue": "100000000000010352",
+          "primaryFeeSpent": "87293000000823",
+          "totalRefunded": "99912707000009529",
+          "totalStudioMeteredFee": "87496000000000",
+          "executionFeeConsumed": "87293000000000",
+          "recommendedFeeValue": "420120000010352",
+          "paddingBps": 12000
+        }
+      },
+      {
+        "method": "increase_stake",
+        "operationId": "lifecycle-increase-stake-20260917",
+        "txHash": "0xbd09e3a0cac0e3b045f0dfa8555056a1b72bc10e40312e8554feded2b19a3cbe",
+        "valueWei": "1000000000000000",
+        "feeQuote": {
+          "source": "Studio Next network-default estimateTransactionFees({})",
+          "feeValue": "100000000000010352",
+          "distribution": {
+            "leaderTimeunitsAllocation": "100",
+            "validatorTimeunitsAllocation": "200",
+            "appealRounds": "0",
+            "executionBudgetPerRound": "25000000000000000",
+            "totalMessageFees": "0",
+            "rotations": ["3"],
+            "maxPriceGenPerTimeUnit": "2",
+            "storageFeeMaxGasPrice": "300000000",
+            "receiptFeeMaxGasPrice": "300000000"
+          }
+        },
+        "finalStatus": "FINALIZED",
+        "consensus": "FINALIZED",
+        "execution": "FINISHED_WITH_RETURN",
+        "success": true,
+        "expectedStateReadback": "stake increased exactly to 2000000000000000, immutable fields unchanged, ledger deposit/escrow 2000000000000000",
+        "rawReceiptPath": "evidence/studio-next/live-operations/lifecycle-increase-stake-20260917.json",
+        "rawFeeMeasurement": {
+          "paidFeeValue": "100000000000010352",
+          "requiredFeeValue": "100000000000010352",
+          "primaryFeeSpent": "78644000000823",
+          "totalRefunded": "99921356000009529",
+          "totalStudioMeteredFee": "78852000000000",
+          "executionFeeConsumed": "78644000000000",
+          "recommendedFeeValue": "378566400010352",
+          "paddingBps": 12000
+        }
+      },
+      {
+        "method": "extend_commitment",
+        "operationId": "lifecycle-extend-20260917",
+        "txHash": "0x75788a94725bcbb134709d4478702c08321d508f711f71530e6fe2888f0eaeef",
+        "valueWei": "0",
+        "feeQuote": {
+          "source": "Studio Next network-default estimateTransactionFees({})",
+          "feeValue": "100000000000010352",
+          "distribution": {
+            "leaderTimeunitsAllocation": "100",
+            "validatorTimeunitsAllocation": "200",
+            "appealRounds": "0",
+            "executionBudgetPerRound": "25000000000000000",
+            "totalMessageFees": "0",
+            "rotations": ["3"],
+            "maxPriceGenPerTimeUnit": "2",
+            "storageFeeMaxGasPrice": "300000000",
+            "receiptFeeMaxGasPrice": "300000000"
+          }
+        },
+        "finalStatus": "FINALIZED",
+        "consensus": "FINALIZED",
+        "execution": "FINISHED_WITH_RETURN",
+        "success": true,
+        "expectedStateReadback": "expiry increased strictly, URL/text/beneficiary/stake unchanged",
+        "rawReceiptPath": "evidence/studio-next/live-operations/lifecycle-extend-20260917.json",
+        "rawFeeMeasurement": {
+          "paidFeeValue": "100000000000010352",
+          "requiredFeeValue": "100000000000010352",
+          "primaryFeeSpent": "78642750000823",
+          "totalRefunded": "99921357250009529",
+          "totalStudioMeteredFee": "78852000000000",
+          "executionFeeConsumed": "78642750000000",
+          "recommendedFeeValue": "378560400010352",
+          "paddingBps": 12000
+        }
+      }
+    ],
+    "semantic": {
+      "baselineClassification": "HOLDS",
+      "checkClassifications": ["HOLDS"],
+      "qualified": true,
+      "qualification": "positive path qualified; no qualified negative finding was produced",
+      "reason": "The current authenticated snapshot contains the exact verbatim commitment found in the original statement and baseline snapshot.",
+      "excerpt": "a number of domains such as example.com and example.org are maintained for documentation purposes."
+    },
+    "accounting": {
+      "initialLedger": {
+        "total_escrowed": 0,
+        "total_deposited": 0,
+        "total_pending_outflows": 0,
+        "total_paid_to_beneficiaries": 0,
+        "total_returned_to_promisors": 0
+      },
+      "finalLedger": {
+        "total_escrowed": 2000000000000000,
+        "total_deposited": 2000000000000000,
+        "total_pending_outflows": 0,
+        "total_pending_payouts": 0,
+        "total_pending_refunds": 0,
+        "total_paid_to_beneficiaries": 0,
+        "total_returned_to_promisors": 0,
+        "commitments_created": 1,
+        "checks_run": 1,
+        "commitments_completed": 0,
+        "pending_commitments": 0
+      },
+      "invariantProof": "final total_escrowed == final total_deposited == final commitment current_stake == 2000000000000000; no settlement or refund was executed, so payout/refund/outflow totals remain zero",
+      "promisorAddressRecord": {
+        "address": "0xCb5a845638Cbc1f95D7f8343278685682c3bA13F",
+        "commitments_created": 1,
+        "total_gen_bonded": 2000000000000000,
+        "breached": 0,
+        "completed_intact": 0,
+        "gen_returned": 0,
+        "gen_received": 0
+      },
+      "beneficiaryAddressRecord": {
+        "address": "0x0291E33706b7cae6ad332a28f66e7f3e6f634d58",
+        "commitments_created": 0,
+        "total_gen_bonded": 0,
+        "breached": 0,
+        "completed_intact": 0,
+        "gen_returned": 0,
+        "gen_received": 0
+      },
+      "addressRecordVerified": true,
+      "notAUniversalTrustScore": true
+    },
+    "fees": {
+      "profilePath": "frontend/fee-profile.json",
+      "profileSha256": "0A3B40FF7963C7488C5CFEBB92BF05E85EA61B87E0978DD0E4E5827C7457DDEE",
+      "headroomBps": 12000,
+      "certifiedMethods": ["deploy", "create_commitment", "check_commitment", "increase_stake", "extend_commitment"],
+      "uncertifiedMethods": ["contest_breach", "adjudicate_contest", "settle_breach", "expire_commitment"],
+      "rawReceiptsPresent": true,
+      "rawReceiptPaths": [
+        "deployments/studio-next/uphold-corrected.json",
+        "evidence/studio-next/live-operations/lifecycle-create-20260917.json",
+        "evidence/studio-next/live-operations/lifecycle-check-20260917.json",
+        "evidence/studio-next/live-operations/lifecycle-increase-stake-20260917.json",
+        "evidence/studio-next/live-operations/lifecycle-extend-20260917.json"
+      ]
+    },
+    "failures": [
+      {
+        "classification": "read_only_rate_limit",
+        "operation": "final_readback_batch",
+        "txHash": null,
+        "resolution": "No write occurred; the same final readback was repeated after the rate-limit window cleared."
+      }
+    ],
+    "optionalSecondCheck": {
+      "status": "NOT_EXECUTED",
+      "reason": "One positive check satisfied the minimum proof; no immediate duplicate check was sent."
+    },
+    "breachPath": "NOT_EXECUTED",
+    "contestPath": "NOT_EXECUTED",
+    "settlementPath": "NOT_EXECUTED",
+    "expiryPath": "NOT_EXECUTED",
+    "frontEndState": {
+      "configuredContract": "0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528",
+      "configuredRpc": "https://studio-next.genlayer.com/api",
+      "configuredChainId": 61997,
+      "realCommitmentId": "live-proof-20260917",
+      "realCommitmentCount": 1,
+      "realStakeWei": "2000000000000000",
+      "realExpiry": "2026-10-01T12:40:01Z",
+      "realClassification": "HOLDS",
+      "noFakeData": true,
+      "noFootballData": true,
+      "setupWarning": false,
+      "routes": {
+        "/": 200,
+        "/app": 200,
+        "/app/explore": 200,
+        "/app/create": 200,
+        "/app/activity": 200,
+        "/app/commitments/live-proof-20260917": 200,
+        "/app/profile/0xCb5a845638Cbc1f95D7f8343278685682c3bA13F": 200,
+        "/transparency": 200
+      },
+      "compiledBundleContainsNewAddress": true,
+      "interactiveBrowserAvailable": false,
+      "interactiveVisualPass": "NOT_AVAILABLE_IN_THIS_ENVIRONMENT",
+      "status": "PASS_READ_ONLY_HTTP_AND_RPC_READ_MODEL"
+    },
+    "regressionGates": {
+      "frontendTests": "34/34",
+      "typecheck": "PASS",
+      "productionBuild": "PASS",
+      "upholdDirectMode": "46/46",
+      "totalDirectMode": "91/91",
+      "astLint": "PASS",
+      "semanticLint": "PASS",
+      "genvmLint": "PASS",
+      "contractSha256": "3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F"
+    },
+    "safety": {
+      "blockchainUserMethodWriteCount": 4,
+      "duplicateBroadcasts": 0,
+      "unknownTransactions": 3,
+      "unknownPendingTransactions": 0,
+      "unrelatedFinalizedTransactionsObserved": [
+        {
+          "nonce": 80,
+          "txHash": "0x96748e371e9cd6dd7afe6b8283f52fa031556f38c8c19db76f0b16eadfcf3529",
+          "to": "0x9Ad4257aD624AA21E04371C8835c6feC0fDD58A6",
+          "status": "FINALIZED",
+          "execution": "FINISHED_WITH_RETURN",
+          "partOfThisProof": false
+        },
+        {
+          "nonce": 82,
+          "txHash": "0x92637c12a3c5738439518daef5c1ebedfbc66dfba8cee08c2a4d67076843e2fc",
+          "to": "0xe3FDEd987767299dD7Da6D162A8C7Ebb8e1093d1",
+          "status": "FINALIZED",
+          "execution": "FINISHED_WITH_RETURN",
+          "partOfThisProof": false
+        },
+        {
+          "nonce": 86,
+          "txHash": "0x45a9dfdbb48b7f325eb142bbd69ca21500f1a6e6e5137a7a65a1d7d117aafdc3",
+          "to": "0xb20A86bcaa5dcB5d19F9163a91A10001DAb738f7",
+          "status": "FINALIZED",
+          "execution": "FINISHED_WITH_RETURN",
+          "partOfThisProof": false
+        }
+      ],
+      "githubPushed": false,
+      "vercelDeployed": false
+    },
+    "artifactPaths": {
+      "operationDirectory": "evidence/studio-next/live-operations",
+      "proof": "evidence/studio-next/uphold-live-proof.json",
+      "feeProfile": "frontend/fee-profile.json",
+      "deploymentProvenance": "deployments/studio-next/uphold-corrected.json",
+      "historicalSmoke": "evidence/studio-next/live-evidence-smoke.json",
+      "capture2Reconciliation": "evidence/studio-next/live-evidence-capture2-reconciliation.json"
+    }
   }
 }

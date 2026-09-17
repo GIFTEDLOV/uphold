@@ -14,8 +14,8 @@ export const UPHOLD_NETWORK = {
   explorerUrl: "https://explorer-studio-dev.genlayer.com/",
 } as const;
 
-/** No evidence-v1.1 user-method profile is certified yet; use network defaults. */
-export const UPHOLD_FEE_PROFILE_PRESENT = false;
+/** Certified Studio Next measurements are recorded in fee-profile.json. */
+export const UPHOLD_FEE_PROFILE_PRESENT = true;
 
 export function getUpholdContractAddress(): `0x${string}` | null {
   const raw = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS?.trim() ?? "";
