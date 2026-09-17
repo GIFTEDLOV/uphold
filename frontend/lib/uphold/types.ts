@@ -66,6 +66,12 @@ export interface Commitment {
   contest_evidence_timestamp: string;
   contest_evidence_digest: string;
   contest_evidence_snapshot_id?: string;
+  contest_classification?: string;
+  contest_nonce?: number;
+  contest_outage_grace_count?: number;
+  contest_outage_at?: string;
+  contest_outage_domain?: string;
+  contest_outage_reason?: string;
   contest_result: string;
   final_settlement_at: string;
   final_settlement_amount: bigint;
@@ -90,6 +96,8 @@ export interface HistoryEntry {
   snapshot_id?: string;
   replay_url?: string;
   classification?: SemanticClassification;
+  captured_state?: "AUTHENTICATED" | "UNASSESSED" | string;
+  snapshot_state?: "UNASSESSED" | string;
   excerpt?: string;
   short_reason?: string;
   qualified?: boolean;
@@ -129,6 +137,7 @@ export interface Limits {
   max_checks: number;
   min_contest_window_seconds: number;
   max_contest_window_seconds: number;
+  contest_outage_grace_seconds?: number;
 }
 
 export interface ContractInfo {
@@ -139,6 +148,9 @@ export interface ContractInfo {
   evidence_discovery?: string;
   breach_rule: string;
   semantic_verification?: string;
+  source_claim?: string;
+  contest_rule?: string;
+  contest_outage_recovery?: string;
   transfer_mechanism?: string;
   settlement_confirmation?: string;
 }

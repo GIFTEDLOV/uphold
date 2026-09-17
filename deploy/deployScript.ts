@@ -17,7 +17,7 @@ const { isSuccessful } = requireFromProject("genlayer-js") as {
 
 export const DEPLOYMENT_CONTRACT_PATH = "contracts/uphold.py";
 export const EXPECTED_CONTRACT_SHA256 =
-  "3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F";
+  "090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8";
 export const EXPECTED_RPC = "https://studio-next.genlayer.com/api";
 export const EXPECTED_CHAIN_ID = 61997;
 
@@ -26,11 +26,11 @@ const deploymentDir = path.resolve(process.cwd(), "deployments/studio-next");
 // own provenance pair so a second, corrected deployment is still one-shot.
 const pendingManifestPath = path.join(
   deploymentDir,
-  "uphold-corrected.pending.json",
+  "uphold-hardening.pending.json",
 );
 const completedManifestPath = path.join(
   deploymentDir,
-  "uphold-corrected.json",
+  "uphold-hardening.json",
 );
 const contractPath = path.resolve(process.cwd(), DEPLOYMENT_CONTRACT_PATH);
 
@@ -184,7 +184,8 @@ export default async function main(client: GenLayerClient<any>): Promise<void> {
     genlayerJsVersion: "2.0.0-rc.1",
     transactionKitVersion: "0.1.0-rc.2",
     deploymentAttempt: 1,
-    supersedes: "0x96671389548f170A6f02BC3017495d157d827599",
+    supersedes: "0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528",
+    historicalSupersededDeployment: "0x96671389548f170A6f02BC3017495d157d827599",
     historicalFailedDeployment:
       "0x5f37c53acfe9af24f212f4b117067ca899bb2ad8d7461e328c0af5b6c7fc4b62",
     status: "PREPARED",

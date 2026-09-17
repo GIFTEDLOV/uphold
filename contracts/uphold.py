@@ -35,6 +35,11 @@ MAX_LISTING = 100
 MAX_COMMITMENT_SECONDS = 365 * 24 * 60 * 60
 MIN_CONTEST_WINDOW_SECONDS = 60 * 60
 MAX_CONTEST_WINDOW_SECONDS = 30 * 24 * 60 * 60
+# A single, bounded recovery window is available when the promisor attempts a
+# contest before the effective deadline but authenticated capture is blocked by
+# external infrastructure.  It is deliberately shorter than the minimum
+# contest window and can never be applied twice for one breach.
+CONTEST_OUTAGE_GRACE_SECONDS = 15 * 60
 AUTHENTICATED_SNAPSHOT = "AUTHENTICATED"
 UNASSESSED_SNAPSHOT = "UNASSESSED"
 SOURCE_UNAVAILABLE = "SOURCE_UNAVAILABLE"
@@ -125,6 +130,12 @@ class Commitment:
     contest_evidence_timestamp: str
     contest_evidence_digest: str
     contest_evidence_snapshot_id: str
+    contest_classification: str
+    contest_nonce: gl.u256
+    contest_outage_grace_count: gl.u256
+    contest_outage_at: str
+    contest_outage_domain: str
+    contest_outage_reason: str
     contest_result: str
     final_settlement_at: str
     final_settlement_amount: gl.u256
@@ -167,11 +178,14 @@ def _valid_url(value: str) -> bool:
         return False
     try:
         parts = urlsplit(value)
+        hostname = parts.hostname
+        _ = parts.port
     except ValueError:
         return False
     return (
-        parts.scheme in ("http", "https")
+        parts.scheme == "https"
         and bool(parts.netloc)
+        and bool(hostname)
         and parts.username is None
         and parts.password is None
         and not parts.fragment
@@ -260,10 +274,14 @@ def _fetch_live_capture(source_url: str, capture_timestamp: str, allow_not_found
 
 
 def _snapshot_from_capture(
-    commitment_id: str, sequence: int, capture: dict, classification: str
+    commitment_id: str,
+    sequence: int,
+    capture: dict,
+    classification: str,
+    snapshot_id: str | None = None,
 ) -> EvidenceSnapshot:
     return EvidenceSnapshot(
-        snapshot_id=commitment_id + ":" + str(sequence),
+        snapshot_id=snapshot_id or commitment_id + ":" + str(sequence),
         commitment_id=commitment_id,
         sequence=gl.u256(sequence),
         source_url=capture["source_url"],
@@ -514,20 +532,6 @@ class Uphold(gl.contract.Contract):
         self._require(snapshot_id in self.evidence_snapshots, "evidence snapshot not found")
         return self.evidence_snapshots[snapshot_id]
 
-    def _find_snapshot_by_capture_timestamp(
-        self, commitment: Commitment, capture_timestamp: str
-    ) -> EvidenceSnapshot | None:
-        # The sequence is bounded by MAX_CHECKS and makes lookup deterministic
-        # without exposing a mutable iterator over storage.
-        for sequence in range(int(commitment.checks_run) + 1):
-            snapshot_id = commitment.commitment_id + ":" + str(sequence)
-            if snapshot_id not in self.evidence_snapshots:
-                continue
-            snapshot = self.evidence_snapshots[snapshot_id]
-            if snapshot.capture_timestamp == capture_timestamp:
-                return snapshot
-        return None
-
     def _require_active(self, commitment: Commitment) -> None:
         self._require(commitment.status == ACTIVE, "commitment is not active")
 
@@ -706,6 +710,12 @@ class Uphold(gl.contract.Contract):
             contest_evidence_timestamp="",
             contest_evidence_digest="",
             contest_evidence_snapshot_id="",
+            contest_classification=UNASSESSED_SNAPSHOT,
+            contest_nonce=gl.u256(0),
+            contest_outage_grace_count=gl.u256(0),
+            contest_outage_at="",
+            contest_outage_domain="",
+            contest_outage_reason="",
             contest_result="",
             final_settlement_at="",
             final_settlement_amount=gl.u256(0),
@@ -733,6 +743,8 @@ class Uphold(gl.contract.Contract):
                     "byte_length": int(baseline_snapshot.byte_length),
                     "http_status": int(baseline_snapshot.http_status),
                     "snapshot_id": baseline_snapshot.snapshot_id,
+                    "captured_state": baseline_snapshot.captured_state,
+                    "classification": baseline_snapshot.classification,
                     "excerpt": baseline["excerpt"],
                     "stake": stake,
                 }
@@ -818,6 +830,7 @@ class Uphold(gl.contract.Contract):
                 "http_status": int(snapshot.http_status),
                 "snapshot_id": snapshot.snapshot_id,
                 "classification": classification,
+                "captured_state": snapshot.captured_state,
                 "excerpt": semantic["excerpt"][:MAX_EXCERPT_LENGTH],
                 "short_reason": semantic["short_reason"][:MAX_REASON_LENGTH],
             },
@@ -827,6 +840,16 @@ class Uphold(gl.contract.Contract):
             commitment.breach_claimed_at = now
             claimed_dt = _now() + dt.timedelta(seconds=int(commitment.contest_window_seconds))
             commitment.contest_deadline = claimed_dt.isoformat().replace("+00:00", "Z")
+            commitment.contest_evidence_url = ""
+            commitment.contest_evidence_timestamp = ""
+            commitment.contest_evidence_digest = ""
+            commitment.contest_evidence_snapshot_id = ""
+            commitment.contest_classification = UNASSESSED_SNAPSHOT
+            commitment.contest_result = ""
+            commitment.contest_outage_grace_count = gl.u256(0)
+            commitment.contest_outage_at = ""
+            commitment.contest_outage_domain = ""
+            commitment.contest_outage_reason = ""
             self.breach_claims = gl.u256(int(self.breach_claims) + 1)
             self._record_history(
                 commitment_id,
@@ -879,42 +902,79 @@ class Uphold(gl.contract.Contract):
         return "EXTENDED"
 
     @gl.public.write
-    def contest_breach(
-        self, commitment_id: str, evidence_url: str, evidence_timestamp: str
-    ) -> str:
+    def contest_breach(self, commitment_id: str) -> str:
+        """Capture the locked source freshly and open one contest adjudication."""
         commitment = self._get(commitment_id)
         self._require(commitment.status == BREACH_CLAIMED, "commitment is not contestable")
         self._require(commitment.promisor == gl.message.sender_address, "only promisor may contest")
+        now = _now_iso()
         deadline = _parse_iso(commitment.contest_deadline)
         self._require(deadline is not None and _now() < deadline, "contest window expired")
-        self._require(evidence_url == commitment.source_url, "contest must use original source")
-        timestamp_dt = _parse_iso(evidence_timestamp)
-        self._require(timestamp_dt is not None and timestamp_dt <= _now(), "invalid contest timestamp")
-        self._require(
-            evidence_timestamp not in (commitment.breach_capture_1, commitment.breach_capture_2),
-            "contest capture already used",
+
+        # Contest evidence is never selected by the caller.  The contract
+        # authenticates a new response from the immutable source URL instead.
+        capture = _authenticated_live_capture(commitment.source_url, now, True)
+        if capture.get("ok") is not True:
+            domain = capture.get("domain", "SOURCE")
+            reason = capture.get("reason", "contest capture failed")
+            grace_applied = int(commitment.contest_outage_grace_count) == 0
+            if grace_applied:
+                grace_deadline = deadline + dt.timedelta(seconds=CONTEST_OUTAGE_GRACE_SECONDS)
+                commitment.contest_deadline = grace_deadline.isoformat().replace("+00:00", "Z")
+                commitment.contest_outage_grace_count = gl.u256(1)
+                commitment.contest_outage_at = now
+                commitment.contest_outage_domain = domain
+                commitment.contest_outage_reason = reason
+            self._record_history(
+                commitment_id,
+                {
+                    "event": "CONTEST_CAPTURE_FAILURE",
+                    "at": now,
+                    "domain": domain,
+                    "reason": reason,
+                    "grace_applied": grace_applied,
+                    "grace_seconds": CONTEST_OUTAGE_GRACE_SECONDS if grace_applied else 0,
+                    "effective_contest_deadline": commitment.contest_deadline,
+                },
+            )
+            return "[" + domain + "] " + reason
+
+        nonce = int(commitment.contest_nonce) + 1
+        snapshot_id = commitment.commitment_id + ":contest:" + str(nonce)
+        snapshot = _snapshot_from_capture(
+            commitment.commitment_id,
+            nonce,
+            capture,
+            UNASSESSED_SNAPSHOT,
+            snapshot_id=snapshot_id,
         )
-        evidence = self._find_snapshot_by_capture_timestamp(commitment, evidence_timestamp)
-        if evidence is None:
-            return "[EVIDENCE] contest snapshot not found"
+        self._store_snapshot(snapshot)
+        snapshot = self._get_snapshot(snapshot_id)
+        commitment.contest_nonce = gl.u256(nonce)
         commitment.status = CONTESTED
-        commitment.contest_evidence_url = evidence_url
-        commitment.contest_evidence_timestamp = evidence.capture_timestamp
-        snapshot = evidence
+        commitment.contest_evidence_url = commitment.source_url
+        commitment.contest_evidence_timestamp = snapshot.capture_timestamp
         commitment.contest_evidence_digest = snapshot.sha256
         commitment.contest_evidence_snapshot_id = snapshot.snapshot_id
+        commitment.contest_classification = UNASSESSED_SNAPSHOT
+        commitment.contest_result = ""
         self.contests_filed = gl.u256(int(self.contests_filed) + 1)
         self._record_history(
             commitment_id,
             {
                 "event": "CONTEST_FILED",
-                "at": _now_iso(),
-                "evidence_timestamp": evidence.capture_timestamp,
-                "capture_timestamp": evidence.capture_timestamp,
+                "at": now,
+                "evidence_url": commitment.source_url,
+                "source_url": snapshot.source_url,
+                "evidence_timestamp": snapshot.capture_timestamp,
+                "capture_timestamp": snapshot.capture_timestamp,
                 "evidence_digest": snapshot.sha256,
+                "sha256": snapshot.sha256,
                 "snapshot_id": snapshot.snapshot_id,
                 "http_status": int(snapshot.http_status),
                 "byte_length": int(snapshot.byte_length),
+                "captured_state": snapshot.captured_state,
+                "classification": snapshot.classification,
                 "excerpt": snapshot.normalized_content[:MAX_EXCERPT_LENGTH],
             },
         )
@@ -928,6 +988,15 @@ class Uphold(gl.contract.Contract):
             evidence = self._get_snapshot(commitment.contest_evidence_snapshot_id)
         except Exception:
             return "[EVIDENCE] contest evidence snapshot missing"
+        self._require(
+            evidence.commitment_id == commitment.commitment_id
+            and evidence.snapshot_id == commitment.contest_evidence_snapshot_id
+            and evidence.snapshot_id.startswith(commitment.commitment_id + ":contest:")
+            and evidence.source_url == commitment.source_url
+            and evidence.captured_state == AUTHENTICATED_SNAPSHOT
+            and evidence.classification == UNASSESSED_SNAPSHOT,
+            "contest evidence is not a fresh authenticated snapshot",
+        )
         baseline = self._get_snapshot(commitment.baseline_snapshot_id)
         semantic = _semantic_judgment(commitment.commitment_text, baseline, evidence)
         if semantic.get("ok") is not True:
@@ -936,25 +1005,42 @@ class Uphold(gl.contract.Contract):
         if classification == HOLDS:
             commitment.status = ACTIVE
             commitment.consecutive_negative_count = gl.u256(0)
-            commitment.last_observed_archive_timestamp = commitment.contest_evidence_timestamp
+            commitment.contest_classification = classification
             commitment.contest_result = "UPHELD"
             self.contests_upheld = gl.u256(int(self.contests_upheld) + 1)
             self._increment_address(commitment.promisor, "contests_won")
             self._record_history(
                 commitment_id,
-                {"event": "CONTEST_UPHELD", "at": _now_iso(), "classification": classification},
+                {
+                    "event": "CONTEST_UPHELD",
+                    "at": _now_iso(),
+                    "classification": classification,
+                    "snapshot_id": evidence.snapshot_id,
+                    "capture_timestamp": evidence.capture_timestamp,
+                    "sha256": evidence.sha256,
+                    "captured_state": evidence.captured_state,
+                },
             )
             return "CONTEST_UPHELD"
         if classification not in QUALIFIED_NEGATIVES:
             return "[LLM] contest judgment indeterminate"
         commitment.status = BREACH_CONFIRMED
+        commitment.contest_classification = classification
         commitment.contest_result = "REJECTED"
         self.contests_rejected = gl.u256(int(self.contests_rejected) + 1)
         self._increment_address(commitment.promisor, "breached")
         self._increment_address(commitment.promisor, "contests_lost")
         self._record_history(
             commitment_id,
-            {"event": "CONTEST_REJECTED", "at": _now_iso(), "classification": classification},
+            {
+                "event": "CONTEST_REJECTED",
+                "at": _now_iso(),
+                "classification": classification,
+                "snapshot_id": evidence.snapshot_id,
+                "capture_timestamp": evidence.capture_timestamp,
+                "sha256": evidence.sha256,
+                "captured_state": evidence.captured_state,
+            },
         )
         return BREACH_CONFIRMED
 
@@ -1082,6 +1168,12 @@ class Uphold(gl.contract.Contract):
             "contest_evidence_timestamp": commitment.contest_evidence_timestamp,
             "contest_evidence_digest": commitment.contest_evidence_digest,
             "contest_evidence_snapshot_id": commitment.contest_evidence_snapshot_id,
+            "contest_classification": commitment.contest_classification,
+            "contest_nonce": int(commitment.contest_nonce),
+            "contest_outage_grace_count": int(commitment.contest_outage_grace_count),
+            "contest_outage_at": commitment.contest_outage_at,
+            "contest_outage_domain": commitment.contest_outage_domain,
+            "contest_outage_reason": commitment.contest_outage_reason,
             "contest_result": commitment.contest_result,
             "final_settlement_at": commitment.final_settlement_at,
             "final_settlement_amount": int(commitment.final_settlement_amount),
@@ -1142,18 +1234,22 @@ class Uphold(gl.contract.Contract):
             "max_checks": MAX_CHECKS,
             "min_contest_window_seconds": MIN_CONTEST_WINDOW_SECONDS,
             "max_contest_window_seconds": MAX_CONTEST_WINDOW_SECONDS,
+            "contest_outage_grace_seconds": CONTEST_OUTAGE_GRACE_SECONDS,
         }
 
     @gl.public.view
     def contract_info(self) -> dict:
         return {
             "name": "Uphold",
-            "version": "live-snapshot-v1.0",
+            "version": "live-snapshot-v1.1",
             "semantic_classifications": [HOLDS, WEAKENED, ABSENT, INDETERMINATE],
             "evidence_provider": "Live public source via gl.nondet.web.get",
             "evidence_discovery": "Wayback/CDX/Availability are optional off-chain research and recovery only",
             "breach_rule": "two distinct consecutive qualified negative captures",
             "semantic_verification": "independent validators classify the same authenticated baseline and live snapshot; only classification is consensus-critical",
+            "source_claim": "the wallet stakes behind the exact commitment text and locked HTTPS source; content authentication does not prove domain ownership or legal identity",
+            "contest_rule": "the promisor may request one fresh authenticated capture of the locked source; adjudication is bound to its immutable contest snapshot",
+            "contest_outage_recovery": "one consensus-observed external capture failure may extend the effective contest deadline by a bounded 900 seconds; no semantic negative is created",
             "redirect_behavior": "gl.nondet.web exposes status and body here; final URL and headers are not assumed visible",
             "transfer_mechanism": "finalized EOA external message",
             "settlement_confirmation": "external Studio/client observation; no contract-level receipt is available",

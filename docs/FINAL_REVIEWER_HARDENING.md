@@ -1,0 +1,22 @@
+# Final reviewer hardening audit
+
+This is the pre-change audit of the current public contract. The audit distinguishes protocol behavior from frontend presentation and points to the direct regression suite. The contest evidence finding below is confirmed and is addressed by the candidate hardening change.
+
+## Findings
+
+| Failure class | Classification | Evidence |
+| --- | --- | --- |
+| A. Round / evidence liveness | APPLICABLE_AND_NEEDS_FIX | `contracts/uphold.py::_authenticated_live_capture` and `check_commitment` fail closed for source, evidence, and validator failures. However, `contest_breach` has no fresh capture or bounded outage recovery, so a promisor can lose the contest window while trying to recover from transport failure. There is no finalist/operator-controlled set; `commitment_ids_json` is append-only from `create_commitment`. |
+| B. Unassessed vs consensus-cleared state | APPLICABLE_AND_NEEDS_FIX | `EvidenceSnapshot` already has `captured_state` and `classification`, and normal `check_commitment` stores only after `_semantic_judgment`. The current contest path reuses an already classified snapshot, so it cannot expose a fresh `AUTHENTICATED` / `UNASSESSED` contest state. `frontend/components/uphold/EvidenceTimeline.tsx` renders a badge only when a classification exists and needs an explicit pending treatment for contest captures. |
+| C. Permissionless adverse checking | APPLICABLE_AND_SAFE | `check_commitment` has no sender restriction and calls `_get` plus `_require_active`; the existing `test_non_promisor_cannot_extend_or_contest` establishes sender restrictions only for protected methods. A dedicated third-party check regression is added in this hardening run. |
+| D. Source authentication and authority | APPLICABLE_AND_NEEDS_FIX | `_valid_url` currently accepts both HTTP and HTTPS, while `create_commitment` stores `source_url` and later `check_commitment` uses that stored value. The contract never proves domain ownership, but the URL policy needs HTTPS-only validation. Frontend source copy must continue to say that content from the locked source is authenticated, not that a promisor owns the domain. |
+| E. Challenge reassessment | APPLICABLE_AND_NEEDS_FIX | Confirmed: `contest_breach(commitment_id, evidence_url, evidence_timestamp)` accepts caller-selected timestamp and `_find_snapshot_by_capture_timestamp` can select the baseline, a pre-breach snapshot, or either breach snapshot. `adjudicate_contest` then assesses that stale snapshot. This violates fresh contest evidence requirements. |
+| F. Multiple/open challenge behavior | APPLICABLE_AND_NEEDS_FIX | The current `status == BREACH_CLAIMED` / `status == CONTESTED` gates allow only one contest at a time and prevent resolved replay, but the contest binding is to caller-selected stale evidence. The replacement must bind adjudication to one immutable contest namespace and one contest nonce. |
+| G. Repeated-notice / evidence priority | APPLICABLE_AND_SAFE | Normal checks use `commitment_id:<sequence>`, increment `checks_run` only after semantic success, and `_store_snapshot` rejects conflicting rewrites. `test_repeated_live_capture_creates_a_new_immutable_snapshot` and `test_authenticated_snapshot_is_immutable_and_conflicting_rewrite_is_rejected` cover these properties. Contest snapshots need their own namespace. |
+| H. Settlement liveness | APPLICABLE_AND_SAFE | `_request_transfer` requires no existing pending transfer, zeros `current_stake`, moves value from escrow to pending outflows, and emits one external EOA transfer. `settle_breach` and `expire_commitment` are status-gated. The existing settlement/refund tests cover single-use behavior. External EOA completion has no contract-level receipt and remains an honest limitation. |
+
+## Required hardening outcome
+
+The candidate contract will make `contest_breach(commitment_id)` capture `commitment.source_url` itself, store an immutable `<commitment_id>:contest:<nonce>` snapshot as `AUTHENTICATED` / `UNASSESSED`, and make `adjudicate_contest` assess only that exact snapshot. A single consensus-observed capture outage may extend the contest deadline by the bounded protocol grace; the failure remains infrastructure evidence and never becomes `WEAKENED` or `ABSENT`.
+
+The final version of this document will append the behavioral test matrix, candidate deployment proof, controlled adversarial lifecycle proof, and a row-by-row live reviewer matrix. The real IANA positive proof remains separate from controlled fixture evidence.

@@ -89,6 +89,12 @@ export function normalizeCommitment(value: unknown): Commitment {
     contest_evidence_timestamp: stringValue(item.contest_evidence_timestamp),
     contest_evidence_digest: stringValue(item.contest_evidence_digest),
     ...(item.contest_evidence_snapshot_id ? { contest_evidence_snapshot_id: stringValue(item.contest_evidence_snapshot_id) } : {}),
+    contest_classification: stringValue(item.contest_classification, "UNASSESSED"),
+    contest_nonce: numberValue(item.contest_nonce),
+    contest_outage_grace_count: numberValue(item.contest_outage_grace_count),
+    contest_outage_at: stringValue(item.contest_outage_at),
+    contest_outage_domain: stringValue(item.contest_outage_domain),
+    contest_outage_reason: stringValue(item.contest_outage_reason),
     contest_result: stringValue(item.contest_result),
     final_settlement_at: stringValue(item.final_settlement_at),
     final_settlement_amount: bigintValue(item.final_settlement_amount),
@@ -116,7 +122,9 @@ export function normalizeHistory(value: unknown): HistoryEntry[] {
       at: stringValue(item.at),
       ...(item.capture_timestamp ? { capture_timestamp: stringValue(item.capture_timestamp) } : {}),
       ...(item.http_status != null ? { http_status: numberValue(item.http_status) } : {}),
-      ...(item.classification ? { classification } : {}),
+      ...(item.classification && item.classification !== "UNASSESSED" ? { classification } : {}),
+      ...(item.captured_state ? { captured_state: stringValue(item.captured_state) } : {}),
+      ...(item.classification === "UNASSESSED" ? { snapshot_state: "UNASSESSED" } : {}),
     } as HistoryEntry;
   });
 }
@@ -157,6 +165,7 @@ export function normalizeLimits(value: unknown): Limits {
     max_checks: numberValue(item.max_checks, 128),
     min_contest_window_seconds: numberValue(item.min_contest_window_seconds, 3600),
     max_contest_window_seconds: numberValue(item.max_contest_window_seconds, 2592000),
+    ...(item.contest_outage_grace_seconds != null ? { contest_outage_grace_seconds: numberValue(item.contest_outage_grace_seconds) } : {}),
   };
 }
 
@@ -176,6 +185,9 @@ export function normalizeContractInfo(value: unknown): ContractInfo {
     breach_rule: stringValue(item.breach_rule),
     ...(item.evidence_discovery ? { evidence_discovery: stringValue(item.evidence_discovery) } : {}),
     ...(item.semantic_verification ? { semantic_verification: stringValue(item.semantic_verification) } : {}),
+    ...(item.source_claim ? { source_claim: stringValue(item.source_claim) } : {}),
+    ...(item.contest_rule ? { contest_rule: stringValue(item.contest_rule) } : {}),
+    ...(item.contest_outage_recovery ? { contest_outage_recovery: stringValue(item.contest_outage_recovery) } : {}),
     ...(item.transfer_mechanism ? { transfer_mechanism: stringValue(item.transfer_mechanism) } : {}),
     ...(item.settlement_confirmation ? { settlement_confirmation: stringValue(item.settlement_confirmation) } : {}),
   };
