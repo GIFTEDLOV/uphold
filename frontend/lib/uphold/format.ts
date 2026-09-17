@@ -13,6 +13,7 @@ export function formatDate(value: string, withTime = false): string {
 }
 
 export function formatArchiveTimestamp(value: string): string {
+  if (value.includes("T")) return formatDate(value, true);
   if (!/^\d{14}$/.test(value)) return "—";
   const date = new Date(`${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}T${value.slice(8, 10)}:${value.slice(10, 12)}:${value.slice(12, 14)}Z`);
   return formatDate(date.toISOString(), true);

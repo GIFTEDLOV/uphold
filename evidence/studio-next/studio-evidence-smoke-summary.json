@@ -1,0 +1,33 @@
+{
+  "artifact": "studio-next-availability-replay-snapshot-smoke",
+  "rpc": "https://studio-next.genlayer.com/api",
+  "chainId": 61997,
+  "sourcePath": "contracts/_studio_next_evidence_smoke.py",
+  "sourceSha256": "3879C5FDABF3675776C8C1B9A2BF0D04C4778BED5DFC8CC7C89DF451D8C06270",
+  "contractAddress": "0x0F3Cb8D7bc04314ac17b2749CE8Ec68454450dCf",
+  "deploymentTx": "0x6f89dc5288b1f3f3e4b0a014a7b03201ad443ca7011ac99e5d67607a418c4c97",
+  "deploymentStatus": "FINALIZED",
+  "deploymentExecution": "FINISHED_WITH_RETURN",
+  "codePresent": true,
+  "captureTx": "0xbb6211f038810b81be737bc5e921e2daec3f7ba84f79afe95936dcfb67c4f0e5",
+  "captureStatus": "FINALIZED",
+  "captureExecution": "FINISHED_WITH_ERROR",
+  "leaderReason": "replay_too_large",
+  "snapshotStored": false,
+  "interpretation": {
+    "availabilityApi": "Reached by Studio validators; a capture was selected.",
+    "exactIdReplay": "Reached by Studio validators; the returned replay bytes exceeded the 32768-byte admission limit.",
+    "authenticatedSnapshot": "Not proven because the strict size gate correctly rejected the fixture.",
+    "canonicalUpholdDeployment": "Not attempted."
+  },
+  "smallFixtureRetry": {
+    "sourceUrl": "https://example.com/",
+    "captureTx": "0x16f4322e919b8833c63639818c39f8e7c8efe16c98a8281bd0ca5f54104ef978",
+    "status": "FINALIZED",
+    "execution": "FINISHED_WITH_ERROR",
+    "reason": "invalid_capture_binding",
+    "snapshotStored": false,
+    "rebroadcast": false
+  },
+  "historicalOnly": true
+}

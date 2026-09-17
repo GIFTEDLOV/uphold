@@ -23,6 +23,7 @@ export type SemanticClassification = (typeof SEMANTIC_CLASSIFICATIONS)[number];
 export type ErrorDomain =
   | "PRECONDITION"
   | "EXTERNAL_EVIDENCE"
+  | "SOURCE"
   | "TRANSIENT"
   | "MODEL_ERROR"
   | "TRANSACTION_FAILURE"
@@ -41,6 +42,8 @@ export interface Commitment {
   baseline_digest: string;
   baseline_body_digest: string;
   baseline_excerpt: string;
+  baseline_snapshot_id?: string;
+  baseline_byte_length?: number;
   created_at: string;
   expires_at: string;
   contest_window_seconds: number;
@@ -50,6 +53,7 @@ export interface Commitment {
   status: CommitmentStatus;
   last_checked_at: string;
   last_observed_archive_timestamp: string;
+  last_snapshot_id?: string;
   last_qualified_archive_timestamp: string;
   last_qualified_digest: string;
   checks_run: number;
@@ -61,6 +65,7 @@ export interface Commitment {
   contest_evidence_url: string;
   contest_evidence_timestamp: string;
   contest_evidence_digest: string;
+  contest_evidence_snapshot_id?: string;
   contest_result: string;
   final_settlement_at: string;
   final_settlement_amount: bigint;
@@ -75,9 +80,15 @@ export interface Commitment {
 export interface HistoryEntry {
   event: string;
   at?: string;
+  capture_timestamp?: string;
+  http_status?: number;
   archive_timestamp?: string;
   archive_digest?: string;
   body_digest?: string;
+  sha256?: string;
+  byte_length?: number;
+  snapshot_id?: string;
+  replay_url?: string;
   classification?: SemanticClassification;
   excerpt?: string;
   short_reason?: string;
@@ -112,6 +123,7 @@ export interface Limits {
   max_url_length: number;
   max_commitment_length: number;
   max_archive_bytes: number;
+  max_snapshot_bytes?: number;
   max_history_entries: number;
   max_commitments: number;
   max_checks: number;
@@ -124,6 +136,7 @@ export interface ContractInfo {
   version: string;
   semantic_classifications: SemanticClassification[];
   evidence_provider: string;
+  evidence_discovery?: string;
   breach_rule: string;
   semantic_verification?: string;
   transfer_mechanism?: string;

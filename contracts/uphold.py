@@ -1,16 +1,20 @@
 # { "Depends": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng" }
 """Uphold commitment bonds.
 
-The contract deliberately keeps economic and admission decisions deterministic.
-Validators are used only for the bounded semantic question in
-``_semantic_judgment`` after an archived capture has passed the archive gates.
+The contract authenticates bounded live-source snapshots before making any
+semantic or economic decision. Wayback/CDX is deliberately not part of the
+authoritative protocol path. The archive-named public fields are retained as
+compatibility aliases for the existing frontend and now contain live capture
+timestamps.
 """
 
 from dataclasses import dataclass
 import datetime as dt
+import html
 import hashlib
 import json
-from urllib.parse import quote, urlsplit
+import re
+from urllib.parse import urlsplit
 
 import genlayer as gl
 from genlayer.storage import allow as allow_storage
@@ -31,6 +35,11 @@ MAX_LISTING = 100
 MAX_COMMITMENT_SECONDS = 365 * 24 * 60 * 60
 MIN_CONTEST_WINDOW_SECONDS = 60 * 60
 MAX_CONTEST_WINDOW_SECONDS = 30 * 24 * 60 * 60
+AUTHENTICATED_SNAPSHOT = "AUTHENTICATED"
+UNASSESSED_SNAPSHOT = "UNASSESSED"
+SOURCE_UNAVAILABLE = "SOURCE_UNAVAILABLE"
+SOURCE_INACCESSIBLE = "SOURCE_INACCESSIBLE"
+EVIDENCE_INVALID = "EVIDENCE_INVALID"
 
 ACTIVE = "ACTIVE"
 BREACH_CLAIMED = "BREACH_CLAIMED"
@@ -62,6 +71,22 @@ class _Recipient:
 
 @allow_storage
 @dataclass
+class EvidenceSnapshot:
+    snapshot_id: str
+    commitment_id: str
+    sequence: gl.u256
+    source_url: str
+    capture_timestamp: str
+    http_status: gl.u256
+    sha256: str
+    byte_length: gl.u256
+    normalized_content: str
+    captured_state: str
+    classification: str
+
+
+@allow_storage
+@dataclass
 class Commitment:
     commitment_id: str
     title: str
@@ -74,6 +99,8 @@ class Commitment:
     baseline_digest: str
     baseline_body_digest: str
     baseline_excerpt: str
+    baseline_snapshot_id: str
+    baseline_byte_length: gl.u256
     created_at: str
     expires_at: str
     contest_window_seconds: gl.u256
@@ -83,6 +110,7 @@ class Commitment:
     status: str
     last_checked_at: str
     last_observed_archive_timestamp: str
+    last_snapshot_id: str
     last_qualified_archive_timestamp: str
     last_qualified_digest: str
     checks_run: gl.u256
@@ -96,6 +124,7 @@ class Commitment:
     contest_evidence_url: str
     contest_evidence_timestamp: str
     contest_evidence_digest: str
+    contest_evidence_snapshot_id: str
     contest_result: str
     final_settlement_at: str
     final_settlement_amount: gl.u256
@@ -131,17 +160,6 @@ def _parse_iso(value: str) -> dt.datetime | None:
     return parsed.astimezone(dt.timezone.utc)
 
 
-def _parse_archive_timestamp(value: str) -> dt.datetime | None:
-    if not isinstance(value, str) or len(value) != 14 or not value.isdigit():
-        return None
-    try:
-        return dt.datetime.strptime(value, "%Y%m%d%H%M%S").replace(
-            tzinfo=dt.timezone.utc
-        )
-    except (TypeError, ValueError):
-        return None
-
-
 def _valid_url(value: str) -> bool:
     if not isinstance(value, str) or not value or len(value) > MAX_URL_LENGTH:
         return False
@@ -160,20 +178,6 @@ def _valid_url(value: str) -> bool:
     )
 
 
-def _archive_query(source_url: str) -> str:
-    encoded = quote(source_url, safe="")
-    return (
-        "https://web.archive.org/cdx/search/cdx?url="
-        + encoded
-        + "&output=json&fl=timestamp,original,digest,length,statuscode,mimetype"
-        + "&filter=statuscode:200&collapse=digest"
-    )
-
-
-def _capture_url(source_url: str, timestamp: str) -> str:
-    return "https://web.archive.org/web/" + timestamp + "id_/" + source_url
-
-
 def _anchor_tokens(commitment_text: str) -> list[str]:
     tokens: list[str] = []
     for raw in commitment_text.lower().replace("\n", " ").split(" "):
@@ -185,171 +189,101 @@ def _anchor_tokens(commitment_text: str) -> list[str]:
     return tokens
 
 
-def _row_fields(row, headers) -> dict | None:
-    if isinstance(row, dict):
-        return {
-            "timestamp": row.get("timestamp"),
-            "original": row.get("original", row.get("url")),
-            "digest": row.get("digest"),
-            "length": row.get("length"),
-            "statuscode": row.get("statuscode", row.get("status")),
-            "mimetype": row.get("mimetype", row.get("mime")),
-        }
-    if not isinstance(row, list):
+def _baseline_supports_commitment(commitment_text: str, normalized_content: str) -> bool:
+    tokens = _anchor_tokens(commitment_text)
+    if len(tokens) < 2:
+        return bool(normalized_content)
+    lower_content = normalized_content.lower()
+    return sum(token in lower_content for token in tokens) >= 2
+
+
+def _bounded_normalized_text(document_bytes: bytes, status: int) -> str | None:
+    """Extract bounded stable text while hashing and sizing the full response."""
+    if status in (404, 410):
+        return "HTTP " + str(status)
+    try:
+        document = document_bytes.decode("utf-8")
+    except UnicodeDecodeError:
         return None
-    names = headers or [
-        "timestamp",
-        "original",
-        "digest",
-        "length",
-        "statuscode",
-        "mimetype",
-    ]
-    return {name: row[index] if index < len(row) else None for index, name in enumerate(names)}
+    document = re.sub(
+        r"(?is)<(script|style|noscript|template)\b[^>]*>.*?</\1>",
+        " ",
+        document,
+    )
+    document = re.sub(r"(?s)<[^>]*>", " ", document)
+    normalized = " ".join(html.unescape(document).split())
+    if not normalized:
+        return None
+    encoded = normalized.encode("utf-8")
+    if len(encoded) > MAX_ARCHIVE_BYTES:
+        normalized = encoded[:MAX_ARCHIVE_BYTES].decode("utf-8", "ignore").rstrip()
+    return normalized or None
 
 
-def _select_cdx_row(raw: str, source_url: str, requested_timestamp: str | None, after_timestamp: str | None) -> dict:
+def _fetch_live_capture(source_url: str, capture_timestamp: str, allow_not_found: bool) -> dict:
+    """Fetch only the registered URL; no redirect target or headers are assumed visible."""
     try:
-        parsed = json.loads(raw)
-    except (TypeError, ValueError):
-        return {"ok": False, "domain": "EVIDENCE", "reason": "invalid_cdx_json"}
-
-    if isinstance(parsed, dict):
-        rows = parsed.get("captures", [])
-    elif isinstance(parsed, list):
-        rows = parsed
-    else:
-        return {"ok": False, "domain": "EVIDENCE", "reason": "invalid_cdx_shape"}
-
-    if not isinstance(rows, list) or not rows:
-        return {"ok": False, "domain": "NO_EVIDENCE", "reason": "no_capture"}
-
-    headers = None
-    first = rows[0]
-    if isinstance(first, list) and first and all(isinstance(item, str) for item in first):
-        candidate_headers = [item.lower() for item in first]
-        if "timestamp" in candidate_headers and "original" in candidate_headers:
-            headers = candidate_headers
-            rows = rows[1:]
-
-    candidates: list[dict] = []
-    for row in rows:
-        fields = _row_fields(row, headers)
-        if fields is None:
-            continue
-        timestamp = fields.get("timestamp")
-        if _parse_archive_timestamp(timestamp) is None:
-            continue
-        if fields.get("original") != source_url:
-            continue
-        if str(fields.get("statuscode")) != "200":
-            continue
-        digest = fields.get("digest")
-        if not isinstance(digest, str) or not digest or len(digest) > 160:
-            continue
-        mimetype = str(fields.get("mimetype") or "").lower()
-        if mimetype and not (
-            mimetype.startswith("text/")
-            or mimetype in ("application/xhtml+xml", "application/json")
-        ):
-            continue
-        try:
-            length = int(fields.get("length"))
-        except (TypeError, ValueError):
-            continue
-        if length < 0 or length > MAX_ARCHIVE_BYTES:
-            continue
-        if requested_timestamp is not None and timestamp != requested_timestamp:
-            continue
-        if after_timestamp is not None and timestamp <= after_timestamp:
-            continue
-        if _parse_archive_timestamp(timestamp) > _now():
-            continue
-        candidates.append(
-            {
-                "timestamp": timestamp,
-                "original": source_url,
-                "archive_digest": digest,
-                "declared_length": length,
-                "mimetype": mimetype,
-            }
-        )
-
-    if not candidates:
-        reason = "capture_not_found" if requested_timestamp else "no_new_capture"
-        domain = "EVIDENCE" if requested_timestamp else "NO_EVIDENCE"
-        return {"ok": False, "domain": domain, "reason": reason}
-
-    candidates.sort(key=lambda item: item["timestamp"])
-    return {"ok": True, "row": candidates[0]}
-
-
-def _fetch_admitted_capture(
-    source_url: str,
-    requested_timestamp: str | None,
-    after_timestamp: str | None,
-    commitment_text: str,
-    require_baseline_anchor: bool,
-) -> dict:
-    try:
-        index_text = gl.nondet.web.render(_archive_query(source_url), mode="text")
+        response = gl.nondet.web.get(source_url)
     except Exception:
-        return {"ok": False, "domain": "EXTERNAL", "reason": "archive_index_unavailable"}
-    selected = _select_cdx_row(index_text, source_url, requested_timestamp, after_timestamp)
-    if not selected.get("ok"):
-        return selected
+        return {"ok": False, "domain": "SOURCE", "reason": SOURCE_UNAVAILABLE}
 
-    row = selected["row"]
-    replay_url = _capture_url(source_url, row["timestamp"])
-    try:
-        document = gl.nondet.web.render(replay_url, mode="text")
-    except Exception:
-        return {"ok": False, "domain": "EXTERNAL", "reason": "archive_replay_unavailable"}
-    if not isinstance(document, str) or not document.strip():
-        return {"ok": False, "domain": "EVIDENCE", "reason": "empty_capture"}
-    document_bytes = document.encode("utf-8")
-    if len(document_bytes) > MAX_ARCHIVE_BYTES:
-        return {"ok": False, "domain": "EVIDENCE", "reason": "capture_too_large"}
-    if "<html" not in document.lower() and len(document.strip()) < 24:
-        return {"ok": False, "domain": "EVIDENCE", "reason": "capture_not_document"}
+    status = getattr(response, "status", None)
+    if not isinstance(status, int):
+        return {"ok": False, "domain": "SOURCE", "reason": SOURCE_UNAVAILABLE}
+    if status >= 500 or status in (408, 429):
+        return {"ok": False, "domain": "SOURCE", "reason": SOURCE_UNAVAILABLE}
+    if status in (401, 403):
+        return {"ok": False, "domain": "SOURCE", "reason": SOURCE_INACCESSIBLE}
+    if status in (404, 410):
+        if not allow_not_found:
+            return {"ok": False, "domain": "SOURCE", "reason": SOURCE_INACCESSIBLE}
+    elif status != 200:
+        return {"ok": False, "domain": "SOURCE", "reason": SOURCE_INACCESSIBLE}
 
-    if require_baseline_anchor:
-        lower_document = document.lower()
-        tokens = _anchor_tokens(commitment_text)
-        if len(tokens) >= 2 and sum(token in lower_document for token in tokens) < 2:
-            return {"ok": False, "domain": "EVIDENCE", "reason": "baseline_not_supported"}
-
-    excerpt = " ".join(document.split())[:MAX_EXCERPT_LENGTH]
+    response_bytes = getattr(response, "body", None)
+    if not isinstance(response_bytes, bytes):
+        return {"ok": False, "domain": "EVIDENCE", "reason": EVIDENCE_INVALID}
+    normalized_content = _bounded_normalized_text(response_bytes, status)
+    if normalized_content is None:
+        return {"ok": False, "domain": "EVIDENCE", "reason": EVIDENCE_INVALID}
+    digest = hashlib.sha256(response_bytes).hexdigest()
     return {
         "ok": True,
-        "timestamp": row["timestamp"],
-        "archive_digest": row["archive_digest"],
-        "body_digest": hashlib.sha256(document_bytes).hexdigest(),
-        "declared_length": row["declared_length"],
-        "mimetype": row["mimetype"],
-        "replay_url": replay_url,
-        "document": document,
-        "excerpt": excerpt,
+        "source_url": source_url,
+        "capture_timestamp": capture_timestamp,
+        "http_status": status,
+        "sha256": digest,
+        "byte_length": len(response_bytes),
+        "normalized_content": normalized_content,
+        "excerpt": normalized_content[:MAX_EXCERPT_LENGTH],
     }
 
 
-def _authenticated_capture(
-    source_url: str,
-    requested_timestamp: str | None,
-    after_timestamp: str | None,
-    commitment_text: str,
-    require_baseline_anchor: bool,
+def _snapshot_from_capture(
+    commitment_id: str, sequence: int, capture: dict, classification: str
+) -> EvidenceSnapshot:
+    return EvidenceSnapshot(
+        snapshot_id=commitment_id + ":" + str(sequence),
+        commitment_id=commitment_id,
+        sequence=gl.u256(sequence),
+        source_url=capture["source_url"],
+        capture_timestamp=capture["capture_timestamp"],
+        http_status=gl.u256(int(capture["http_status"])),
+        sha256=capture["sha256"],
+        byte_length=gl.u256(int(capture["byte_length"])),
+        normalized_content=capture["normalized_content"],
+        captured_state=AUTHENTICATED_SNAPSHOT,
+        classification=classification,
+    )
+
+
+def _authenticated_live_capture(
+    source_url: str, capture_timestamp: str, allow_not_found: bool
 ) -> dict:
-    """Fetch and admit a pinned archive capture under strict equality."""
+    """Require validators to agree on the bounded live response snapshot."""
     def capture_leader() -> str:
         return json.dumps(
-            _fetch_admitted_capture(
-                source_url,
-                requested_timestamp,
-                after_timestamp,
-                commitment_text,
-                require_baseline_anchor,
-            ),
+            _fetch_live_capture(source_url, capture_timestamp, allow_not_found),
             sort_keys=True,
             separators=(",", ":"),
         )
@@ -358,10 +292,10 @@ def _authenticated_capture(
         result = gl.eq_principle.strict_eq(capture_leader)
         decoded = json.loads(result)
         if not isinstance(decoded, dict):
-            return {"ok": False, "domain": "TRANSIENT", "reason": "archive_consensus_shape"}
+            return {"ok": False, "domain": "TRANSIENT", "reason": "validator_disagreement"}
         return decoded
     except Exception:
-        return {"ok": False, "domain": "TRANSIENT", "reason": "archive_consensus_unavailable"}
+        return {"ok": False, "domain": "TRANSIENT", "reason": "validator_disagreement"}
 
 
 def _decode_semantic_output(raw) -> dict | None:
@@ -392,22 +326,41 @@ def _decode_semantic_output(raw) -> dict | None:
     }
 
 
-def _semantic_leader(commitment_text: str, document: str) -> dict:
+def _semantic_leader(
+    commitment_text: str,
+    baseline_snapshot: EvidenceSnapshot,
+    current_snapshot: EvidenceSnapshot,
+) -> dict:
     prompt = f"""
 You are the Uphold semantic adjudicator. Answer only the bounded question below.
-Does the authenticated archived document still substantially carry the original
-commitment, materially weaken it, or remove it?
+Compare the original commitment with the authenticated baseline snapshot and the
+authenticated current snapshot. Decide whether the current snapshot still
+substantially carries the original commitment, materially weakens it, or removes it.
 
 Original commitment:
 {commitment_text}
 
-Authenticated archived document:
-{document}
+Authenticated baseline snapshot:
+source URL: {baseline_snapshot.source_url}
+capture timestamp: {baseline_snapshot.capture_timestamp}
+HTTP status: {int(baseline_snapshot.http_status)}
+SHA-256: {baseline_snapshot.sha256}
+byte length: {int(baseline_snapshot.byte_length)}
+normalized content: {baseline_snapshot.normalized_content}
+
+Authenticated current snapshot:
+source URL: {current_snapshot.source_url}
+capture timestamp: {current_snapshot.capture_timestamp}
+HTTP status: {int(current_snapshot.http_status)}
+SHA-256: {current_snapshot.sha256}
+byte length: {int(current_snapshot.byte_length)}
+normalized content: {current_snapshot.normalized_content}
 
 Return exactly one JSON object with this schema:
 {{"classification":"HOLDS|WEAKENED|ABSENT|INDETERMINATE","excerpt":"short quote","short_reason":"short reason"}}
-Only classification may affect protocol state. Do not discuss payment, dates,
-authorization, admissibility, or settlement.
+Only classification may affect protocol state. The HTTP status is evidence, not an
+automatic protocol classification. Do not discuss payment, dates, authorization,
+admissibility, or settlement.
 """
     try:
         raw = gl.nondet.exec_prompt(prompt, response_format="json")
@@ -417,9 +370,27 @@ authorization, admissibility, or settlement.
     return parsed or {"classification": "__MALFORMED__", "excerpt": "", "short_reason": ""}
 
 
-def _semantic_judgment(commitment_text: str, document: str) -> dict:
+def _semantic_judgment(
+    commitment_text: str,
+    baseline_snapshot: EvidenceSnapshot,
+    current_snapshot: EvidenceSnapshot | None = None,
+) -> dict:
+    if current_snapshot is None:
+        current_snapshot = baseline_snapshot
+    if not isinstance(baseline_snapshot, EvidenceSnapshot) or not isinstance(
+        current_snapshot, EvidenceSnapshot
+    ):
+        return {"ok": False, "domain": "EVIDENCE", "reason": "invalid_evidence_snapshot"}
+    if (
+        baseline_snapshot.captured_state != AUTHENTICATED_SNAPSHOT
+        or current_snapshot.captured_state != AUTHENTICATED_SNAPSHOT
+    ):
+        return {"ok": False, "domain": "EVIDENCE", "reason": "snapshot_not_authenticated"}
+    if baseline_snapshot.source_url != current_snapshot.source_url:
+        return {"ok": False, "domain": "EVIDENCE", "reason": "snapshot_source_mismatch"}
+
     def semantic_leader() -> dict:
-        return _semantic_leader(commitment_text, document)
+        return _semantic_leader(commitment_text, baseline_snapshot, current_snapshot)
 
     def semantic_validator(result) -> bool:
         if not isinstance(result, gl.vm.Return):
@@ -432,7 +403,9 @@ def _semantic_judgment(commitment_text: str, document: str) -> dict:
             INDETERMINATE,
         ):
             return False
-        validator = _decode_semantic_output(_semantic_leader(commitment_text, document))
+        validator = _decode_semantic_output(
+            _semantic_leader(commitment_text, baseline_snapshot, current_snapshot)
+        )
         if validator is None or validator.get("classification") not in (
             HOLDS,
             WEAKENED,
@@ -463,9 +436,10 @@ def _semantic_judgment(commitment_text: str, document: str) -> dict:
 
 
 class Uphold(gl.contract.Contract):
-    """A commitment bond registry with archived-evidence adjudication."""
+    """A commitment bond registry with authenticated live-source evidence."""
 
     commitments: gl.storage.TreeMap[str, Commitment]
+    evidence_snapshots: gl.storage.TreeMap[str, EvidenceSnapshot]
     history: gl.storage.TreeMap[str, str]
     address_records: gl.storage.TreeMap[str, str]
     commitment_ids_json: str
@@ -510,6 +484,49 @@ class Uphold(gl.contract.Contract):
     def _get(self, commitment_id: str) -> Commitment:
         self._require(commitment_id in self.commitments, "commitment not found")
         return self.commitments[commitment_id]
+
+    def _store_snapshot(self, snapshot: EvidenceSnapshot) -> None:
+        # EvidenceSnapshot is protocol-immutable: a bound id may be inserted once,
+        # and every later attempt must reproduce the exact authenticated value.
+        self._require(
+            snapshot.captured_state == AUTHENTICATED_SNAPSHOT,
+            "evidence snapshot is not authenticated",
+        )
+        if snapshot.snapshot_id in self.evidence_snapshots:
+            existing = self.evidence_snapshots[snapshot.snapshot_id]
+            self._require(
+                existing.commitment_id == snapshot.commitment_id
+                and int(existing.sequence) == int(snapshot.sequence)
+                and existing.source_url == snapshot.source_url
+                and existing.capture_timestamp == snapshot.capture_timestamp
+                and int(existing.http_status) == int(snapshot.http_status)
+                and existing.sha256 == snapshot.sha256
+                and int(existing.byte_length) == int(snapshot.byte_length)
+                and existing.normalized_content == snapshot.normalized_content
+                and existing.captured_state == snapshot.captured_state
+                and existing.classification == snapshot.classification,
+                "evidence snapshot binding conflict",
+            )
+            return
+        self.evidence_snapshots[snapshot.snapshot_id] = snapshot
+
+    def _get_snapshot(self, snapshot_id: str) -> EvidenceSnapshot:
+        self._require(snapshot_id in self.evidence_snapshots, "evidence snapshot not found")
+        return self.evidence_snapshots[snapshot_id]
+
+    def _find_snapshot_by_capture_timestamp(
+        self, commitment: Commitment, capture_timestamp: str
+    ) -> EvidenceSnapshot | None:
+        # The sequence is bounded by MAX_CHECKS and makes lookup deterministic
+        # without exposing a mutable iterator over storage.
+        for sequence in range(int(commitment.checks_run) + 1):
+            snapshot_id = commitment.commitment_id + ":" + str(sequence)
+            if snapshot_id not in self.evidence_snapshots:
+                continue
+            snapshot = self.evidence_snapshots[snapshot_id]
+            if snapshot.capture_timestamp == capture_timestamp:
+                return snapshot
+        return None
 
     def _require_active(self, commitment: Commitment) -> None:
         self._require(commitment.status == ACTIVE, "commitment is not active")
@@ -576,9 +593,6 @@ class Uphold(gl.contract.Contract):
             "invalid commitment text",
         )
         self._require(_valid_url(source_url), "invalid source url")
-        baseline_dt = _parse_archive_timestamp(baseline_archive_timestamp)
-        self._require(baseline_dt is not None, "invalid baseline timestamp")
-        self._require(baseline_dt <= _now(), "baseline timestamp is in the future")
         expiry_dt = _parse_iso(expires_at)
         self._require(expiry_dt is not None, "invalid expiry")
         now = _now()
@@ -616,6 +630,7 @@ class Uphold(gl.contract.Contract):
     ) -> str:
         self._require(commitment_id not in self.commitments, "commitment already exists")
         self._require(len(json.loads(self.commitment_ids_json)) < MAX_COMMITMENTS, "commitment limit reached")
+        now = _now_iso()
         beneficiary_address = self._validate_creation_inputs(
             commitment_id,
             title,
@@ -627,22 +642,31 @@ class Uphold(gl.contract.Contract):
             expires_at,
             contest_window_seconds,
         )
-        baseline = _authenticated_capture(
-            source_url,
-            baseline_archive_timestamp,
-            None,
-            commitment_text,
-            True,
+        baseline = _authenticated_live_capture(source_url, now, False)
+        if baseline.get("ok") is not True:
+            domain = baseline.get("domain", "SOURCE")
+            reason = baseline.get("reason", "baseline capture failed")
+            self._require(False, "[" + domain + "] " + reason)
+        baseline_snapshot = _snapshot_from_capture(
+            commitment_id, 0, baseline, UNASSESSED_SNAPSHOT
         )
-        self._require(baseline.get("ok") is True, "baseline evidence was not admitted")
-        baseline_semantic = _semantic_judgment(commitment_text, baseline["document"])
+        self._require(
+            _baseline_supports_commitment(
+                commitment_text, baseline_snapshot.normalized_content
+            ),
+            "baseline evidence was not admitted",
+        )
+        baseline_semantic = _semantic_judgment(
+            commitment_text, baseline_snapshot, baseline_snapshot
+        )
         self._require(baseline_semantic.get("ok") is True, "baseline semantic judgment failed")
         self._require(
             baseline_semantic.get("classification") == HOLDS,
             "baseline does not support commitment",
         )
-
-        now = _now_iso()
+        baseline_snapshot.classification = baseline_semantic["classification"]
+        self._store_snapshot(baseline_snapshot)
+        baseline_snapshot = self._get_snapshot(baseline_snapshot.snapshot_id)
         stake = int(gl.message.value)
         commitment = Commitment(
             commitment_id=commitment_id,
@@ -652,10 +676,12 @@ class Uphold(gl.contract.Contract):
             beneficiary=beneficiary_address,
             source_url=source_url,
             commitment_text=commitment_text,
-            baseline_archive_timestamp=baseline["timestamp"],
-            baseline_digest=baseline["archive_digest"],
-            baseline_body_digest=baseline["body_digest"],
+            baseline_archive_timestamp=baseline["capture_timestamp"],
+            baseline_digest=baseline_snapshot.sha256,
+            baseline_body_digest=baseline_snapshot.sha256,
             baseline_excerpt=baseline["excerpt"],
+            baseline_snapshot_id=baseline_snapshot.snapshot_id,
+            baseline_byte_length=baseline_snapshot.byte_length,
             created_at=now,
             expires_at=_canonical_iso(expires_at),
             contest_window_seconds=gl.u256(int(contest_window_seconds)),
@@ -664,7 +690,8 @@ class Uphold(gl.contract.Contract):
             total_stake_added=gl.u256(0),
             status=ACTIVE,
             last_checked_at=now,
-            last_observed_archive_timestamp=baseline["timestamp"],
+            last_observed_archive_timestamp=baseline["capture_timestamp"],
+            last_snapshot_id=baseline_snapshot.snapshot_id,
             last_qualified_archive_timestamp="",
             last_qualified_digest="",
             checks_run=gl.u256(0),
@@ -678,6 +705,7 @@ class Uphold(gl.contract.Contract):
             contest_evidence_url="",
             contest_evidence_timestamp="",
             contest_evidence_digest="",
+            contest_evidence_snapshot_id="",
             contest_result="",
             final_settlement_at="",
             final_settlement_amount=gl.u256(0),
@@ -697,8 +725,14 @@ class Uphold(gl.contract.Contract):
                 {
                     "event": "CREATED",
                     "at": now,
-                    "archive_timestamp": baseline["timestamp"],
-                    "archive_digest": baseline["archive_digest"],
+                    "archive_timestamp": baseline["capture_timestamp"],
+                    "capture_timestamp": baseline["capture_timestamp"],
+                    "archive_digest": baseline_snapshot.sha256,
+                    "body_digest": baseline_snapshot.sha256,
+                    "sha256": baseline_snapshot.sha256,
+                    "byte_length": int(baseline_snapshot.byte_length),
+                    "http_status": int(baseline_snapshot.http_status),
+                    "snapshot_id": baseline_snapshot.snapshot_id,
                     "excerpt": baseline["excerpt"],
                     "stake": stake,
                 }
@@ -721,44 +755,40 @@ class Uphold(gl.contract.Contract):
         self._require(expiry is not None and _now() < expiry, "commitment has expired")
         self._require(int(commitment.checks_run) < MAX_CHECKS, "check limit reached")
         now = _now_iso()
-        commitment.checks_run = gl.u256(int(commitment.checks_run) + 1)
-        self.checks_run = gl.u256(int(self.checks_run) + 1)
-        commitment.last_checked_at = now
 
-        capture = _authenticated_capture(
-            commitment.source_url,
-            None,
-            commitment.last_observed_archive_timestamp,
-            commitment.commitment_text,
-            False,
-        )
+        capture = _authenticated_live_capture(commitment.source_url, now, True)
         if capture.get("ok") is not True:
-            domain = capture.get("domain", "EXTERNAL")
+            domain = capture.get("domain", "SOURCE")
             reason = capture.get("reason", "check_failed")
-            self._record_history(
-                commitment_id,
-                {"event": "CHECK_FAILURE", "at": now, "domain": domain, "reason": reason},
-            )
+            if not (domain == "TRANSIENT" and reason == "validator_disagreement"):
+                self._record_history(
+                    commitment_id,
+                    {"event": "CHECK_FAILURE", "at": now, "domain": domain, "reason": reason},
+                )
             return "[" + domain + "] " + reason
 
-        semantic = _semantic_judgment(commitment.commitment_text, capture["document"])
-        timestamp = capture["timestamp"]
-        commitment.last_observed_archive_timestamp = timestamp
+        baseline_snapshot = self._get_snapshot(commitment.baseline_snapshot_id)
+        sequence = int(commitment.checks_run) + 1
+        snapshot = _snapshot_from_capture(
+            commitment_id, sequence, capture, UNASSESSED_SNAPSHOT
+        )
+        semantic = _semantic_judgment(
+            commitment.commitment_text, baseline_snapshot, snapshot
+        )
+        # No storage or commitment mutation occurs until semantic consensus succeeds.
         if semantic.get("ok") is not True:
-            self._record_history(
-                commitment_id,
-                {
-                    "event": "CHECK_FAILURE",
-                    "at": now,
-                    "archive_timestamp": timestamp,
-                    "archive_digest": capture["archive_digest"],
-                    "domain": semantic.get("domain", "LLM"),
-                    "reason": semantic.get("reason", "semantic_failure"),
-                },
-            )
             return "[" + semantic.get("domain", "LLM") + "] " + semantic.get("reason", "semantic_failure")
 
         classification = semantic["classification"]
+        snapshot.classification = classification
+        self._store_snapshot(snapshot)
+        snapshot = self._get_snapshot(snapshot.snapshot_id)
+        commitment.checks_run = gl.u256(int(commitment.checks_run) + 1)
+        self.checks_run = gl.u256(int(self.checks_run) + 1)
+        commitment.last_checked_at = now
+        timestamp = capture["capture_timestamp"]
+        commitment.last_observed_archive_timestamp = timestamp
+        commitment.last_snapshot_id = snapshot.snapshot_id
         if classification == HOLDS:
             commitment.consecutive_negative_count = gl.u256(0)
         elif classification in QUALIFIED_NEGATIVES:
@@ -766,13 +796,13 @@ class Uphold(gl.contract.Contract):
                 int(commitment.consecutive_negative_count) + 1
             )
             commitment.last_qualified_archive_timestamp = timestamp
-            commitment.last_qualified_digest = capture["archive_digest"]
+            commitment.last_qualified_digest = snapshot.sha256
             if not commitment.breach_capture_1:
                 commitment.breach_capture_1 = timestamp
-                commitment.breach_digest_1 = capture["archive_digest"]
+                commitment.breach_digest_1 = snapshot.sha256
             elif timestamp != commitment.breach_capture_1:
                 commitment.breach_capture_2 = timestamp
-                commitment.breach_digest_2 = capture["archive_digest"]
+                commitment.breach_digest_2 = snapshot.sha256
 
         self._record_history(
             commitment_id,
@@ -780,8 +810,13 @@ class Uphold(gl.contract.Contract):
                 "event": "CHECK",
                 "at": now,
                 "archive_timestamp": timestamp,
-                "archive_digest": capture["archive_digest"],
-                "body_digest": capture["body_digest"],
+                "capture_timestamp": timestamp,
+                "archive_digest": snapshot.sha256,
+                "body_digest": snapshot.sha256,
+                "sha256": snapshot.sha256,
+                "byte_length": int(snapshot.byte_length),
+                "http_status": int(snapshot.http_status),
+                "snapshot_id": snapshot.snapshot_id,
                 "classification": classification,
                 "excerpt": semantic["excerpt"][:MAX_EXCERPT_LENGTH],
                 "short_reason": semantic["short_reason"][:MAX_REASON_LENGTH],
@@ -853,38 +888,34 @@ class Uphold(gl.contract.Contract):
         deadline = _parse_iso(commitment.contest_deadline)
         self._require(deadline is not None and _now() < deadline, "contest window expired")
         self._require(evidence_url == commitment.source_url, "contest must use original source")
-        timestamp_dt = _parse_archive_timestamp(evidence_timestamp)
+        timestamp_dt = _parse_iso(evidence_timestamp)
         self._require(timestamp_dt is not None and timestamp_dt <= _now(), "invalid contest timestamp")
         self._require(
             evidence_timestamp not in (commitment.breach_capture_1, commitment.breach_capture_2),
             "contest capture already used",
         )
-        evidence = _authenticated_capture(
-            evidence_url,
-            evidence_timestamp,
-            None,
-            commitment.commitment_text,
-            False,
-        )
-        if evidence.get("ok") is not True:
-            domain = evidence.get("domain", "EVIDENCE")
-            reason = evidence.get("reason", "contest evidence was not admitted")
-            if domain in ("EXTERNAL", "TRANSIENT"):
-                return "[" + domain + "] " + reason
-            self._require(False, "contest evidence was not admitted")
+        evidence = self._find_snapshot_by_capture_timestamp(commitment, evidence_timestamp)
+        if evidence is None:
+            return "[EVIDENCE] contest snapshot not found"
         commitment.status = CONTESTED
         commitment.contest_evidence_url = evidence_url
-        commitment.contest_evidence_timestamp = evidence["timestamp"]
-        commitment.contest_evidence_digest = evidence["archive_digest"]
+        commitment.contest_evidence_timestamp = evidence.capture_timestamp
+        snapshot = evidence
+        commitment.contest_evidence_digest = snapshot.sha256
+        commitment.contest_evidence_snapshot_id = snapshot.snapshot_id
         self.contests_filed = gl.u256(int(self.contests_filed) + 1)
         self._record_history(
             commitment_id,
             {
                 "event": "CONTEST_FILED",
                 "at": _now_iso(),
-                "evidence_timestamp": evidence["timestamp"],
-                "evidence_digest": evidence["archive_digest"],
-                "excerpt": evidence["excerpt"],
+                "evidence_timestamp": evidence.capture_timestamp,
+                "capture_timestamp": evidence.capture_timestamp,
+                "evidence_digest": snapshot.sha256,
+                "snapshot_id": snapshot.snapshot_id,
+                "http_status": int(snapshot.http_status),
+                "byte_length": int(snapshot.byte_length),
+                "excerpt": snapshot.normalized_content[:MAX_EXCERPT_LENGTH],
             },
         )
         return CONTESTED
@@ -893,20 +924,12 @@ class Uphold(gl.contract.Contract):
     def adjudicate_contest(self, commitment_id: str) -> str:
         commitment = self._get(commitment_id)
         self._require(commitment.status == CONTESTED, "no active contest")
-        evidence = _authenticated_capture(
-            commitment.contest_evidence_url,
-            commitment.contest_evidence_timestamp,
-            None,
-            commitment.commitment_text,
-            False,
-        )
-        if evidence.get("ok") is not True:
-            domain = evidence.get("domain", "EVIDENCE")
-            reason = evidence.get("reason", "contest evidence unavailable")
-            if domain in ("EXTERNAL", "TRANSIENT"):
-                return "[" + domain + "] " + reason
-            self._require(False, "contest evidence unavailable")
-        semantic = _semantic_judgment(commitment.commitment_text, evidence["document"])
+        try:
+            evidence = self._get_snapshot(commitment.contest_evidence_snapshot_id)
+        except Exception:
+            return "[EVIDENCE] contest evidence snapshot missing"
+        baseline = self._get_snapshot(commitment.baseline_snapshot_id)
+        semantic = _semantic_judgment(commitment.commitment_text, baseline, evidence)
         if semantic.get("ok") is not True:
             return "[" + semantic.get("domain", "LLM") + "] " + semantic.get("reason", "contest judgment failed")
         classification = semantic["classification"]
@@ -1035,6 +1058,8 @@ class Uphold(gl.contract.Contract):
             "baseline_digest": commitment.baseline_digest,
             "baseline_body_digest": commitment.baseline_body_digest,
             "baseline_excerpt": commitment.baseline_excerpt,
+            "baseline_snapshot_id": commitment.baseline_snapshot_id,
+            "baseline_byte_length": int(commitment.baseline_byte_length),
             "created_at": commitment.created_at,
             "expires_at": commitment.expires_at,
             "contest_window_seconds": int(commitment.contest_window_seconds),
@@ -1044,6 +1069,7 @@ class Uphold(gl.contract.Contract):
             "status": commitment.status,
             "last_checked_at": commitment.last_checked_at,
             "last_observed_archive_timestamp": commitment.last_observed_archive_timestamp,
+            "last_snapshot_id": commitment.last_snapshot_id,
             "last_qualified_archive_timestamp": commitment.last_qualified_archive_timestamp,
             "last_qualified_digest": commitment.last_qualified_digest,
             "checks_run": int(commitment.checks_run),
@@ -1055,6 +1081,7 @@ class Uphold(gl.contract.Contract):
             "contest_evidence_url": commitment.contest_evidence_url,
             "contest_evidence_timestamp": commitment.contest_evidence_timestamp,
             "contest_evidence_digest": commitment.contest_evidence_digest,
+            "contest_evidence_snapshot_id": commitment.contest_evidence_snapshot_id,
             "contest_result": commitment.contest_result,
             "final_settlement_at": commitment.final_settlement_at,
             "final_settlement_amount": int(commitment.final_settlement_amount),
@@ -1108,6 +1135,7 @@ class Uphold(gl.contract.Contract):
             "max_category_length": MAX_CATEGORY_LENGTH,
             "max_url_length": MAX_URL_LENGTH,
             "max_commitment_length": MAX_COMMITMENT_LENGTH,
+            "max_snapshot_bytes": MAX_ARCHIVE_BYTES,
             "max_archive_bytes": MAX_ARCHIVE_BYTES,
             "max_history_entries": MAX_HISTORY_ENTRIES,
             "max_commitments": MAX_COMMITMENTS,
@@ -1120,11 +1148,13 @@ class Uphold(gl.contract.Contract):
     def contract_info(self) -> dict:
         return {
             "name": "Uphold",
-            "version": "phase3.5-v1",
+            "version": "live-snapshot-v1.0",
             "semantic_classifications": [HOLDS, WEAKENED, ABSENT, INDETERMINATE],
-            "evidence_provider": "Internet Archive Wayback CDX and pinned replay",
+            "evidence_provider": "Live public source via gl.nondet.web.get",
+            "evidence_discovery": "Wayback/CDX/Availability are optional off-chain research and recovery only",
             "breach_rule": "two distinct consecutive qualified negative captures",
-            "semantic_verification": "independent validator re-runs the classification over the same admitted evidence",
+            "semantic_verification": "independent validators classify the same authenticated baseline and live snapshot; only classification is consensus-critical",
+            "redirect_behavior": "gl.nondet.web exposes status and body here; final URL and headers are not assumed visible",
             "transfer_mechanism": "finalized EOA external message",
             "settlement_confirmation": "external Studio/client observation; no contract-level receipt is available",
         }

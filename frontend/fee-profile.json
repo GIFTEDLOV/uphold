@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "network": "studio-next",
+  "measuredAt": null,
+  "source": "evidence-v1.1 source is not deployed; no current-source method execution has been certified",
+  "contractPath": "contracts/uphold.py",
+  "contractSha256": "3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F",
+  "headroomBps": 12000,
+  "methods": {},
+  "uncertifiedMethods": [
+    "deploy",
+    "create_commitment",
+    "check_commitment",
+    "increase_stake",
+    "extend_commitment",
+    "contest_breach",
+    "adjudicate_contest",
+    "settle_breach",
+    "expire_commitment"
+  ],
+  "fallback": "Use Studio Next network-default estimateTransactionFees({}) until a finalized current-source execution is measured.",
+  "provenance": {
+    "historicalDeploymentTx": "0x14c10cf845dded1cdb51aa9bcebb08e5ae11ab9c7d14740f7684c9136ffce4cc",
+    "historicalDeploymentSourceSha256": "81F23002AC051165D4DE03603F6E61CD76B317CA397E57B5A0B3C290D0588320",
+    "historicalOnly": true
+  },
+  "noFootballValues": true
+}

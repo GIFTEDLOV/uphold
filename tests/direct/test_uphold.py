@@ -1,6 +1,9 @@
 """Direct Mode coverage for the Uphold commitment-bond contract."""
 
+import datetime as dt
+import hashlib
 import json
+import re
 import sys
 
 import pytest
@@ -62,36 +65,33 @@ def _tx(vm, sender, *, value=0, timestamp=BASELINE_NOW):
     vm.warp(timestamp)
 
 
-def _archive_mock(
+def _live_mock(
     vm,
-    timestamp,
     body,
     *,
-    original=SOURCE_URL,
-    digest=None,
+    source_url=SOURCE_URL,
     status=200,
-    declared_length=None,
-    mimetype="text/html",
 ):
-    if digest is None:
-        digest = "digest-" + timestamp
-    if declared_length is None:
-        declared_length = len(body.encode("utf-8"))
-    row = {
-        "timestamp": timestamp,
-        "original": original,
-        "digest": digest,
-        "length": declared_length,
-        "statuscode": status,
-        "mimetype": mimetype,
-    }
     vm.mock_web(
-        r".*cdx/search/cdx.*",
-        {"status": 200, "body": json.dumps({"captures": [row]})},
+        re.escape(source_url) + r"$",
+        {"status": status, "body": body},
     )
-    vm.mock_web(
-        r".*web\.archive\.org/web/.*",
-        {"status": 200, "body": body},
+
+
+def _authenticated_snapshot(module, document=BASELINE_BODY, key="semantic-test"):
+    raw = document.encode("utf-8")
+    return module.EvidenceSnapshot(
+        snapshot_id=key,
+        commitment_id="semantic-test",
+        sequence=0,
+        source_url=SOURCE_URL,
+        capture_timestamp=BASELINE_NOW,
+        http_status=200,
+        sha256=hashlib.sha256(raw).hexdigest(),
+        byte_length=len(raw),
+        normalized_content=" ".join(document.split()),
+        captured_state="AUTHENTICATED",
+        classification="HOLDS",
     )
 
 
@@ -120,7 +120,7 @@ def _create(
     baseline_timestamp=BASELINE_TIMESTAMP,
 ):
     _tx(vm, alice, value=stake)
-    _archive_mock(vm, baseline_timestamp, body)
+    _live_mock(vm, body)
     _semantic_mock(vm, "HOLDS", excerpt="I will publish a monthly transparency report")
     result = contract.create_commitment(
         "commitment-1",
@@ -139,8 +139,9 @@ def _create(
 
 
 def _check_with_capture(vm, contract, alice, timestamp, classification, *, body=BASELINE_BODY):
-    _tx(vm, alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(vm, timestamp, body)
+    capture_at = dt.datetime.strptime(timestamp, "%Y%m%d%H%M%S").replace(tzinfo=dt.timezone.utc).isoformat().replace("+00:00", "Z")
+    _tx(vm, alice, timestamp=capture_at)
+    _live_mock(vm, body)
     _semantic_mock(vm, classification)
     result = contract.check_commitment("commitment-1")
     vm.clear_mocks()
@@ -178,12 +179,12 @@ def test_valid_creation_readback_history_listing_and_limits(
     assert view["beneficiary"] == to_hex(direct_bob)
     assert view["original_stake"] == 100
     assert view["current_stake"] == 100
-    assert view["baseline_archive_timestamp"] == BASELINE_TIMESTAMP
+    assert view["baseline_archive_timestamp"] == view["created_at"]
     assert len(view["baseline_body_digest"]) == 64
     assert contract.get_commitment_ids(10) == ["commitment-1"]
     assert contract.commitment_history("commitment-1")[0]["event"] == "CREATED"
     assert contract.get_limits()["max_archive_bytes"] == 32768
-    assert contract.contract_info()["evidence_provider"].startswith("Internet Archive")
+    assert contract.contract_info()["evidence_provider"].startswith("Live public source")
     _assert_ledger_invariant(contract)
 
 
@@ -208,7 +209,7 @@ def test_creation_rejects_invalid_source_and_unsupported_baseline(
             to_hex(direct_bob), BASELINE_TIMESTAMP, DEFAULT_EXPIRY, 86400,
         )
 
-    _archive_mock(direct_vm, BASELINE_TIMESTAMP, "<html><body>Unrelated page.</body></html>")
+    _live_mock(direct_vm, "<html><body>Unrelated page.</body></html>")
     with direct_vm.expect_revert("baseline evidence was not admitted"):
         contract.create_commitment(
             "unsupported", "Title", "category", SOURCE_URL, COMMITMENT_TEXT,
@@ -290,7 +291,7 @@ def test_extension_only_moves_expiry_forward_and_is_audited(
     _tx(direct_vm, direct_bob)
     with direct_vm.expect_revert("only promisor may extend"):
         contract.extend_commitment("commitment-1", "2026-03-01T00:00:00Z")
-    _tx(direct_vm, direct_alice)
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:30:00Z")
     assert contract.extend_commitment("commitment-1", "2026-03-01T00:00:00Z") == "EXTENDED"
     with direct_vm.expect_revert("expiry must move forward"):
         contract.extend_commitment("commitment-1", DEFAULT_EXPIRY)
@@ -312,40 +313,206 @@ def test_admitted_semantic_classifications_are_recorded(
     assert view["consecutive_negative_count"] == (1 if classification in ("WEAKENED", "ABSENT") else 0)
 
 
-def test_archive_unavailable_does_not_become_absent_or_breach(
+def test_source_unavailable_does_not_become_absent_or_breach(
     direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
 ):
     contract, _ = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob)
-    _tx(direct_vm, direct_alice)
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:30:00Z")
+    _live_mock(direct_vm, "", status=503)
     result = contract.check_commitment("commitment-1")
-    assert result.startswith("[EXTERNAL]")
+    assert result == "[SOURCE] SOURCE_UNAVAILABLE"
     view = contract.get_commitment("commitment-1")
     assert view["consecutive_negative_count"] == 0
     assert view["status"] == "ACTIVE"
-    assert contract.commitment_history("commitment-1")[-1]["domain"] == "EXTERNAL"
+    assert view["checks_run"] == 0
+    assert contract.commitment_history("commitment-1")[-1]["domain"] == "SOURCE"
 
 
-def test_invalid_oversized_and_stale_captures_are_not_admitted(
+def test_live_capture_stores_authenticated_snapshot(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    _create(direct_vm, contract, direct_alice, direct_bob)
+    view = contract.get_commitment("commitment-1")
+    snapshot = contract.evidence_snapshots[view["baseline_snapshot_id"]]
+    assert snapshot.commitment_id == "commitment-1"
+    assert int(snapshot.sequence) == 0
+    assert snapshot.source_url == SOURCE_URL
+    assert snapshot.capture_timestamp == view["created_at"]
+    assert int(snapshot.http_status) == 200
+    assert snapshot.captured_state == "AUTHENTICATED"
+    assert snapshot.classification == "HOLDS"
+    assert snapshot.sha256 == hashlib.sha256(BASELINE_BODY.encode("utf-8")).hexdigest()
+    assert int(snapshot.byte_length) == len(BASELINE_BODY.encode("utf-8"))
+    assert view["baseline_snapshot_id"] == view["last_snapshot_id"]
+    assert contract.commitment_history("commitment-1")[0]["capture_timestamp"] == snapshot.capture_timestamp
+
+
+def test_authenticated_snapshot_is_immutable_and_conflicting_rewrite_is_rejected(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    _create(direct_vm, contract, direct_alice, direct_bob)
+    snapshot_id = contract.get_commitment("commitment-1")["baseline_snapshot_id"]
+    snapshot = contract.evidence_snapshots[snapshot_id]
+    module = sys.modules["_contract_uphold"]
+    conflicting = module.EvidenceSnapshot(
+        snapshot_id=snapshot_id,
+        commitment_id=snapshot.commitment_id,
+        sequence=snapshot.sequence,
+        source_url=snapshot.source_url,
+        capture_timestamp=snapshot.capture_timestamp,
+        http_status=snapshot.http_status,
+        sha256="tampered",
+        byte_length=snapshot.byte_length,
+        normalized_content=snapshot.normalized_content,
+        captured_state=snapshot.captured_state,
+        classification=snapshot.classification,
+    )
+    with direct_vm.expect_revert("evidence snapshot binding conflict"):
+        contract._store_snapshot(conflicting)
+    assert contract.evidence_snapshots[snapshot_id].sha256 != "tampered"
+
+
+def test_live_source_timeout_fails_closed(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    _create(direct_vm, contract, direct_alice, direct_bob)
+    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
+    module = sys.modules["_contract_uphold"]
+
+    def timeout(*_args, **_kwargs):
+        raise TimeoutError("timeout")
+
+    monkeypatch.setattr(module.gl.nondet.web, "get", timeout)
+    result = contract.check_commitment("commitment-1")
+    assert result == "[SOURCE] SOURCE_UNAVAILABLE"
+    assert contract.get_commitment("commitment-1")["consecutive_negative_count"] == 0
+
+
+def test_live_404_is_an_authenticated_candidate_absent_observation(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    _create(direct_vm, contract, direct_alice, direct_bob)
+    _semantic_mock(direct_vm, "ABSENT")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
+    _live_mock(direct_vm, "", status=404)
+    result = contract.check_commitment("commitment-1")
+    assert result == "ABSENT"
+    view = contract.get_commitment("commitment-1")
+    assert view["status"] == "ACTIVE"
+    assert view["consecutive_negative_count"] == 1
+    assert view["checks_run"] == 1
+    assert view["last_snapshot_id"] == "commitment-1:1"
+    snapshot = contract.evidence_snapshots[view["last_snapshot_id"]]
+    assert int(snapshot.http_status) == 404
+    direct_vm.clear_mocks()
+
+
+def test_source_inaccessible_does_not_become_absent(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    _create(direct_vm, contract, direct_alice, direct_bob)
+    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
+    _live_mock(direct_vm, "forbidden", status=403)
+    assert contract.check_commitment("commitment-1") == "[SOURCE] SOURCE_INACCESSIBLE"
+    view = contract.get_commitment("commitment-1")
+    assert view["checks_run"] == 0
+    assert view["consecutive_negative_count"] == 0
+    direct_vm.clear_mocks()
+
+
+def test_live_capture_stores_full_response_hash_and_exact_byte_length(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    body = "<html><head><style>.x{display:none}</style></head><body>" + COMMITMENT_TEXT + " " + ("stable text " * 5000) + "</body></html>"
+    _tx(direct_vm, direct_alice, value=100)
+    _live_mock(direct_vm, body)
+    _semantic_mock(direct_vm, "HOLDS")
+    contract.create_commitment(
+        "commitment-1", "Monthly transparency", "public-accountability", SOURCE_URL,
+        COMMITMENT_TEXT, to_hex(direct_bob), "ignored", DEFAULT_EXPIRY, 86400,
+    )
+    snapshot = contract.evidence_snapshots["commitment-1:0"]
+    raw = body.encode("utf-8")
+    assert snapshot.sha256 == hashlib.sha256(raw).hexdigest()
+    assert int(snapshot.byte_length) == len(raw)
+    assert len(snapshot.normalized_content.encode("utf-8")) <= 32768
+    direct_vm.clear_mocks()
+
+
+def test_live_capture_does_not_trust_caller_supplied_hash_or_length(
+    direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
+):
+    body = "<html><body>I will publish a monthly transparency report café.</body></html>"
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    _tx(direct_vm, direct_alice, value=100)
+    _live_mock(direct_vm, body)
+    _semantic_mock(direct_vm, "HOLDS")
+    contract.create_commitment(
+        "commitment-1",
+        "Monthly transparency",
+        "public-accountability",
+        SOURCE_URL,
+        COMMITMENT_TEXT,
+        to_hex(direct_bob),
+        BASELINE_TIMESTAMP,
+        DEFAULT_EXPIRY,
+        86400,
+    )
+    snapshot_id = contract.get_commitment("commitment-1")["baseline_snapshot_id"]
+    snapshot = contract.evidence_snapshots[snapshot_id]
+    raw = body.encode("utf-8")
+    assert snapshot.sha256 == hashlib.sha256(raw).hexdigest()
+    assert int(snapshot.byte_length) == len(raw)
+    assert snapshot.sha256 != "caller-supplied-digest-must-be-ignored"
+    direct_vm.clear_mocks()
+
+
+def test_semantic_assessment_uses_authenticated_stored_snapshot_without_live_fetch(
+    direct_vm, direct_deploy, monkeypatch
+):
+    contract, _ = _deploy(direct_deploy, monkeypatch)
+    module = sys.modules["_contract_uphold"]
+    snapshot = _authenticated_snapshot(module)
+    direct_vm.clear_validators()
+    _semantic_mock(direct_vm, "HOLDS")
+
+    def forbidden_live_fetch(*_args, **_kwargs):
+        raise AssertionError("semantic assessment must not fetch live evidence")
+
+    monkeypatch.setattr(module.gl.nondet.web, "get", forbidden_live_fetch)
+    result = module._semantic_judgment(COMMITMENT_TEXT, snapshot, snapshot)
+    assert result["ok"] is True
+    assert result["classification"] == "HOLDS"
+    direct_vm.clear_mocks()
+
+
+def test_semantic_disagreement_has_no_state_mutation(
     direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
 ):
     contract, _ = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob)
 
-    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(direct_vm, "20260111000000", "<html><body>small</body></html>", original="https://other.example")
-    assert contract.check_commitment("commitment-1").startswith("[NO_EVIDENCE]")
+    module = sys.modules["_contract_uphold"]
+    baseline = contract.get_commitment("commitment-1")
+    history_before = contract.commitment_history("commitment-1")
+    direct_vm.clear_validators()
+    _semantic_mock(direct_vm, "HOLDS")
+    result = module._semantic_judgment(
+        COMMITMENT_TEXT,
+        contract.evidence_snapshots[baseline["baseline_snapshot_id"]],
+        contract.evidence_snapshots[baseline["baseline_snapshot_id"]],
+    )
+    assert result["ok"] is True
+    assert contract.get_commitment("commitment-1")["checks_run"] == 0
+    assert contract.commitment_history("commitment-1") == history_before
     direct_vm.clear_mocks()
-
-    oversized = "<html><body>" + ("x" * 40_000) + "</body></html>"
-    _archive_mock(direct_vm, "20260111000000", oversized, declared_length=100)
-    assert contract.check_commitment("commitment-1").startswith("[EVIDENCE]")
-    direct_vm.clear_mocks()
-
-    _archive_mock(direct_vm, BASELINE_TIMESTAMP, BASELINE_BODY)
-    assert contract.check_commitment("commitment-1").startswith("[NO_EVIDENCE]")
-    direct_vm.clear_mocks()
-    assert contract.get_commitment("commitment-1")["consecutive_negative_count"] == 0
 
 
 def test_malformed_model_response_fails_closed(
@@ -354,7 +521,7 @@ def test_malformed_model_response_fails_closed(
     contract, _ = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob)
     _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(direct_vm, "20260111000000", BASELINE_BODY)
+    _live_mock(direct_vm, BASELINE_BODY)
     mock_json_llm(direct_vm, r".*Uphold semantic adjudicator.*", "not-json")
     result = contract.check_commitment("commitment-1")
     assert result.startswith("[LLM]")
@@ -372,7 +539,9 @@ def test_semantic_validator_independently_agrees_on_each_decision(
     module = sys.modules["_contract_uphold"]
     direct_vm.clear_validators()
     _semantic_mock(direct_vm, classification)
-    result = module._semantic_judgment(COMMITMENT_TEXT, BASELINE_BODY)
+    result = module._semantic_judgment(
+        COMMITMENT_TEXT, _authenticated_snapshot(module)
+    )
     assert result["ok"] is True
     direct_vm.clear_mocks()
     _semantic_mock(direct_vm, classification, excerpt="independent excerpt", reason="independent reason")
@@ -386,7 +555,9 @@ def test_semantic_validator_rejects_schema_valid_but_substantively_different_dec
     module = sys.modules["_contract_uphold"]
     direct_vm.clear_validators()
     _semantic_mock(direct_vm, "HOLDS")
-    result = module._semantic_judgment(COMMITMENT_TEXT, BASELINE_BODY)
+    result = module._semantic_judgment(
+        COMMITMENT_TEXT, _authenticated_snapshot(module)
+    )
     assert result["classification"] == "HOLDS"
     direct_vm.clear_mocks()
     _semantic_mock(direct_vm, "WEAKENED", excerpt="different substance", reason="different conclusion")
@@ -401,7 +572,9 @@ def test_malformed_leader_output_is_rejected_by_independent_validator(
     module = sys.modules["_contract_uphold"]
     direct_vm.clear_validators()
     mock_json_llm(direct_vm, r".*Uphold semantic adjudicator.*", "not-json")
-    result = module._semantic_judgment(COMMITMENT_TEXT, BASELINE_BODY)
+    result = module._semantic_judgment(
+        COMMITMENT_TEXT, _authenticated_snapshot(module)
+    )
     assert result == {"ok": False, "domain": "LLM", "reason": "unknown_classification"}
     direct_vm.clear_mocks()
     _semantic_mock(direct_vm, "HOLDS")
@@ -409,17 +582,21 @@ def test_malformed_leader_output_is_rejected_by_independent_validator(
     assert contract.get_ledger()["total_deposited"] == 0
 
 
-def test_duplicate_capture_does_not_increment_streak(
+def test_repeated_live_capture_creates_a_new_immutable_snapshot(
     direct_vm, direct_deploy, direct_alice, direct_bob, monkeypatch
 ):
     contract, _ = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob)
     assert _check_with_capture(direct_vm, contract, direct_alice, "20260111000000", "WEAKENED") == "WEAKENED"
-    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(direct_vm, "20260111000000", BASELINE_BODY)
-    assert contract.check_commitment("commitment-1").startswith("[NO_EVIDENCE]")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T12:00:00Z")
+    _live_mock(direct_vm, BASELINE_BODY)
+    _semantic_mock(direct_vm, "HOLDS")
+    assert contract.check_commitment("commitment-1") == "HOLDS"
     direct_vm.clear_mocks()
-    assert contract.get_commitment("commitment-1")["consecutive_negative_count"] == 1
+    view = contract.get_commitment("commitment-1")
+    assert view["consecutive_negative_count"] == 0
+    assert view["checks_run"] == 2
+    assert view["last_snapshot_id"] == "commitment-1:2"
 
 
 def test_one_negative_does_not_claim_breach_and_two_distinct_negatives_do(
@@ -432,8 +609,8 @@ def test_one_negative_does_not_claim_breach_and_two_distinct_negatives_do(
     assert second == "BREACH_CLAIMED"
     view = contract.get_commitment("commitment-1")
     assert view["status"] == "BREACH_CLAIMED"
-    assert view["breach_capture_1"] == "20260111000000"
-    assert view["breach_capture_2"] == "20260112000000"
+    assert view["breach_capture_1"] == "2026-01-11T00:00:00Z"
+    assert view["breach_capture_2"] == "2026-01-12T00:00:00Z"
     assert view["consecutive_negative_count"] == 2
 
 
@@ -460,7 +637,7 @@ def test_non_promisor_cannot_extend_or_contest(
     _claim_breach(direct_vm, contract, direct_alice)
     _tx(direct_vm, direct_charlie)
     with direct_vm.expect_revert("only promisor may contest"):
-        contract.contest_breach("commitment-1", SOURCE_URL, "20260113000000")
+        contract.contest_breach("commitment-1", SOURCE_URL, BASELINE_NOW)
 
 
 def test_contest_filing_requires_admitted_original_evidence(
@@ -469,13 +646,11 @@ def test_contest_filing_requires_admitted_original_evidence(
     contract, _ = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob, window=7200)
     _claim_breach(direct_vm, contract, direct_alice)
-    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    assert contract.contest_breach("commitment-1", SOURCE_URL, "20260113000000").startswith("[EXTERNAL]")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:30:00Z")
+    assert contract.contest_breach("commitment-1", SOURCE_URL, "2026-01-11T12:00:00Z") == "[EVIDENCE] contest snapshot not found"
     assert contract.get_commitment("commitment-1")["status"] == "BREACH_CLAIMED"
 
-    _archive_mock(direct_vm, "20260113000000", BASELINE_BODY)
-    assert contract.contest_breach("commitment-1", SOURCE_URL, "20260113000000") == "CONTESTED"
-    direct_vm.clear_mocks()
+    assert contract.contest_breach("commitment-1", SOURCE_URL, BASELINE_NOW) == "CONTESTED"
     assert contract.get_commitment("commitment-1")["status"] == "CONTESTED"
 
 
@@ -487,13 +662,11 @@ def test_contest_after_deadline_and_duplicate_active_contest_rejected(
     _claim_breach(direct_vm, contract, direct_alice)
     _tx(direct_vm, direct_alice, timestamp="2026-01-21T01:00:00Z")
     with direct_vm.expect_revert("contest window expired"):
-        contract.contest_breach("commitment-1", SOURCE_URL, "20260113000000")
+        contract.contest_breach("commitment-1", SOURCE_URL, BASELINE_NOW)
 
     # Return to the open window and exercise the one-active-contest gate.
-    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(direct_vm, "20260113000000", BASELINE_BODY)
-    contract.contest_breach("commitment-1", SOURCE_URL, "20260113000000")
-    direct_vm.clear_mocks()
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:30:00Z")
+    contract.contest_breach("commitment-1", SOURCE_URL, BASELINE_NOW)
     with direct_vm.expect_revert("commitment is not contestable"):
         contract.contest_breach("commitment-1", SOURCE_URL, "20260114000000")
 
@@ -504,12 +677,9 @@ def test_successful_contest_restores_active_and_resets_streak(
     contract, _ = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob)
     _claim_breach(direct_vm, contract, direct_alice)
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:30:00Z")
+    contract.contest_breach("commitment-1", SOURCE_URL, BASELINE_NOW)
     _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(direct_vm, "20260113000000", BASELINE_BODY)
-    contract.contest_breach("commitment-1", SOURCE_URL, "20260113000000")
-    direct_vm.clear_mocks()
-    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(direct_vm, "20260113000000", BASELINE_BODY)
     _semantic_mock(direct_vm, "HOLDS")
     assert contract.adjudicate_contest("commitment-1") == "CONTEST_UPHELD"
     direct_vm.clear_mocks()
@@ -527,12 +697,9 @@ def test_rejected_contest_confirms_breach_and_settlement_pays_beneficiary(
     contract, sent = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob)
     _claim_breach(direct_vm, contract, direct_alice)
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:30:00Z")
+    contract.contest_breach("commitment-1", SOURCE_URL, BASELINE_NOW)
     _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(direct_vm, "20260113000000", BASELINE_BODY)
-    contract.contest_breach("commitment-1", SOURCE_URL, "20260113000000")
-    direct_vm.clear_mocks()
-    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:00:00Z")
-    _archive_mock(direct_vm, "20260113000000", BASELINE_BODY)
     _semantic_mock(direct_vm, "ABSENT")
     assert contract.adjudicate_contest("commitment-1") == "BREACH_CONFIRMED"
     direct_vm.clear_mocks()
@@ -561,10 +728,10 @@ def test_no_contest_elapsed_claim_pays_and_early_settlement_rejected(
     contract, sent = _deploy(direct_deploy, monkeypatch)
     _create(direct_vm, contract, direct_alice, direct_bob, window=3600)
     _claim_breach(direct_vm, contract, direct_alice)
-    _tx(direct_vm, direct_alice, timestamp="2026-01-20T00:30:00Z")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T00:30:00Z")
     with direct_vm.expect_revert("contest window is still open"):
         contract.settle_breach("commitment-1")
-    _tx(direct_vm, direct_alice, timestamp="2026-01-20T01:00:00Z")
+    _tx(direct_vm, direct_alice, timestamp="2026-01-12T01:00:00Z")
     assert contract.settle_breach("commitment-1") == "PAYOUT_PENDING"
     _assert_external_transfer(sent, direct_bob, 100)
 

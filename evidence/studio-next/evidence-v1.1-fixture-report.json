@@ -1,0 +1,25 @@
+{
+  "reportVersion": 2,
+  "flow": "evidence-v1.1",
+  "protocolAdmission": "Wayback Availability API plus exact id_ replay; CDX is optional off-chain discovery only",
+  "candidateUrl": "https://www.python.org/",
+  "requestedTimestamp": "20230901044154",
+  "directAvailabilityPreflight": {
+    "endpoint": "https://archive.org/wayback/available",
+    "status": 429,
+    "classification": "availability_unavailable",
+    "admitted": false
+  },
+  "studioSmoke": {
+    "deploymentTx": "0x6f89dc5288b1f3f3e4b0a014a7b03201ad443ca7011ac99e5d67607a418c4c97",
+    "captureTx": "0xbb6211f038810b81be737bc5e921e2daec3f7ba84f79afe95936dcfb67c4f0e5",
+    "contractAddress": "0x0F3Cb8D7bc04314ac17b2749CE8Ec68454450dCf",
+    "captureStatus": "FINALIZED",
+    "captureExecution": "FINISHED_WITH_ERROR",
+    "leaderReason": "replay_too_large",
+    "snapshotStored": false
+  },
+  "decision": "No canonical Uphold deployment and no user-method write until a bounded, valid small replay proves snapshot construction on Studio Next.",
+  "syntheticEvidenceCreated": false,
+  "historicalOnly": true
+}

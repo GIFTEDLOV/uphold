@@ -79,7 +79,8 @@ describe("Uphold contract boundary", () => {
   it("validates create, extension, and contest inputs before a write payload", () => {
     const draft = { title: "", category: "", sourceUrl: "not a url", commitmentText: "", baselineTimestamp: "bad", beneficiary: "bad", stake: "0", expiresAt: "2020-01-01T00:00", contestWindow: "5" };
     const errors = validateDraft(draft, 4);
-    expect(errors.join(" ")).toMatch(/title|category|URL|commitment|timestamp|beneficiary|Stake|Expiry|Contest/);
+    expect(errors.join(" ")).toMatch(/title|category|URL|commitment|beneficiary|Stake|Expiry|Contest/);
+    expect(validateDraft({ ...draft, title: "A", category: "accountability", sourceUrl: "https://example.com/promise", commitmentText: "I will publish a monthly report.", beneficiary, stake: "1", expiresAt: "2099-01-01T00:00", contestWindow: "86400" }, 4)).toEqual([]);
     expect(allowedActions({ commitment: commitment({ expires_at: "2099-01-01T00:00:00Z" }), actor })).toContain("extend");
     expect(allowedActions({ commitment: commitment({ status: "BREACH_CLAIMED", contest_deadline: "2020-01-02T00:00:00Z" }), actor })).not.toContain("contest");
   });
@@ -94,6 +95,7 @@ describe("Uphold contract boundary", () => {
 
   it("preserves failure domains instead of flattening evidence failures", () => {
     expect(mapUpholdError(new Error("[EXTERNAL] archive unavailable")).domain).toBe("EXTERNAL_EVIDENCE");
+    expect(mapUpholdError(new Error("[SOURCE] SOURCE_UNAVAILABLE")).domain).toBe("SOURCE");
     expect(mapUpholdError(new Error("[LLM] malformed semantic response")).domain).toBe("MODEL_ERROR");
     expect(mapUpholdError(new Error("contest window expired")).domain).toBe("PRECONDITION");
   });

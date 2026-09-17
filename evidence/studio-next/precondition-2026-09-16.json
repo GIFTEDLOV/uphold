@@ -1,0 +1,107 @@
+{
+  "recordedAt": "2026-09-16T21:52:33.5672096Z",
+  "network": "GenLayer Studio Next",
+  "rpc": "https://studio-next.genlayer.com/api",
+  "chainId": 61997,
+  "chainIdReadback": "0xf22d",
+  "contract": "0x96671389548f170A6f02BC3017495d157d827599",
+  "deployer": "0xcb5a845638cbc1f95d7f8343278685682c3ba13f",
+  "balanceBeforeWei": "4998607360249985774",
+  "balanceBeforeGen": "4.998607360249985774",
+  "nonceLatestBefore": 19,
+  "noncePendingBefore": 19,
+  "unknownPendingTransaction": false,
+  "contractInfo": {
+    "breach_rule": "two distinct consecutive qualified negative captures",
+    "evidence_provider": "Internet Archive Wayback CDX and pinned replay",
+    "name": "Uphold",
+    "semantic_classifications": ["HOLDS", "WEAKENED", "ABSENT", "INDETERMINATE"],
+    "semantic_verification": "independent validator re-runs the classification over the same admitted evidence",
+    "settlement_confirmation": "external Studio/client observation; no contract-level receipt is available",
+    "transfer_mechanism": "finalized EOA external message",
+    "version": "phase3.5-v1"
+  },
+  "limits": {
+    "max_archive_bytes": 32768,
+    "max_category_length": 48,
+    "max_checks": 128,
+    "max_commitment_length": 2000,
+    "max_commitments": 1000,
+    "max_contest_window_seconds": 2592000,
+    "max_history_entries": 64,
+    "max_id_length": 64,
+    "max_title_length": 120,
+    "max_url_length": 512,
+    "min_contest_window_seconds": 3600
+  },
+  "ledger": {
+    "breach_claims": 0,
+    "checks_run": 0,
+    "commitments_completed": 0,
+    "commitments_created": 0,
+    "contests_filed": 0,
+    "contests_rejected": 0,
+    "contests_upheld": 0,
+    "pending_commitments": 0,
+    "total_deposited": 0,
+    "total_escrowed": 0,
+    "total_paid_to_beneficiaries": 0,
+    "total_pending_outflows": 0,
+    "total_pending_payouts": 0,
+    "total_pending_refunds": 0,
+    "total_returned_to_promisors": 0
+  },
+  "commitmentIds": [],
+  "feePolicy": {
+    "enabled": true,
+    "policy": {
+      "genPerTimeUnit": "1",
+      "storageUnitPrice": "250000000",
+      "receiptGasPrice": "250000000",
+      "intrinsicGas": "21000",
+      "bootloaderOverhead": "60000",
+      "gasPerChangedSlot": "1000",
+      "calldataGasPerByte": "16",
+      "fixedProposeReceiptGas": "210000",
+      "fixedMessageRevealGas": "100000",
+      "receiptWrapperBytes": "1024",
+      "extraExecGas": "210000",
+      "messageFeeParamsBudgetFloor": "76548000000000",
+      "genvmStartBudgetFloor": "127878000000000",
+      "maxAllocationTreeDepth": "5",
+      "maxAllocatedMessages": "20",
+      "maxMessagesPerTx": "0",
+      "minExternalGasLimit": "0",
+      "defaultExternalGasLimit": "500000",
+      "timeUnitOverlayBps": "1500",
+      "minProposeTimeunits": "30",
+      "maxProposeTimeunits": "600",
+      "minCommitTimeunits": "30",
+      "maxCommitTimeunits": "600"
+    },
+    "capabilities": {
+      "messageFees": {
+        "mode1": {"accounting": true, "genvmExecution": false},
+        "mode2": {"accounting": true, "genvmExecution": true},
+        "externalFinalization": {"accounting": true, "genvmExecution": true}
+      }
+    },
+    "defaultFees": {
+      "distribution": {
+        "leaderTimeunitsAllocation": "100",
+        "validatorTimeunitsAllocation": "200",
+        "appealRounds": "0",
+        "executionBudgetPerRound": "76548000000000",
+        "executionConsumed": "0",
+        "totalMessageFees": "0",
+        "rotations": ["0"],
+        "maxPriceGenPerTimeUnit": "2",
+        "storageFeeMaxGasPrice": "300000000",
+        "receiptFeeMaxGasPrice": "300000000"
+      },
+      "feeValue": "76548000002588"
+    }
+  },
+  "writeBroadcasts": 0,
+  "notes": "All reads were made before any Phase 4B user-method write. No user method has been invoked."
+}

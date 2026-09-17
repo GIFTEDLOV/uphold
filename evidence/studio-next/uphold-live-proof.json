@@ -1,0 +1,169 @@
+{
+  "proofVersion": 1,
+  "phase": "4B",
+  "status": "BLOCKED_CDX_OFFLINE",
+  "readOnlyPhase4B": true,
+  "release": {
+    "network": "GenLayer Studio Next",
+    "rpc": "https://studio-next.genlayer.com/api",
+    "chainId": 61997,
+    "sourceCommit": "f8345f5a32553749b363f6e8dba2eea090852920",
+    "provenanceCommit": "d56952cd929241e3fb04fb359af45fca831b2b72",
+    "sourceSha256": "81F23002AC051165D4DE03603F6E61CD76B317CA397E57B5A0B3C290D0588320",
+    "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "deploymentTx": "0x14c10cf845dded1cdb51aa9bcebb08e5ae11ab9c7d14740f7684c9136ffce4cc",
+    "contractAddress": "0x96671389548f170A6f02BC3017495d157d827599",
+    "sourceUnchangedDuringPhase4B": true
+  },
+  "precondition": {
+    "recordPath": "evidence/studio-next/precondition-2026-09-16.json",
+    "deployer": "0xcb5a845638cbc1f95d7f8343278685682c3ba13f",
+    "balanceWei": "4998607360249985774",
+    "balanceGen": "4.998607360249985774",
+    "latestNonce": 19,
+    "pendingNonce": 19,
+    "unknownPendingTransaction": false,
+    "contractInfo": {
+      "name": "Uphold",
+      "version": "phase3.5-v1",
+      "transferMechanism": "finalized EOA external message",
+      "evidenceProvider": "Internet Archive Wayback CDX and pinned replay",
+      "breachRule": "two distinct consecutive qualified negative captures"
+    },
+    "limits": {
+      "maxArchiveBytes": 32768,
+      "maxCategoryLength": 48,
+      "maxChecks": 128,
+      "maxCommitmentLength": 2000,
+      "maxCommitments": 1000,
+      "maxContestWindowSeconds": 2592000,
+      "maxHistoryEntries": 64,
+      "maxIdLength": 64,
+      "maxTitleLength": 120,
+      "maxUrlLength": 512,
+      "minContestWindowSeconds": 3600
+    },
+    "initialLedger": {
+      "totalDeposited": 0,
+      "totalEscrowed": 0,
+      "totalPendingOutflows": 0,
+      "totalPaidToBeneficiaries": 0,
+      "totalReturnedToPromisors": 0,
+      "commitmentsCreated": 0,
+      "checksRun": 0,
+      "pendingCommitments": 0
+    },
+    "initialCommitmentIds": [],
+    "feePolicySource": "sim_getFeeConfig",
+    "feePolicy": {
+      "genPerTimeUnit": "1",
+      "storageUnitPrice": "250000000",
+      "receiptGasPrice": "250000000",
+      "messageFeeParamsBudgetFloor": "76548000000000",
+      "genvmStartBudgetFloor": "127878000000000",
+      "defaultFeeValue": "76548000002588",
+      "defaultDistribution": {
+        "leaderTimeunitsAllocation": "100",
+        "validatorTimeunitsAllocation": "200",
+        "executionBudgetPerRound": "76548000000000",
+        "totalMessageFees": "0",
+        "rotations": ["0"]
+      }
+    }
+  },
+  "archiveFixtures": {
+    "reportPath": "evidence/studio-next/fixture-report.json",
+    "stableCandidate": {
+      "liveUrl": "https://www.python.org/",
+      "baseline": "20230901044154",
+      "laterCaptures": ["20230902031056", "20230902115256"],
+      "commitmentTextCandidate": "The official home of the Python Programming Language",
+      "replayUrlsVerifiedReadOnly": true,
+      "offChainAssessment": "Appears stable across retrieved replay bodies; not a validator classification.",
+      "admissionPreflight": "BLOCKED_CDX_OFFLINE"
+    },
+    "weakenedCandidate": {
+      "found": false,
+      "reason": "No trustworthy historical wording change was admitted; no synthetic evidence was created."
+    },
+    "cdxObservation": {
+      "query": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.python.org%2F&output=json&fl=timestamp%2Coriginal%2Cstatuscode%2Cdigest%2Clength&filter=statuscode%3A200&collapse=digest&limit=5",
+      "boundedAttempts": [
+        {"attempt": 1, "httpStatus": 503, "durationMs": 6345, "classification": "transient_http"},
+        {"attempt": 2, "httpStatus": 503, "durationMs": 5282, "classification": "transient_http"},
+        {"attempt": 3, "httpStatus": null, "durationMs": 45093, "classification": "connection_failure"},
+        {"attempt": 4, "httpStatus": 503, "durationMs": 6081, "classification": "transient_http"},
+        {"attempt": 5, "httpStatus": 503, "durationMs": 5270, "classification": "transient_http"}
+      ],
+      "latestReadOnlyResult": "No parseable CDX response after five bounded attempts",
+      "writeSafetyDecision": "Do not broadcast create_commitment while the contract's CDX admission source is unavailable."
+    }
+  },
+  "phase4BOperations": [],
+  "methodFeeMeasurements": {
+    "measuredMethods": ["deploy"],
+    "uncertifiedMethods": [
+      "create_commitment",
+      "check_commitment",
+      "increase_stake",
+      "extend_commitment",
+      "contest_breach",
+      "adjudicate_contest",
+      "settle_breach",
+      "expire_commitment"
+    ],
+    "activeProfilePath": "frontend/fee-profile.json",
+    "activeProfileSha256": "0BB36D292C172E83AFB7E32154EBDCF264D730CB3589C6691CBCA96D8987C682",
+    "fallback": "network-default for uncertified methods",
+    "rawMethodReceiptsPresent": false
+  },
+  "accounting": {
+    "finalLedger": null,
+    "finalLedgerReadback": "Not performed because no Phase 4B commitment was created.",
+    "addressRecordVerified": false,
+    "addressRecordReason": "No completed live lifecycle path exists to audit.",
+    "externalBalanceDeltas": []
+  },
+  "regressionGates": {
+    "upholdDirectMode": "37/37",
+    "totalDirectMode": "82/82",
+    "astLint": "PASS",
+    "semanticLint": "PASS",
+    "genvmLint": "PASS",
+    "frontendTests": "34/34",
+    "typecheckLint": "PASS",
+    "productionBuild": "PASS"
+  },
+  "provenance": {
+    "historicalFailedUpholdTx": {
+      "txHash": "0x5f37c53acfe9af24f212f4b117067ca899bb2ad8d7461e328c0af5b6c7fc4b62",
+      "status": "FINALIZED",
+      "executionResult": "FINISHED_WITH_ERROR",
+      "error": "invalid_contract runner malformed",
+      "historicalOnly": true
+    },
+    "runnerSmoke": {
+      "txHash": "0xb6aee88fa326c7ffe3be00bb1ffeed264e3e8a7525d21f6b70366cd1b9550257",
+      "contractAddress": "0x39AAB4413bF614355b8EaBdb89c289E001688805",
+      "status": "FINALIZED",
+      "executionResult": "FINISHED_WITH_RETURN",
+      "readback": "UPHOLD_RUNNER_SMOKE"
+    }
+  },
+  "failures": [
+    {
+      "classification": "external_preflight_unavailable",
+      "operation": "archive_fixture_discovery",
+      "txHash": null,
+      "resolution": "Stopped before any user-method broadcast; retry only after CDX returns admissible metadata."
+    }
+  ],
+  "safety": {
+    "blockchainUserMethodWriteCount": 0,
+    "duplicateBroadcasts": 0,
+    "unknownTransactions": 0,
+    "githubPushed": false,
+    "vercelDeployed": false,
+    "phase4BReadyForPublicRelease": false
+  }
+}

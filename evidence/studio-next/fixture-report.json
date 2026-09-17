@@ -1,0 +1,82 @@
+{
+  "reportVersion": 1,
+  "createdAt": "2026-09-16T21:45:00Z",
+  "purpose": "Read-only Wayback fixture discovery for live Uphold proof",
+  "contractAdmissionRules": {
+    "sourceUrl": "HTTPS URL without fragment or credentials",
+    "archiveTimestamp": "14 digits, YYYYMMDDHHMMSS",
+    "replay": "https://web.archive.org/web/{timestamp}id_/{source_url}",
+    "maxArchiveBytes": 32768,
+    "requiredCdxStatus": "200",
+    "acceptedMimeTypes": ["text/*", "application/xhtml+xml", "application/json"]
+  },
+  "stableCandidate": {
+    "liveUrl": "https://www.python.org/",
+    "commitmentTextCandidate": "The official home of the Python Programming Language",
+    "commitmentTextEvidence": "The phrase appears in the archived page description metadata and is suitable for the contract's baseline anchor-token check.",
+    "baseline": {
+      "timestamp": "20230901044154",
+      "replayUrl": "https://web.archive.org/web/20230901044154id_/https://www.python.org/",
+      "statusCode": 200,
+      "mimeType": "text/html",
+      "archiveDigest": "R225B3ZNLSX5P7YQV6G5O462NVQHINE2",
+      "declaredLengthBytes": 10579,
+      "retrievedHttpBodyBytes": 50182,
+      "retrievedHttpBodySha256": "d27cab628a30c6f9cd80d6bcc2f1646fc55bbec3ddb450e8687b339e4c7c9e94",
+      "relevantText": "The official home of the Python Programming Language",
+      "replayAvailability": "HTTP 200 observed during read-only preflight"
+    },
+    "laterCaptures": [
+      {
+        "timestamp": "20230902031056",
+        "replayUrl": "https://web.archive.org/web/20230902031056id_/https://www.python.org/",
+        "statusCode": 200,
+        "mimeType": "text/html",
+        "archiveDigest": "TUTUHFJ7DAQKKKPWBGEMNPYK425SCD24",
+        "declaredLengthBytes": 10647,
+        "retrievedHttpBodyBytes": 50391,
+        "retrievedHttpBodySha256": "855277ddeddb1fb63d5bf126af3d38303c8912b4507cb907b7ebf068a77c8fd6",
+        "relevantText": "The official home of the Python Programming Language",
+        "replayAvailability": "HTTP 200 observed during read-only preflight"
+      },
+      {
+        "timestamp": "20230902115256",
+        "replayUrl": "https://web.archive.org/web/20230902115256id_/https://www.python.org/",
+        "statusCode": 200,
+        "mimeType": "text/html",
+        "archiveDigest": "YCJBNXWHURIGAB3F6VB3C2TJO7OTCWPB",
+        "declaredLengthBytes": 10476,
+        "retrievedHttpBodyBytes": 50027,
+        "retrievedHttpBodySha256": "77e388f1dd45a4ae32ac54f262a0067033c5ecdcb3d1a9cb59eec2fb81293939",
+        "relevantText": "The official home of the Python Programming Language",
+        "replayAvailability": "HTTP 200 observed during read-only preflight"
+      }
+    ],
+    "offChainAssessment": "Appears stable for the candidate phrase across the baseline and later replay bodies. This is not a validator classification and is not being treated as a live result.",
+    "admissionPreflight": "BLOCKED_CDX_OFFLINE"
+  },
+  "weakenedCandidate": {
+    "found": false,
+    "reason": "No trustworthy historical wording change was admitted during this read-only pass; no synthetic or hosted evidence was created."
+  },
+  "archiveQueries": {
+    "cdxTemplate": "https://web.archive.org/cdx/search/cdx?url={url}&output=json&fl=timestamp,original,statuscode,digest,length,mimetype&filter=statuscode:200&filter=mimetype:text/html",
+    "cdxObservation": "The bounded recovery check obtained no parseable CDX response. Attempts 1, 2, 4, and 5 returned HTTP 503; attempt 3 ended in a connection timeout. A CDX-backed live create is therefore not safe to broadcast.",
+    "boundedRecoveryCheck": {
+      "query": "https://web.archive.org/cdx/search/cdx?url=https%3A%2F%2Fwww.python.org%2F&output=json&fl=timestamp%2Coriginal%2Cstatuscode%2Cdigest%2Clength&filter=statuscode%3A200&collapse=digest&limit=5",
+      "attempts": [
+        {"attempt": 1, "timestamp": "2026-09-16T22:37:18.3838419Z", "httpStatus": 503, "durationMs": 6345, "responseClassification": "transient_http", "parseClassification": "not_attempted"},
+        {"attempt": 2, "timestamp": "2026-09-16T22:37:26.7472585Z", "httpStatus": 503, "durationMs": 5282, "responseClassification": "transient_http", "parseClassification": "not_attempted"},
+        {"attempt": 3, "timestamp": "2026-09-16T22:37:37.0339141Z", "httpStatus": null, "durationMs": 45093, "responseClassification": "connection_failure", "parseClassification": "not_attempted"},
+        {"attempt": 4, "timestamp": "2026-09-16T22:38:32.1688754Z", "httpStatus": 503, "durationMs": 6081, "responseClassification": "transient_http", "parseClassification": "not_attempted"},
+        {"attempt": 5, "timestamp": "2026-09-16T22:38:58.2606561Z", "httpStatus": 503, "durationMs": 5270, "responseClassification": "transient_http", "parseClassification": "not_attempted"}
+      ],
+      "recovered": false,
+      "secondQueryConfirmed": false
+    },
+    "timemapCrosscheck": "https://web.archive.org/web/timemap/json?url=https%3A%2F%2Fwww.iana.org%2Fdomains%2Fexample&from=2020&to=2026",
+    "timemapUse": "Used only to cross-check genuine historical capture metadata; it does not replace the contract's CDX admission path."
+  },
+  "liveWriteAllowed": false,
+  "blocker": "Internet Archive CDX service unavailable during preflight; broadcasting create_commitment would be expected to fail closed at baseline evidence admission."
+}

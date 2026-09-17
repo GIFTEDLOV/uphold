@@ -17,7 +17,7 @@ const { isSuccessful } = requireFromProject("genlayer-js") as {
 
 export const DEPLOYMENT_CONTRACT_PATH = "contracts/uphold.py";
 export const EXPECTED_CONTRACT_SHA256 =
-  "81F23002AC051165D4DE03603F6E61CD76B317CA397E57B5A0B3C290D0588320";
+  "3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F";
 export const EXPECTED_RPC = "https://studio-next.genlayer.com/api";
 export const EXPECTED_CHAIN_ID = 61997;
 

@@ -1,0 +1,49 @@
+{
+  "smoke": "studio-next-availability-replay-snapshot-small-retry",
+  "status": "FINALIZED_FAILED",
+  "rpc": "https://studio-next.genlayer.com/api",
+  "chainId": 61997,
+  "contractAddress": "0x0F3Cb8D7bc04314ac17b2749CE8Ec68454450dCf",
+  "contractPath": "contracts/_studio_next_evidence_smoke.py",
+  "sourceSha256": "3879C5FDABF3675776C8C1B9A2BF0D04C4778BED5DFC8CC7C89DF451D8C06270",
+  "sourceUrl": "https://example.com/",
+  "requestedTimestamp": "20230901044154",
+  "deployer": "0xCb5a845638Cbc1f95D7f8343278685682c3bA13F",
+  "balanceBefore": "4997553338499975898",
+  "nonceLatestBefore": "0x1d",
+  "noncePendingBefore": "0x1d",
+  "preparedAt": "2026-09-17T00:14:07.584Z",
+  "contractInfo": "UPHOLD_EVIDENCE_SMOKE",
+  "feeQuote": {
+    "distribution": {
+      "leaderTimeunitsAllocation": "100",
+      "validatorTimeunitsAllocation": "200",
+      "appealRounds": "0",
+      "executionBudgetPerRound": "25000000000000000",
+      "executionConsumed": "0",
+      "totalMessageFees": "0",
+      "rotations": [
+        "3"
+      ],
+      "maxPriceGenPerTimeUnit": "2",
+      "storageFeeMaxGasPrice": "300000000",
+      "receiptFeeMaxGasPrice": "300000000"
+    },
+    "feeValue": "100000000000010352",
+    "policy": {
+      "enabled": true,
+      "genPerTimeUnit": "1",
+      "storageUnitPrice": "250000000",
+      "receiptGasPrice": "250000000",
+      "executionBudgetFloor": "76548000000000",
+      "timeUnitOverlayBps": "1500"
+    }
+  },
+  "quoteSource": "Studio Next network-default estimateTransactionFees({})",
+  "txHash": "0x16f4322e919b8833c63639818c39f8e7c8efe16c98a8281bd0ca5f54104ef978",
+  "broadcastAt": "2026-09-17T00:14:09.886Z",
+  "finalizedStatus": "FINALIZED",
+  "executionResult": "FINISHED_WITH_ERROR",
+  "failureReason": "invalid_capture_binding",
+  "reconciliationNote": "SDK wait timed out at status 5, then the same hash was reconciled read-only with genlayer receipt; no rebroadcast was attempted."
+}

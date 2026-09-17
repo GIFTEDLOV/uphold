@@ -14,7 +14,7 @@ export const UPHOLD_NETWORK = {
   explorerUrl: "https://explorer-studio-dev.genlayer.com/",
 } as const;
 
-/** The fee profile in this repository was measured for the retired starter contract. */
+/** No evidence-v1.1 user-method profile is certified yet; use network defaults. */
 export const UPHOLD_FEE_PROFILE_PRESENT = false;
 
 export function getUpholdContractAddress(): `0x${string}` | null {
