@@ -1,90 +1,94 @@
 # Agent Tank submission
 
-## Project name
+## Project
 
 Uphold
-
-## One-line description
-
-Uphold turns public promises into enforceable onchain commitments by combining GEN-backed stakes with GenLayer-authenticated web snapshots and validator-backed semantic judgment.
-
-## Short description
-
-Public promises are difficult to enforce when their meaning depends on changing web content. A conventional deterministic contract can hold stake and timestamps, but it cannot reliably retrieve public pages or interpret natural-language evidence as the promise changes.
-
-Uphold combines a published promise with a GEN stake and an immutable, authenticated snapshot captured from a live public source. GenLayer validators independently capture and assess the stored evidence using a bounded result: HOLDS, WEAKENED, ABSENT, or INDETERMINATE. The real Studio Next proof created commitment live-proof-20260917, stored baseline and later snapshots, classified the later evidence HOLDS, increased stake to 0.002 GEN, and extended the expiry.
-
-This is a practical trust layer for commitments whose truth lives partly outside the chain: validators handle web retrieval and semantic judgment, while contract logic remains responsible for authorization, stake, timing, breach thresholds, contests, settlement, expiry, and accounting.
 
 ## Track and category
 
 - Track: Agentic Commerce Infrastructure
 - Category: Project
 
-## Links
+## One-line description
 
-- GitHub: to be recorded after the release push
-- Live app: to be recorded after the Vercel production deployment
-- Contract explorer/address: https://explorer-studio-dev.genlayer.com/ · 0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528
-- Demo video: not yet created
+Uphold turns public promises into enforceable onchain commitments by combining GEN-backed stakes with GenLayer-authenticated web snapshots and validator-backed semantic judgment.
+
+## Problem
+
+Many commitments are stated on public websites, but their truth changes outside a deterministic blockchain execution environment. A contract can hold stake and timestamps, yet cannot independently retrieve a changing page or determine whether natural-language evidence still supports the promise.
+
+## Solution
+
+Uphold lets a promisor publish a commitment, stake GEN, and nominate a public source. GenLayer validators capture that source and store an authenticated immutable snapshot. Later checks compare a new authenticated observation with the commitment and record a bounded semantic result: `HOLDS`, `WEAKENED`, `ABSENT`, or `INDETERMINATE`. Deterministic contract logic handles authorization, stake, timing, breach thresholds, contests and accounting.
 
 ## Why GenLayer
 
-Deterministic EVM-style execution is well suited to balances and state transitions, but not to independently retrieving changing public web content or evaluating natural-language promises. GenLayer supplies validator-backed retrieval and semantic assessment while preserving consensus and an auditable execution record. Uphold narrows the semantic output and stores the evidence snapshot so the contract does not rely on arbitrary caller-supplied text.
+GenLayer is necessary at the boundary where public web retrieval and natural-language interpretation meet onchain state. Validators independently retrieve and assess evidence, while the contract stores the evidence identity and limits semantic authority. Consensus selects the bounded judgment; consensus does not authenticate the evidence. Wayback/CDX is not required for normal operation.
+
+## How it works
+
+```text
+public source
+  -> validator capture
+  -> immutable authenticated snapshot
+  -> bounded semantic judgment
+  -> deterministic stake and lifecycle consequence
+```
 
 ## Architecture
 
-~~~text
-live public source
-  -> independent validator capture
-  -> immutable authenticated snapshot
-  -> semantic assessment from stored snapshot
-  -> deterministic stake and lifecycle transition
-~~~
-
-Wayback/CDX is not required for normal operation. The live source is captured and authenticated at the contract operation, and later semantic assessment uses the stored snapshot.
+See [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) for system components, trust boundaries, state transitions, accounting, contest flow, transaction safety, and Studio Next context.
 
 ## Live proof
 
-- Network: GenLayer Studio Next, chain 61997
-- Contract: 0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528
-- Commitment: live-proof-20260917
+The real Studio Next proof used the canonical contract `0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528` on chain `61997`:
+
+- Commitment: `live-proof-20260917`
 - Source: https://www.iana.org/help/example-domains
-- Create: 0x651fab5959bc6228a9df3a16f4185eb7793e7bf085d7613b44dd50be492a969d
-- Check: 0xcc8c1d43edad2068c79184f5da0b0fc9fe8bbeb1f177c31b2135145f31bba1b5
-- Classification: HOLDS
-- Increase stake: 0xbd09e3a0cac0e3b045f0dfa8555056a1b72bc10e40312e8554feded2b19a3cbe
-- Extend expiry: 0x75788a94725bcbb134709d4478702c08321d508f711f71530e6fe2888f0eaeef
-- Final stake: 0.002 GEN
+- Create: `0x651fab5959bc6228a9df3a16f4185eb7793e7bf085d7613b44dd50be492a969d`
+- Check: `0xcc8c1d43edad2068c79184f5da0b0fc9fe8bbeb1f177c31b2135145f31bba1b5`
+- Classification: `HOLDS`
+- Increase stake: `0xbd09e3a0cac0e3b045f0dfa8555056a1b72bc10e40312e8554feded2b19a3cbe`
+- Extend expiry: `0x75788a94725bcbb134709d4478702c08321d508f711f71530e6fe2888f0eaeef`
+- Final stake: `0.002 GEN`
 
-Machine-readable evidence is in evidence/studio-next/uphold-live-proof.json.
-
-## Differentiation
-
-Uphold combines economic skin in the game with authenticated web evidence and bounded semantic judgment. The promise, source, snapshots, stake, and lifecycle history are all connected to a contract record rather than being an offchain reputation claim.
+Machine-readable proof: [`evidence/studio-next/uphold-live-proof.json`](../evidence/studio-next/uphold-live-proof.json).
 
 ## Security model
 
-The contract controls authorized writes, immutable commitment fields, evidence admission, snapshot history, timing, stake arithmetic, contest windows, and accounting. Validator judgment cannot select a beneficiary or move funds directly. The frontend reads the chain and surfaces transaction status; it is not a source of truth.
+The contract internally hashes snapshot content, derives exact byte length, keeps the baseline and historical snapshots immutable, and performs semantic assessment from stored authenticated snapshots. Qualified weakening observations are required for breach. Accounting separates escrow from pending and completed outflows. The frontend reads chain state; it is not evidence authority.
+
+## Differentiation
+
+Uphold combines economic skin in the game with authenticated web evidence and bounded semantic judgment. It connects the promise, source, snapshots, stake, and lifecycle history to a verifiable contract record instead of treating reputation as an offchain claim.
 
 ## Known limitations
 
-- Breach and contest paths are not live-demonstrated.
-- Beneficiary payout and promisor refund/expiry are not live-demonstrated.
+- Breach, contest, settlement/payout, and expiry/refund were not live-demonstrated.
 - Studio Next does not fully prove production Ghost/EVM semantics.
 - External payout completion remains observed off-contract.
+
+## Links
+
+- GitHub: https://github.com/GIFTEDLOV/uphold
+- Live app: to be recorded after the final Uphold Vercel project is deployed
+- Contract: `0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528` on chain `61997`
+- Deployment transaction: `0x187a259c1763c762409be1c8c294b5a2b8b76b09dca7bd0a737760f16ce9a3f4`
+- Demo video: not yet created
 
 ## Demo sequence
 
 1. Landing
-2. Create commitment
-3. Show authenticated baseline snapshot
-4. Open commitment detail
-5. Show HOLDS check
-6. Show stake increase
-7. Show expiry extension
-8. Show activity
-9. Show transparency / proof
-10. Show Studio Next contract and transaction evidence
+2. Dashboard
+3. Create Commitment
+4. Existing live commitment
+5. Authenticated baseline snapshot
+6. `HOLDS` check
+7. `0.002 GEN` stake
+8. Extended expiry
+9. Activity
+10. Transparency
+11. GitHub proof
+12. Studio Next contract
 
 No breach or settlement live proof is claimed in this submission.

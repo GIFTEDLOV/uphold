@@ -2,9 +2,10 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 import { chains, createAccount, createClient, isSuccessful } from "genlayer-js";
 
-const REPO_ROOT = path.resolve("C:/Users/DELL/Uphold");
+const REPO_ROOT = path.resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const RPC = "https://studio-next.genlayer.com/api";
 const CHAIN_ID = 61997;
 const CONTRACT = "0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528";
@@ -56,7 +57,14 @@ function feeAccountingFromReceipt(receipt) {
 }
 
 async function activeAccount() {
-  const requireGlobal = createRequire("C:/Users/DELL/AppData/Roaming/npm/node_modules/genlayer/package.json");
+  const globalGenlayerPackage = path.join(
+    process.env.APPDATA ?? process.env.XDG_DATA_HOME ?? ".",
+    "npm",
+    "node_modules",
+    "genlayer",
+    "package.json",
+  );
+  const requireGlobal = createRequire(globalGenlayerPackage);
   const keytarModule = requireGlobal("keytar");
   const keytar = keytarModule.default ?? keytarModule;
   const privateKey = await keytar.getPassword("genlayer-cli", `account:${ACCOUNT_NAME}`);

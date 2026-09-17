@@ -2,9 +2,10 @@ import { createHash } from "crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { createRequire } from "module";
 import path from "path";
+import { fileURLToPath } from "url";
 import type { GenLayerClient, GenLayerTransaction } from "genlayer-js/types";
 
-const REPO_ROOT = "C:/Users/DELL/Uphold";
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const RPC = "https://studio-next.genlayer.com/api";
 const CHAIN_ID = 61997;
 const CONTRACT = "0x96671389548f170A6f02BC3017495d157d827599" as `0x${string}`;
