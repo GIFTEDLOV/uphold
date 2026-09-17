@@ -37,7 +37,19 @@ NEXT_PUBLIC_GENLAYER_SYMBOL=GEN
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528
 ~~~
 
-The GitHub repository, release commit, Vercel project, deployment ID, production URL, and deployed Git SHA are recorded here after the public deployment is completed.
+## Public release configuration
+
+- GitHub repository: https://github.com/GIFTEDLOV/uphold
+- Release source commit: b56465e1f95295497d715f894a30096071685422
+- Vercel project: `uphold`
+- Vercel project ID: `prj_YqhtNLEgwPPj7nhGoamGr6vbMd67`
+- Vercel root directory: `frontend`
+- Production URL: https://uphold-sable.vercel.app
+- Verified production deployment: `dpl_CPfPAWFFt9JiRquE7ciWTSeuicmK`
+- Immutable deployment URL: https://uphold-szhqx7kqm-kolofahkelvin16-6437s-projects.vercel.app
+- Deployed Git SHA: b56465e1f95295497d715f894a30096071685422
+
+The deployment above is the first READY GitHub-linked production build for the new Uphold project. The final metadata commit and its resulting Vercel deployment are reported in the release audit.
 
 ## Historical records
 

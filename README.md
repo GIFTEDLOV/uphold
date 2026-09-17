@@ -9,7 +9,7 @@
 <p align="center">GEN-backed commitments with authenticated live-source evidence and bounded semantic judgment on GenLayer.</p>
 
 <p align="center">
-  <a href="https://uphold.vercel.app">Live App</a> ·
+  <a href="https://uphold-sable.vercel.app">Live App</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="PROVENANCE.md">Deployment</a> ·
   <a href="evidence/studio-next/uphold-live-proof.json">Verification</a> ·
@@ -400,4 +400,4 @@ For a deeper audit, compare the deployed source and deployment transaction in PR
 
 ## Status
 
-Uphold is publicly released on GitHub with a verified Studio Next contract and an end-to-end positive lifecycle proof. The canonical public application URL is recorded in PROVENANCE.md after the final Uphold-branded deployment. No claim is made that breach, settlement, or expiry has been demonstrated live.
+Uphold is publicly released on GitHub with a verified Studio Next contract and an end-to-end positive lifecycle proof. The canonical public application is [uphold-sable.vercel.app](https://uphold-sable.vercel.app). No claim is made that breach, settlement, or expiry has been demonstrated live.
