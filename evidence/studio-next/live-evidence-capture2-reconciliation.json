@@ -1,0 +1,49 @@
+{
+  "recordedAt": "2026-09-17T12:14:54.916Z",
+  "rpc": "https://studio-next.genlayer.com/api",
+  "chainId": 61997,
+  "sdk": "genlayer-js 2.0.0-rc.1; Consensus v0.6",
+  "genvmValidationCache": "v0.6.0-rc5",
+  "contractAddress": "0x9B076a0594d504e0D925e05d0a1126ad676007e7",
+  "transactionHash": "0x9ed8a7c5465ccfb9f33b54fea0869b1869f8b2a66e4e9d8bd7cb43e44e067516",
+  "statusBeforeReconciliation": "FINALIZED",
+  "finalStatus": "FINALIZED",
+  "execution": "FINISHED_WITH_RETURN",
+  "successful": true,
+  "contractInfo": "UPHOLD_LIVE_EVIDENCE_SMOKE",
+  "snapshotHistoryCount": 2,
+  "snapshotHistory": [
+    {
+      "snapshot_id": "snapshot:0",
+      "sequence": 0,
+      "source_url": "https://example.com/",
+      "http_status": 200,
+      "sha256": "ff67a9d764d6a2367a187734e697f6a53217db9a21c101d410a113ca871a299d",
+      "byte_length": 559,
+      "normalized_content": "Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more",
+      "captured_state": "AUTHENTICATED",
+      "capture_timestamp": "2026-09-17T01:51:44.930937Z"
+    },
+    {
+      "snapshot_id": "snapshot:1",
+      "sequence": 1,
+      "source_url": "https://example.com/",
+      "http_status": 200,
+      "sha256": "ff67a9d764d6a2367a187734e697f6a53217db9a21c101d410a113ca871a299d",
+      "byte_length": 559,
+      "normalized_content": "Example Domain Example Domain This domain is for use in documentation examples without needing permission. Avoid use in operations. Learn more",
+      "captured_state": "AUTHENTICATED",
+      "capture_timestamp": "2026-09-17T01:52:21.332516Z"
+    }
+  ],
+  "capture2Readback": {
+    "snapshotExists": true,
+    "snapshotHistoryCountIncreased": true,
+    "immutableSnapshot": true,
+    "internalSha256Present": true,
+    "exactByteLengthPresent": true,
+    "normalizedContentPresent": true,
+    "capture1Unchanged": true
+  },
+  "noWayback": true
+}

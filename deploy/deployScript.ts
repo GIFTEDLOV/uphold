@@ -22,8 +22,16 @@ export const EXPECTED_RPC = "https://studio-next.genlayer.com/api";
 export const EXPECTED_CHAIN_ID = 61997;
 
 const deploymentDir = path.resolve(process.cwd(), "deployments/studio-next");
-const pendingManifestPath = path.join(deploymentDir, "uphold.pending.json");
-const completedManifestPath = path.join(deploymentDir, "uphold.json");
+// Keep the superseded deployment manifests immutable. This release gets its
+// own provenance pair so a second, corrected deployment is still one-shot.
+const pendingManifestPath = path.join(
+  deploymentDir,
+  "uphold-corrected.pending.json",
+);
+const completedManifestPath = path.join(
+  deploymentDir,
+  "uphold-corrected.json",
+);
 const contractPath = path.resolve(process.cwd(), DEPLOYMENT_CONTRACT_PATH);
 
 type JsonRecord = Record<string, unknown>;
@@ -175,6 +183,10 @@ export default async function main(client: GenLayerClient<any>): Promise<void> {
     cliVersion: "0.40.0-rc.3",
     genlayerJsVersion: "2.0.0-rc.1",
     transactionKitVersion: "0.1.0-rc.2",
+    deploymentAttempt: 1,
+    supersedes: "0x96671389548f170A6f02BC3017495d157d827599",
+    historicalFailedDeployment:
+      "0x5f37c53acfe9af24f212f4b117067ca899bb2ad8d7461e328c0af5b6c7fc4b62",
     status: "PREPARED",
     txHash: null,
     contractAddress: null,
