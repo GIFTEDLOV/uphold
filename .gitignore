@@ -25,3 +25,5 @@ package-lock.json
 
 *.tsbuildinfo
 /.venv-genlayer/
+
+.vercel

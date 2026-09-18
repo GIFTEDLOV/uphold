@@ -40,16 +40,14 @@ NEXT_PUBLIC_CONTRACT_ADDRESS=0x23786A52b62DC489A5f69653dedD68d1fc56c231
 ## Public release configuration
 
 - GitHub repository: https://github.com/GIFTEDLOV/uphold
-- Release source commit: b56465e1f95295497d715f894a30096071685422
+- Release source commit before final production metadata: 22dca3e5a09f699d6b39a5374c2c559f855a65ef
 - Vercel project: `uphold`
 - Vercel project ID: `prj_YqhtNLEgwPPj7nhGoamGr6vbMd67`
 - Vercel root directory: `frontend`
 - Production URL: https://uphold-sable.vercel.app
-- Verified production deployment: `dpl_CPfPAWFFt9JiRquE7ciWTSeuicmK`
-- Immutable deployment URL: https://uphold-szhqx7kqm-kolofahkelvin16-6437s-projects.vercel.app
-- Deployed Git SHA: b56465e1f95295497d715f894a30096071685422
+- Final production deployment ID, immutable URL, and deployed Git SHA are recorded in the final release audit after the metadata release commit.
 
-The deployment above is the first READY GitHub-linked production build for the new Uphold project. The final metadata commit and its resulting Vercel deployment are reported in the release audit.
+The production project is the new Uphold project and is not the historical UptimeBond project. The final metadata commit and its resulting Vercel deployment are reported in the release audit.
 
 ## Historical records
 
