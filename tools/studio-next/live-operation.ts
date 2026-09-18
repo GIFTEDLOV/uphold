@@ -8,9 +8,9 @@ import type { GenLayerClient, GenLayerTransaction } from "genlayer-js/types";
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const RPC = "https://studio-next.genlayer.com/api";
 const CHAIN_ID = 61997;
-const CONTRACT = "0x96671389548f170A6f02BC3017495d157d827599" as `0x${string}`;
+const CONTRACT = "0x23786A52b62DC489A5f69653dedD68d1fc56c231" as `0x${string}`;
 const CONTRACT_PATH = "contracts/uphold.py";
-const CONTRACT_SHA256 = "3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F";
+const CONTRACT_SHA256 = "090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8";
 const RUNNER = "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng";
 
 const requireFromProject = createRequire(path.resolve(REPO_ROOT, "package.json"));

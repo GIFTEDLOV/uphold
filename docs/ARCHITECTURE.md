@@ -13,13 +13,13 @@ Uphold turns a public promise into a bounded, auditable commitment. The contract
 | Public source | The external page whose current content is captured; no authentication or JavaScript dependency is required by the live proof source. |
 | Snapshot storage | Contract state containing the source URL, capture metadata, SHA-256, exact byte length, normalized content and semantic result. |
 
-The authoritative deployed instance is the Studio Next contract `0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528` on chain `61997`, using `https://studio-next.genlayer.com/api`. The deployed source is identified by SHA-256 `3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F`.
+The authoritative deployed instance is the Studio Next release candidate promoted locally at `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`, using `https://studio-next.genlayer.com/api`. The deployed source is identified by SHA-256 `090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8` and reports version `live-snapshot-v1.1`.
 
 ## Trust boundaries
 
 The public web is untrusted and mutable. A caller can nominate a URL and promise, but cannot supply arbitrary evidence bytes to the contract. Validator retrieval is nondeterministic infrastructure; it is admitted only through the contract's authenticated capture path. Semantic judgment is bounded to `HOLDS`, `WEAKENED`, `ABSENT`, or `INDETERMINATE` and cannot choose beneficiaries or directly move funds.
 
-Consensus establishes the validator-backed result; it does not itself authenticate the evidence. Authentication comes from the capture operation storing the source response and its internal digest and byte length. Deterministic contract logic then applies authorization, timing, breach thresholds and accounting consequences.
+Consensus establishes the validator-backed result; it does not itself authenticate the evidence. Authentication comes from the capture operation storing the source response and its internal digest and byte length. A contest captures the same locked HTTPS source fresh into a distinct `<commitment>:contest:<nonce>` namespace as `AUTHENTICATED` / `UNASSESSED`; adjudication is bound to that exact immutable snapshot. Deterministic contract logic then applies authorization, timing, breach thresholds and accounting consequences.
 
 ## Evidence capture and snapshot identity
 
@@ -99,11 +99,11 @@ Polling ambiguity never authorizes a second broadcast. A transaction hash is pre
 
 ## Studio Next deployment context
 
-The canonical release is deployed on GenLayer Studio Next, chain `61997`, with the `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` runner dependency. The deployment transaction is `0x187a259c1763c762409be1c8c294b5a2b8b76b09dca7bd0a737760f16ce9a3f4`; the source commit is `2064950cfe1ee353772df6027e1660326e83c792`.
+The canonical release is deployed on GenLayer Studio Next, chain `61997`, with the `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` runner dependency. The deployment transaction is `0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f4`; the source commit is `536346f00f158f374f6e5e28112a0fc06a9065a4`.
 
 ## Verification artifacts
 
-- Deployment proof: [`deployments/studio-next/uphold-corrected.json`](../deployments/studio-next/uphold-corrected.json)
-- Live lifecycle proof: [`evidence/studio-next/uphold-live-proof.json`](../evidence/studio-next/uphold-live-proof.json)
+- Deployment proof: [`deployments/studio-next/uphold-hardening.json`](../deployments/studio-next/uphold-hardening.json)
+- Live lifecycle proof: [`evidence/studio-next/uphold-hardening-live-proof.json`](../evidence/studio-next/uphold-hardening-live-proof.json)
 - Fee profile: [`frontend/fee-profile.json`](../frontend/fee-profile.json)
 - Protocol detail: [`UPHOLD_PROTOCOL.md`](UPHOLD_PROTOCOL.md)

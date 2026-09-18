@@ -41,18 +41,23 @@ See [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) for system components, trust bound
 
 ## Live proof
 
-The real Studio Next proof used the canonical contract `0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528` on chain `61997`:
+The real Studio Next proof uses the hardened contract `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`:
 
-- Commitment: `live-proof-20260917`
+- Commitment: `live-proof-v2-20260918`
 - Source: https://www.iana.org/help/example-domains
-- Create: `0x651fab5959bc6228a9df3a16f4185eb7793e7bf085d7613b44dd50be492a969d`
-- Check: `0xcc8c1d43edad2068c79184f5da0b0fc9fe8bbeb1f177c31b2135145f31bba1b5`
+- Create: `0x99dbe6d38bfd12ba38566d5d19faf0b26d2547559c0bd5a07e3e3566ea758328`
+- Check: `0xa435018c7e6bef1bb33245b2d2fb1c21af94858f9706ff6a7abdae354432b389`
 - Classification: `HOLDS`
-- Increase stake: `0xbd09e3a0cac0e3b045f0dfa8555056a1b72bc10e40312e8554feded2b19a3cbe`
-- Extend expiry: `0x75788a94725bcbb134709d4478702c08321d508f711f71530e6fe2888f0eaeef`
+- Increase stake: `0xfdbbbefb9738f203f9b0634a23976f48454b73952d5734ec5c6956a39c93c43e`
+- Extend expiry: `0xbbd945983a6b539a18f1c4c252a175f3dc56580273157ab54a7f9a537e0d8df5`
 - Final stake: `0.002 GEN`
 
-Machine-readable proof: [`evidence/studio-next/uphold-live-proof.json`](../evidence/studio-next/uphold-live-proof.json).
+Machine-readable proof: [`evidence/studio-next/uphold-hardening-live-proof.json`](../evidence/studio-next/uphold-hardening-live-proof.json).
+
+Controlled adversarial evidence also covers fresh locked-source contest capture,
+upheld and rejected adjudication, payout-pending, and refund-pending states.
+Those results are explicitly controlled testing infrastructure, not natural
+production breach evidence.
 
 ## Security model
 
@@ -64,7 +69,7 @@ Uphold combines economic skin in the game with authenticated web evidence and bo
 
 ## Known limitations
 
-- Breach, contest, settlement/payout, and expiry/refund were not live-demonstrated.
+- Natural public-source breach and settlement were not organically demonstrated; controlled A/B/C lifecycle evidence is included separately.
 - Studio Next does not fully prove production Ghost/EVM semantics.
 - External payout completion remains observed off-contract.
 
@@ -72,8 +77,8 @@ Uphold combines economic skin in the game with authenticated web evidence and bo
 
 - GitHub: https://github.com/GIFTEDLOV/uphold
 - Live app: https://uphold-sable.vercel.app
-- Contract: `0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528` on chain `61997`
-- Deployment transaction: `0x187a259c1763c762409be1c8c294b5a2b8b76b09dca7bd0a737760f16ce9a3f4`
+- Contract: `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`
+- Deployment transaction: `0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f`
 - Demo video: not yet created
 
 ## Demo sequence

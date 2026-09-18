@@ -1,0 +1,12 @@
+{
+  "operationId": "b-settlement",
+  "method": "settle_breach",
+  "commitmentId": "controlled-b-20260917",
+  "status": "PRE_BROADCAST_FAILURE",
+  "txHash": null,
+  "error": "Rate limit exceeded: 30 requests per minute",
+  "retryAfterObservedSeconds": 3,
+  "broadcastAttempted": false,
+  "sameHashReconciliation": "NOT_APPLICABLE",
+  "nextAction": "One safe retry may be attempted after the RPC rate window clears; no transaction was broadcast."
+}

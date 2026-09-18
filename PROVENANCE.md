@@ -5,25 +5,25 @@ This file records the current public Uphold release. Historical deployments are 
 ## Canonical contract
 
 - Branch: uphold/app
-- Source commit: 2064950cfe1ee353772df6027e1660326e83c792
+- Source commit: 536346f00f158f374f6e5e28112a0fc06a9065a4
 - Contract source: contracts/uphold.py
-- Contract SHA-256: 3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F
-- Contract version: live-snapshot-v1.0
-- Address: 0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528
-- Deployment transaction: 0x187a259c1763c762409be1c8c294b5a2b8b76b09dca7bd0a737760f16ce9a3f4
+- Contract SHA-256: 090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8
+- Contract version: live-snapshot-v1.1
+- Address: 0x23786A52b62DC489A5f69653dedD68d1fc56c231
+- Deployment transaction: 0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f
 - RPC: https://studio-next.genlayer.com/api
 - Chain ID: 61997
 - Runner dependency: py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng
 
 ## Evidence
 
-- Deployment proof: deployments/studio-next/uphold-corrected.json
-- Live lifecycle proof: evidence/studio-next/uphold-live-proof.json
-- Raw lifecycle operation receipts: evidence/studio-next/live-operations/
+- Deployment proof: deployments/studio-next/uphold-hardening.json
+- Live lifecycle proof: evidence/studio-next/uphold-hardening-live-proof.json
+- Raw lifecycle operation receipts: evidence/studio-next/hardening-live-operations/
 - Fee profile: frontend/fee-profile.json
-- Fee profile SHA-256: 0A3B40FF7963C7488C5CFEBB92BF05E85EA61B87E0978DD0E4E5827C7457DDEE
+- Fee profile SHA-256: 9BDF64B9C58F2DCBF8DC7CB66D74C18DB0CD7D50A5EE2E039CEDC8C67D59A072
 
-The live proof covers creation, an authenticated baseline snapshot, a successful check classified HOLDS, a later authenticated snapshot, a stake increase, expiry extension, ledger invariants, and address records. Breach, contest, payout, and expiry/refund remain documented limitations because they were not naturally exercised.
+The real positive proof covers creation, an authenticated baseline snapshot, a successful check classified HOLDS, a later authenticated snapshot, a stake increase, expiry extension, ledger invariants, and address records. Controlled adversarial A/B/C evidence additionally covers fresh contest capture, upheld and rejected contest adjudication, payout-pending, and refund-pending states. These controlled results are not presented as natural production breach evidence.
 
 ## Public frontend configuration
 
@@ -34,7 +34,7 @@ NEXT_PUBLIC_GENLAYER_RPC_URL=https://studio-next.genlayer.com/api
 NEXT_PUBLIC_GENLAYER_CHAIN_ID=61997
 NEXT_PUBLIC_GENLAYER_CHAIN_NAME=GenLayer Studio Next
 NEXT_PUBLIC_GENLAYER_SYMBOL=GEN
-NEXT_PUBLIC_CONTRACT_ADDRESS=0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528
+NEXT_PUBLIC_CONTRACT_ADDRESS=0x23786A52b62DC489A5f69653dedD68d1fc56c231
 ~~~
 
 ## Public release configuration

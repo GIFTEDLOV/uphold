@@ -1,0 +1,93 @@
+{
+  "release": {
+    "contractAddress": "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
+    "contractSha256": "090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8",
+    "contractVersion": "live-snapshot-v1.1",
+    "deploymentTx": "0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f",
+    "sourceCommit": "536346f00f158f374f6e5e28112a0fc06a9065a4",
+    "rpc": "https://studio-next.genlayer.com/api",
+    "chainId": 61997,
+    "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "sourceParity": "PASS",
+    "schema": {"methodCount": 15, "writeCount": 8, "viewCount": 7},
+    "historicalSupersededContract": "0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528"
+  },
+  "realPositive": {
+    "proofType": "REAL POSITIVE",
+    "commitmentId": "live-proof-v2-20260918",
+    "sourceUrl": "https://www.iana.org/help/example-domains",
+    "commitmentText": "a number of domains such as example.com and example.org are maintained for documentation purposes.",
+    "sourceByteLength": 6639,
+    "sourceSha256": "6fde51fc02d67b032e17adfe1ae5c67daf2c01bed20f533b7754ee32e14c4bc9",
+    "initialStakeWei": "1000000000000000",
+    "finalStakeWei": "2000000000000000",
+    "initialExpiry": "2026-09-25T04:30:00Z",
+    "finalExpiry": "2026-10-01T04:30:00Z",
+    "baseline": {"sequence": 0, "snapshotId": "live-proof-v2-20260918:0", "classification": "HOLDS", "sha256": "6fde51fc02d67b032e17adfe1ae5c67daf2c01bed20f533b7754ee32e14c4bc9", "byteLength": 6639},
+    "later": {"sequence": 1, "snapshotId": "live-proof-v2-20260918:1", "classification": "HOLDS", "sha256": "6fde51fc02d67b032e17adfe1ae5c67daf2c01bed20f533b7754ee32e14c4bc9", "byteLength": 6639, "captureTime": "2026-09-18T04:26:18.033513Z"}
+  },
+  "controlledAdversarial": {
+    "proofType": "CONTROLLED ADVERSARIAL TEST",
+    "fixtureRepository": "https://github.com/GIFTEDLOV/uphold-lifecycle-fixture",
+    "fixtureUrl": "https://raw.githubusercontent.com/GIFTEDLOV/uphold-lifecycle-fixture/main/commitment.html",
+    "fixtureCommits": {"baseline": "c07cc11d4b3b15a61aec8cfecc1b86f73f0df73f", "negative": "6612486d9f8cb5f63e39bafc25450da92354afb1", "restored": "63a3be856476e94d97aee2f8052b5c4cd822e183", "activeNegative": "fd65af551fccb5583e714c55b3f3fade7154e00d", "finalRestored": "b013d981e933ceb20709fe7ce8f319001480d469"},
+    "A": {
+      "commitmentId": "controlled-a-20260917",
+      "negativeChecks": [{"txHash": "0xba997ed8443ff6ac430fc5946c2722d7626ef6733005cc0efc1a4802993210f4", "classification": "HOLDS", "snapshotId": "controlled-a-20260917:1"}, {"txHash": "0x09331f7a5153e223ddb80d4b0a362fdd7c09a49784b0ae4b09eb7cd2e3be7632", "classification": "ABSENT", "snapshotId": "controlled-a-20260917:2"}, {"txHash": "0xc23ce3a204bd421b6eedd9e7370c1364c783b233f3a955002ca6d1f1fd25402e", "classification": "ABSENT", "snapshotId": "controlled-a-20260917:3"}],
+      "breachClaimed": true,
+      "contestTx": "0x819797ca700b03a62c11d82c2bc13b1a6796e005392aa80d0edbddd6e9654dd8",
+      "contestSnapshot": {"snapshotId": "controlled-a-20260917:contest:1", "classification": "UNASSESSED", "capturedState": "AUTHENTICATED", "sha256": "b131e6bac87bc17b36491ba1b6597118a9346ae090892bf5bd7acb9e44a8e753", "byteLength": 141, "captureTime": "2026-09-18T04:17:43.236232Z"},
+      "adjudicationTx": "0x3c482d6be2bf07e25d0270740ab7eec49d310cc0f16e5c584aba6c5546e86ca2",
+      "final": {"status": "ACTIVE", "contestResult": "UPHELD", "contestClassification": "HOLDS", "negativeStreak": 0, "pendingPayout": 0}
+    },
+    "B": {
+      "commitmentId": "controlled-b-20260917",
+      "negativeChecks": [{"txHash": "0x8b6154f5124598c21c835d244291709a4db200ebe1a9d23023cfe29cd2181f22", "classification": "ABSENT", "snapshotId": "controlled-b-20260917:1", "captureTime": "2026-09-18T04:06:14.641586Z"}, {"txHash": "0x347b55455ac57ffb58170648315a94f2bdcaba0385fb2c44973e8bf02ffa9565", "classification": "ABSENT", "snapshotId": "controlled-b-20260917:2", "captureTime": "2026-09-18T04:08:07.509334Z"}],
+      "breachClaimed": true,
+      "contestTx": "0xe54a5920438fd9a0a29f94d439d08b5f8ef566f4e40108a7e3449df20386de7c",
+      "contestSnapshot": {"snapshotId": "controlled-b-20260917:contest:1", "classification": "UNASSESSED", "capturedState": "AUTHENTICATED", "sha256": "b7ce271f10c6edd456c740a6b6e3094c0866f3759f950bc09c37ecf0eef104a9", "byteLength": 157, "captureTime": "2026-09-18T04:10:01.190475Z"},
+      "adjudicationTx": "0xd746c5f17ee46f23e5fd9eb9318accc7eeae7db8e03bba04c4174c5337772bfb",
+      "settlementTx": "0xca2469ca75a0d177fc3f04e30c41bdc1a09de00bf49b80aac182b530755cf4e4",
+      "final": {"status": "PAYOUT_PENDING", "contestResult": "REJECTED", "contestClassification": "ABSENT", "currentStakeWei": "0", "pendingPayoutWei": "1000000000000", "beneficiary": "0x6311dE989ab01Ae4Da77d36CC45d495fbCd4B7a8"}
+    },
+    "C": {
+      "commitmentId": "controlled-c-20260917",
+      "expiry": "2026-09-17T21:16:55Z",
+      "expiryTx": "0xcee107918318115bbacf6a1b13f38cec9a5bfca7827ab3c6b0c2058eedfc92f9",
+      "final": {"status": "REFUND_PENDING", "currentStakeWei": "0", "pendingRefundWei": "1000000000000", "recipient": "0xCb5a845638Cbc1f95D7f8343278685682c3bA13F"}
+    }
+  },
+  "transactions": [
+    {"method": "create_commitment", "operationId": "real-positive-v2-create", "txHash": "0x99dbe6d38bfd12ba38566d5d19faf0b26d2547559c0bd5a07e3e3566ea758328", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "REAL POSITIVE"},
+    {"method": "check_commitment", "operationId": "real-positive-v2-check", "txHash": "0xa435018c7e6bef1bb33245b2d2fb1c21af94858f9706ff6a7abdae354432b389", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "REAL POSITIVE"},
+    {"method": "increase_stake", "operationId": "real-positive-v2-increase", "txHash": "0xfdbbbefb9738f203f9b0634a23976f48454b73952d5734ec5c6956a39c93c43e", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "REAL POSITIVE"},
+    {"method": "extend_commitment", "operationId": "real-positive-v2-extend", "txHash": "0xbbd945983a6b539a18f1c4c252a175f3dc56580273157ab54a7f9a537e0d8df5", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "REAL POSITIVE"},
+    {"method": "contest_breach", "operationId": "b-contest", "txHash": "0xe54a5920438fd9a0a29f94d439d08b5f8ef566f4e40108a7e3449df20386de7c", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "CONTROLLED ADVERSARIAL"},
+    {"method": "adjudicate_contest", "operationId": "b-adjudication", "txHash": "0xd746c5f17ee46f23e5fd9eb9318accc7eeae7db8e03bba04c4174c5337772bfb", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "CONTROLLED ADVERSARIAL"},
+    {"method": "settle_breach", "operationId": "b-settlement-2", "txHash": "0xca2469ca75a0d177fc3f04e30c41bdc1a09de00bf49b80aac182b530755cf4e4", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "CONTROLLED ADVERSARIAL"},
+    {"method": "expire_commitment", "operationId": "c-expiry", "txHash": "0xcee107918318115bbacf6a1b13f38cec9a5bfca7827ab3c6b0c2058eedfc92f9", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "CONTROLLED ADVERSARIAL"},
+    {"method": "contest_breach", "operationId": "a-contest", "txHash": "0x819797ca700b03a62c11d82c2bc13b1a6796e005392aa80d0edbddd6e9654dd8", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED_AFTER_SAME_HASH_RECONCILIATION", "proofType": "CONTROLLED ADVERSARIAL"},
+    {"method": "adjudicate_contest", "operationId": "a-adjudication", "txHash": "0x3c482d6be2bf07e25d0270740ab7eec49d310cc0f16e5c584aba6c5546e86ca2", "finalStatus": "FINALIZED", "execution": "FINISHED_WITH_RETURN", "stateReadback": "VERIFIED", "proofType": "CONTROLLED ADVERSARIAL"}
+  ],
+  "accounting": {
+    "finalLedger": {"totalDepositedWei": "2003000000000000", "totalEscrowedWei": "2001000000000000", "totalPendingOutflowsWei": "2000000000000", "totalPendingPayoutsWei": "1000000000000", "totalPendingRefundsWei": "1000000000000", "totalPaidToBeneficiariesWei": "0", "totalReturnedToPromisorsWei": "0"},
+    "invariant": "escrowed stake plus pending outflows equals deposited value after controlled payout/refund requests; payout and refund buckets are mutually exclusive per commitment"
+  },
+  "reviewerControls": {
+    "permissionlessThirdPartyCheckTx": "0xba997ed8443ff6ac430fc5946c2722d7626ef6733005cc0efc1a4802993210f4",
+    "sourceFailureDoesNotBecomeNegative": "LOCAL_TESTS_PASS",
+    "boundedOutageGraceSeconds": 900,
+    "callerSelectedContestUrl": false,
+    "callerSelectedContestTimestamp": false,
+    "contestNamespace": "<commitment_id>:contest:<contest_nonce>",
+    "domainOwnershipClaimed": false
+  },
+  "fees": {"profile": "frontend/fee-profile.json", "headroomBps": 12000, "allEightMethodsCertified": true},
+  "failures": [
+    {"operationId": "b-settlement", "txHash": null, "broadcast": false, "error": "Rate limit exceeded: 30 requests per minute"},
+    {"operationId": "a-contest", "txHash": "0x819797ca700b03a62c11d82c2bc13b1a6796e005392aa80d0edbddd6e9654dd8", "broadcast": true, "error": "Initial post-finalization readback rate limit; same hash later reconciled"},
+    {"operationId": "real-positive-v2-increase", "txHash": "0xfdbbbefb9738f203f9b0634a23976f48454b73952d5734ec5c6956a39c93c43e", "broadcast": true, "error": "Initial post-finalization readback rate limit; same hash later reconciled"}
+  ],
+  "duplicateBroadcasts": 0,
+  "unknownPendingTransactions": 0
+}

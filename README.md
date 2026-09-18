@@ -12,8 +12,8 @@
   <a href="https://uphold-sable.vercel.app">Live App</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="PROVENANCE.md">Deployment</a> ·
-  <a href="evidence/studio-next/uphold-live-proof.json">Verification</a> ·
-  <a href="https://explorer-studio-dev.genlayer.com/address/0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528">Contract</a>
+  <a href="evidence/studio-next/uphold-hardening-live-proof.json">Verification</a> ·
+  <a href="https://explorer-studio-dev.genlayer.com/address/0x23786A52b62DC489A5f69653dedD68d1fc56c231">Contract</a>
 </p>
 
 ![Uphold landing page](docs/assets/readme/01-landing.png)
@@ -32,7 +32,7 @@ The contract keeps the boundary explicit: validators provide evidence capture an
 | Category | Project |
 | Network | GenLayer Studio Next |
 | Chain ID | 61997 |
-| Canonical contract | 0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528 |
+| Canonical contract | 0x23786A52b62DC489A5f69653dedD68d1fc56c231 |
 | Evidence model | Live public source → independent validator capture → immutable authenticated snapshot |
 | Judgment model | Bounded semantic comparison over authenticated stored snapshots |
 | Verdict set | HOLDS · WEAKENED · ABSENT · INDETERMINATE |
@@ -199,7 +199,7 @@ INDETERMINATE, validator disagreement, and capture failures leave economic state
 
 ## Snapshot authentication
 
-The contract derives the snapshot digest from the captured response bytes and derives byte length internally. It bounds the response before storage, stores normalized content for the semantic prompt, and assigns an immutable sequence identifier such as live-proof-20260917:0 or live-proof-20260917:1.
+The contract derives the snapshot digest from the captured response bytes and derives byte length internally. It bounds the response before storage, stores normalized content for the semantic prompt, and assigns an immutable sequence identifier such as live-proof-v2-20260918:0 or live-proof-v2-20260918:1.
 
 The baseline fields are copied into the commitment at creation and are never replaced by a later check. Later snapshots append to history, so the proof can show the exact baseline and the exact later observation that informed a classification.
 
@@ -253,28 +253,41 @@ The SDK distinguishes finalization from successful execution. If polling becomes
 | Network | GenLayer Studio Next |
 | Chain ID | 61997 |
 | RPC | https://studio-next.genlayer.com/api |
-| Contract | 0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528 |
-| Deployment transaction | 0x187a259c1763c762409be1c8c294b5a2b8b76b09dca7bd0a737760f16ce9a3f4 |
-| Deployed source commit | 2064950cfe1ee353772df6027e1660326e83c792 |
-| Source SHA-256 | 3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F |
-| Contract version | live-snapshot-v1.0 |
+| Contract | 0x23786A52b62DC489A5f69653dedD68d1fc56c231 |
+| Deployment transaction | 0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f |
+| Deployed source commit | 536346f00f158f374f6e5e28112a0fc06a9065a4 |
+| Source SHA-256 | 090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8 |
+| Contract version | live-snapshot-v1.1 |
 | Runner | py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng |
 
-The deployed source was read back and matched byte-for-byte. Deployment proof is retained in deployments/studio-next/uphold-corrected.json.
+The deployed source was read back and matched byte-for-byte. Deployment proof is retained in deployments/studio-next/uphold-hardening.json. The previous v1.0 deployment remains preserved as historical evidence.
 
 ## End-to-end live proof
 
-Commitment live-proof-20260917 uses the stable public source https://www.iana.org/help/example-domains. The baseline snapshot and later snapshot both contain 6639 bytes and the later semantic result is HOLDS.
+The headline real-world proof is commitment `live-proof-v2-20260918` against https://www.iana.org/help/example-domains. Its baseline and later snapshots both contain 6639 bytes, share SHA-256 `6fde51fc02d67b032e17adfe1ae5c67daf2c01bed20f533b7754ee32e14c4bc9`, and the later semantic result is `HOLDS`.
 
 | Step | Method / result | Transaction |
 | --- | --- | --- |
-| Create | Baseline snapshot stored; ACTIVE | 0x651fab5959bc6228a9df3a16f4185eb7793e7bf085d7613b44dd50be492a969d |
-| Check | Later snapshot stored; HOLDS | 0xcc8c1d43edad2068c79184f5da0b0fc9fe8bbeb1f177c31b2135145f31bba1b5 |
-| Increase | Stake increased by 0.001 GEN | 0xbd09e3a0cac0e3b045f0dfa8555056a1b72bc10e40312e8554feded2b19a3cbe |
-| Extend | Expiry moved forward | 0x75788a94725bcbb134709d4478702c08321d508f711f71530e6fe2888f0eaeef |
+| Create | Baseline snapshot stored; ACTIVE | 0x99dbe6d38bfd12ba38566d5d19faf0b26d2547559c0bd5a07e3e3566ea758328 |
+| Check | Later snapshot stored; HOLDS | 0xa435018c7e6bef1bb33245b2d2fb1c21af94858f9706ff6a7abdae354432b389 |
+| Increase | Stake increased by 0.001 GEN | 0xfdbbbefb9738f203f9b0634a23976f48454b73952d5734ec5c6956a39c93c43e |
+| Extend | Expiry moved to 2026-10-01T04:30:00Z | 0xbbd945983a6b539a18f1c4c252a175f3dc56580273157ab54a7f9a537e0d8df5 |
 | Final state | ACTIVE · 2 snapshots · 1 check · 0.002 GEN | — |
 
-Full state readback, semantic evidence, fee observations, and raw receipt accounting are in [evidence/studio-next/uphold-live-proof.json](evidence/studio-next/uphold-live-proof.json) and evidence/studio-next/live-operations/.
+Full state readback, semantic evidence, fee observations, and raw receipt accounting are in [evidence/studio-next/uphold-hardening-live-proof.json](evidence/studio-next/uphold-hardening-live-proof.json) and evidence/studio-next/hardening-live-operations/.
+
+### Controlled adversarial lifecycle proof
+
+This is controlled testing infrastructure, not the headline production proof. A tiny public fixture was intentionally moved through negative and restored states to exercise the hardened contest path:
+
+| Path | Result | Evidence |
+| --- | --- | --- |
+| A: negative checks | Two `ABSENT` observations; `BREACH_CLAIMED` | `0xc23ce3a204bd421b6eedd9e7370c1364c783b233f3a955002ca6d1f1fd25402e` |
+| A: restored contest | Fresh snapshot; `HOLDS`; `CONTEST_UPHELD`; `ACTIVE` | `0x819797ca700b03a62c11d82c2bc13b1a6796e005392aa80d0edbddd6e9654dd8`, `0x3c482d6be2bf07e25d0270740ab7eec49d310cc0f16e5c584aba6c5546e86ca2` |
+| B: rejected contest | Fresh negative snapshot; `BREACH_CONFIRMED`; `PAYOUT_PENDING` | `0xe54a5920438fd9a0a29f94d439d08b5f8ef566f4e40108a7e3449df20386de7c`, `0xd746c5f17ee46f23e5fd9eb9318accc7eeae7db8e03bba04c4174c5337772bfb`, `0xca2469ca75a0d177fc3f04e30c41bdc1a09de00bf49b80aac182b530755cf4e4` |
+| C: clean expiry | `REFUND_PENDING`; stake zero; refund exact | `0xcee107918318115bbacf6a1b13f38cec9a5bfca7827ab3c6b0c2058eedfc92f9` |
+
+The fixture repository and every state commit are recorded in the machine-readable proof. These tests demonstrate contest hardening; they are not an organically occurring breach.
 
 ## Security properties
 
@@ -291,7 +304,8 @@ Full state readback, semantic evidence, fee observations, and raw receipt accoun
 | Pending payout/refund separation | PROVEN | Separate contract fields and status paths exist; completion is external. |
 | No blind transaction rebroadcast | TESTED LOCALLY | Frontend same-hash reconciliation and lifecycle tooling preserve hashes. |
 | Source/deployment parity | LIVE DEMONSTRATED | Deployed source readback matches the required SHA and byte parity. |
-| Breach, contest, settlement, expiry/refund | NOT YET LIVE DEMONSTRATED | No natural safe live fixture was exercised. |
+| Controlled breach, contest, settlement, expiry/refund | LIVE DEMONSTRATED AS CONTROLLED ADVERSARIAL TEST | A/B/C fixture lifecycle; not natural production evidence. |
+| Natural production breach/contest/settlement | NOT CLAIMED | No natural public-source breach is claimed. |
 
 ## Application
 
@@ -330,14 +344,14 @@ The final verified regression baseline is:
 | Gate | Result |
 | --- | --- |
 | Frontend tests | 34/34 PASS |
-| Uphold Direct Mode | 46/46 PASS |
-| Total Direct Mode | 91/91 PASS |
+| Uphold Direct Mode | 77/77 PASS |
+| Total Direct Mode | 123/123 PASS |
 | AST lint | PASS |
 | Semantic validation | PASS |
 | GenVM lint | PASS |
 | Typecheck/lint | PASS |
 | Production build | PASS |
-| Contract SHA-256 | 3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F |
+| Contract SHA-256 | 090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8 |
 
 Useful local checks:
 
@@ -383,21 +397,21 @@ The public defaults target Studio Next and the canonical contract. The frontend 
 ## Verify Uphold in 5 minutes
 
 1. Clone https://github.com/GIFTEDLOV/uphold and enter the repository.
-2. Confirm contracts/uphold.py hashes to 3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F.
+2. Confirm contracts/uphold.py hashes to 090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8.
 3. Run npm ci and npm run dev.
-4. Open Explore and the live-proof-20260917 detail page.
-5. Compare the visible HOLDS result, 0.002 GEN stake, snapshot history, and expiry with evidence/studio-next/uphold-live-proof.json.
+4. Open Explore and the live-proof-v2-20260918 detail page.
+5. Compare the visible HOLDS result, 0.002 GEN stake, snapshot history, and expiry with evidence/studio-next/uphold-hardening-live-proof.json.
 
 For a deeper audit, compare the deployed source and deployment transaction in PROVENANCE.md, then inspect the raw receipt records.
 
 ## Limitations
 
-- Breach and contest are not live-demonstrated with a natural source change.
-- Beneficiary payout and promisor refund/expiry are not live-demonstrated.
+- Controlled adversarial breach, contest, payout-pending, and refund-pending paths are live-demonstrated; no natural production breach is claimed.
+- External EOA payout/refund completion has no contract-level receipt and remains observed off-contract.
 - Studio Next does not fully prove production Ghost/EVM semantics.
 - External payout completion remains observed off-contract.
 - The production UI is verified through HTTP, bundle, and RPC read checks; interactive browser automation was unavailable in this environment.
 
 ## Status
 
-Uphold is publicly released on GitHub with a verified Studio Next contract and an end-to-end positive lifecycle proof. The canonical public application is [uphold-sable.vercel.app](https://uphold-sable.vercel.app). No claim is made that breach, settlement, or expiry has been demonstrated live.
+Uphold is publicly released on GitHub with a verified Studio Next contract, an end-to-end real positive lifecycle proof, and separately labeled controlled adversarial lifecycle evidence. The canonical public application is [uphold-sable.vercel.app](https://uphold-sable.vercel.app). No natural-production breach is claimed.

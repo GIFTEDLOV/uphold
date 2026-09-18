@@ -1,133 +1,86 @@
 {
-  "version": 2,
+  "version": 3,
   "network": "studio-next",
-  "measuredAt": "2026-09-17T12:44:04.143871Z",
-  "source": "successful finalized current-source Studio Next deployment and live lifecycle receipts",
+  "measuredAt": "2026-09-18T04:30:54.428400Z",
+  "source": "successful finalized release-candidate deployment and live lifecycle receipts",
   "contractPath": "contracts/uphold.py",
-  "contractSha256": "3DDFAA229BF36B7D8F06B70FE6E1B4582D004A3FFEDAF08E154834B54819FD3F",
+  "contractAddress": "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
+  "contractSha256": "090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8",
   "headroomBps": 12000,
+  "feeQuotePolicy": "Studio Next network-default estimateTransactionFees({})",
   "deploy": {
-    "leaderTimeunitsAllocation": "100",
-    "validatorTimeunitsAllocation": "200",
-    "executionBudgetPerRound": "95093400000000",
-    "totalMessageFees": "0",
-    "rotations": ["3"],
-    "appealRounds": "0",
-    "maxPriceGenPerTimeUnit": "2",
-    "storageFeeMaxGasPrice": "300000000",
-    "receiptFeeMaxGasPrice": "300000000",
-    "recommendedFeeValue": "380373600010352",
-    "observed": {
-      "executionFee": "79020500000000",
-      "messageFeeBudget": "0",
-      "totalEstimatedFee": "78628000000000",
-      "totalStudioMeteredFee": "78852000000000",
-      "genvmExecutionRequired": "79244500000000",
-      "externalMessageReserved": "0"
-    },
-    "rawReceiptPath": "deployments/studio-next/uphold-corrected.json"
+    "txHash": "0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f",
+    "feeValue": "100000000000010352",
+    "recommendedFeeValue": "120000000000012423",
+    "rawReceiptPath": "deployments/studio-next/uphold-hardening.json"
   },
   "methods": {
     "create_commitment": {
-      "leaderTimeunitsAllocation": "100",
-      "validatorTimeunitsAllocation": "200",
-      "executionBudgetPerRound": "104895000000000",
-      "totalMessageFees": "0",
-      "rotations": ["3"],
-      "appealRounds": "0",
-      "maxPriceGenPerTimeUnit": "2",
-      "storageFeeMaxGasPrice": "300000000",
-      "receiptFeeMaxGasPrice": "300000000",
-      "recommendedFeeValue": "419580000010352",
-      "observed": {
-        "executionFee": "87176500000000",
-        "messageFeeBudget": "0",
-        "totalEstimatedFee": "87140000000000",
-        "totalStudioMeteredFee": "87376000000000",
-        "genvmExecutionRequired": "87412500000000",
-        "externalMessageReserved": "0"
-      },
-      "rawReceiptPath": "evidence/studio-next/live-operations/lifecycle-create-20260917.json"
+      "txHash": "0x99dbe6d38bfd12ba38566d5d19faf0b26d2547559c0bd5a07e3e3566ea758328",
+      "feeValue": "100000000000010352",
+      "recommendedFeeValue": "104904000000000",
+      "observed": {"primaryFeeSpent": "87223500000823", "totalEstimatedFee": "87184000000000", "totalStudioMeteredFee": "87420000000000", "genvmExecution": "87459500000000", "totalRefunded": "99912776500009529"},
+      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/real-positive-v2-create.json"
     },
     "check_commitment": {
-      "leaderTimeunitsAllocation": "100",
-      "validatorTimeunitsAllocation": "200",
-      "executionBudgetPerRound": "105030000000000",
-      "totalMessageFees": "0",
-      "rotations": ["3"],
-      "appealRounds": "0",
-      "maxPriceGenPerTimeUnit": "2",
-      "storageFeeMaxGasPrice": "300000000",
-      "receiptFeeMaxGasPrice": "300000000",
-      "recommendedFeeValue": "420120000010352",
-      "observed": {
-        "executionFee": "87293000000000",
-        "messageFeeBudget": "0",
-        "totalEstimatedFee": "87264000000000",
-        "totalStudioMeteredFee": "87496000000000",
-        "genvmExecutionRequired": "87525000000000",
-        "externalMessageReserved": "0"
-      },
-      "rawReceiptPath": "evidence/studio-next/live-operations/lifecycle-check-20260917.json"
+      "txHash": "0xa435018c7e6bef1bb33245b2d2fb1c21af94858f9706ff6a7abdae354432b389",
+      "feeValue": "100000000000010352",
+      "recommendedFeeValue": "104740800000000",
+      "observed": {"primaryFeeSpent": "87078250000823", "totalEstimatedFee": "87048000000000", "totalStudioMeteredFee": "87284000000000", "genvmExecution": "87314250000000", "totalRefunded": "99912921750009529"},
+      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/real-positive-v2-check.json"
     },
     "increase_stake": {
-      "leaderTimeunitsAllocation": "100",
-      "validatorTimeunitsAllocation": "200",
-      "executionBudgetPerRound": "94641600000000",
-      "totalMessageFees": "0",
-      "rotations": ["3"],
-      "appealRounds": "0",
-      "maxPriceGenPerTimeUnit": "2",
-      "storageFeeMaxGasPrice": "300000000",
-      "receiptFeeMaxGasPrice": "300000000",
-      "recommendedFeeValue": "378566400010352",
-      "observed": {
-        "executionFee": "78644000000000",
-        "messageFeeBudget": "0",
-        "totalEstimatedFee": "78628000000000",
-        "totalStudioMeteredFee": "78852000000000",
-        "genvmExecutionRequired": "78868000000000",
-        "externalMessageReserved": "0"
-      },
-      "rawReceiptPath": "evidence/studio-next/live-operations/lifecycle-increase-stake-20260917.json"
+      "txHash": "0xfdbbbefb9738f203f9b0634a23976f48454b73952d5734ec5c6956a39c93c43e",
+      "feeValue": "100000000000010352",
+      "recommendedFeeValue": "94622400000000",
+      "observed": {"primaryFeeSpent": "78645000000823", "totalEstimatedFee": "78628000000000", "totalStudioMeteredFee": "78852000000000", "genvmExecution": "78869000000000", "totalRefunded": "99921355000009529"},
+      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/real-positive-v2-increase.json"
     },
     "extend_commitment": {
-      "leaderTimeunitsAllocation": "100",
-      "validatorTimeunitsAllocation": "200",
-      "executionBudgetPerRound": "94640100000000",
-      "totalMessageFees": "0",
-      "rotations": ["3"],
-      "appealRounds": "0",
-      "maxPriceGenPerTimeUnit": "2",
-      "storageFeeMaxGasPrice": "300000000",
-      "receiptFeeMaxGasPrice": "300000000",
-      "recommendedFeeValue": "378560400010352",
-      "observed": {
-        "executionFee": "78642750000000",
-        "messageFeeBudget": "0",
-        "totalEstimatedFee": "78628000000000",
-        "totalStudioMeteredFee": "78852000000000",
-        "genvmExecutionRequired": "78866750000000",
-        "externalMessageReserved": "0"
-      },
-      "rawReceiptPath": "evidence/studio-next/live-operations/lifecycle-extend-20260917.json"
+      "txHash": "0xbbd945983a6b539a18f1c4c252a175f3dc56580273157ab54a7f9a537e0d8df5",
+      "feeValue": "100000000000010352",
+      "recommendedFeeValue": "94622400000000",
+      "observed": {"primaryFeeSpent": "78643500000823", "totalEstimatedFee": "78628000000000", "totalStudioMeteredFee": "78852000000000", "genvmExecution": "78867500000000", "totalRefunded": "99921356500009529"},
+      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/real-positive-v2-extend.json"
+    },
+    "contest_breach": {
+      "txHash": "0xe54a5920438fd9a0a29f94d439d08b5f8ef566f4e40108a7e3449df20386de7c",
+      "feeValue": "100000000000010352",
+      "recommendedFeeValue": "97209600000000",
+      "observed": {"primaryFeeSpent": "80818000000823", "totalEstimatedFee": "80784000000000", "totalStudioMeteredFee": "81008000000000", "genvmExecution": "81042000000000", "totalRefunded": "99919182000009529"},
+      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/b-contest.json"
+    },
+    "adjudicate_contest": {
+      "txHash": "0xd746c5f17ee46f23e5fd9eb9318accc7eeae7db8e03bba04c4174c5337772bfb",
+      "feeValue": "100000000000010352",
+      "recommendedFeeValue": "95726400000000",
+      "observed": {"primaryFeeSpent": "79569000000823", "totalEstimatedFee": "79540000000000", "totalStudioMeteredFee": "79772000000000", "genvmExecution": "79801000000000", "totalRefunded": "99920431000009529"},
+      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/b-adjudication.json"
+    },
+    "settle_breach": {
+      "txHash": "0xca2469ca75a0d177fc3f04e30c41bdc1a09de00bf49b80aac182b530755cf4e4",
+      "feeValue": "100000000000010352",
+      "recommendedFeeValue": "152448000000000",
+      "observed": {"primaryFeeSpent": "126335250000823", "totalEstimatedFee": "126304000000000", "totalStudioMeteredFee": "127040000000000", "genvmExecution": "127071250000000", "totalRefunded": "99873664750009529"},
+      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/b-settlement-2.json"
+    },
+    "expire_commitment": {
+      "txHash": "0xcee107918318115bbacf6a1b13f38cec9a5bfca7827ab3c6b0c2058eedfc92f9",
+      "feeValue": "100000000000010352",
+      "recommendedFeeValue": "152448000000000",
+      "observed": {"primaryFeeSpent": "126315000000823", "totalEstimatedFee": "126304000000000", "totalStudioMeteredFee": "127040000000000", "genvmExecution": "127051000000000", "totalRefunded": "99873685000009529"},
+      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/c-expiry.json"
     }
   },
-  "uncertifiedMethods": [
-    "contest_breach",
-    "adjudicate_contest",
-    "settle_breach",
-    "expire_commitment"
-  ],
-  "fallback": "Use Studio Next network-default estimateTransactionFees({}) for uncertified methods.",
+  "uncertifiedMethods": [],
+  "fallback": "Use Studio Next network-default estimateTransactionFees({}) if a future method profile is absent.",
+  "externalTransferLimitation": "PAYOUT_PENDING and REFUND_PENDING are contract-level states; completion of the external EOA transfer is observed off-contract.",
   "provenance": {
-    "deploymentTx": "0x187a259c1763c762409be1c8c294b5a2b8b76b09dca7bd0a737760f16ce9a3f4",
-    "contractAddress": "0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528",
+    "deploymentTx": "0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f",
+    "contractAddress": "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
     "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
-    "createTx": "0x651fab5959bc6228a9df3a16f4185eb7793e7bf085d7613b44dd50be492a969d",
-    "checkTx": "0xcc8c1d43edad2068c79184f5da0b0fc9fe8bbeb1f177c31b2135145f31bba1b5",
-    "increaseStakeTx": "0xbd09e3a0cac0e3b045f0dfa8555056a1b72bc10e40312e8554feded2b19a3cbe",
-    "extendTx": "0x75788a94725bcbb134709d4478702c08321d508f711f71530e6fe2888f0eaeef"
+    "realPositiveCommitment": "live-proof-v2-20260918",
+    "controlledFixtureRepository": "https://github.com/GIFTEDLOV/uphold-lifecycle-fixture"
   },
   "noFootballValues": true
 }

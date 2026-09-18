@@ -7,7 +7,7 @@ bounded validator agreement.
 
 ## Live-snapshot evidence
 
-Protocol evidence is captured from the exact HTTPS/HTTP source URL registered in
+Protocol evidence is captured from the exact HTTPS source URL registered in
 the commitment:
 
 1. Each validator calls `gl.nondet.web.get(source_url)`.
@@ -19,10 +19,21 @@ the commitment:
 5. A later check fetches the same registered URL, stores a new immutable
    snapshot, and compares it with the stored baseline.
 
+When a breach is claimed, `contest_breach(commitment_id)` fetches the same
+locked HTTPS source itself. It does not accept a caller-supplied URL or
+timestamp. The fresh response is stored in a separate contest namespace as
+`AUTHENTICATED` / `UNASSESSED`; `adjudicate_contest` assesses only that exact
+immutable snapshot. One consensus-observed external capture failure may extend
+the effective contest deadline once by the bounded 900-second grace. The
+failure remains infrastructure evidence and never becomes `WEAKENED` or
+`ABSENT`.
+
 The runtime exposes the response status and body used here. It does not expose a
 trusted final redirect URL or response headers to this contract, so Uphold does
 not invent redirect guarantees. The registered URL is the binding identity and
-the returned status/body are the authenticated evidence.
+the returned status/body are the authenticated evidence. Uphold authenticates
+content returned from the locked source; it does not prove domain ownership,
+legal identity, or that the promisor controls the domain.
 
 The full response is hashed and sized before normalization. Stable text is
 extracted from the response and bounded to 32 KiB for storage and semantic

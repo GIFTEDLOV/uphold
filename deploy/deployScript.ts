@@ -184,7 +184,7 @@ export default async function main(client: GenLayerClient<any>): Promise<void> {
     genlayerJsVersion: "2.0.0-rc.1",
     transactionKitVersion: "0.1.0-rc.2",
     deploymentAttempt: 1,
-    supersedes: "0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528",
+    supersedes: "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
     historicalSupersededDeployment: "0x96671389548f170A6f02BC3017495d157d827599",
     historicalFailedDeployment:
       "0x5f37c53acfe9af24f212f4b117067ca899bb2ad8d7461e328c0af5b6c7fc4b62",

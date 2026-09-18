@@ -12,7 +12,7 @@ Copy-Item frontend/.env.example frontend/.env
 npm run dev
 ```
 
-The public configuration targets GenLayer Studio Next, chain `61997`, RPC `https://studio-next.genlayer.com/api`, and the canonical Uphold contract `0x51A1B4eFC6Be539C54C642515d3c537dd2D3e528`.
+The public configuration targets GenLayer Studio Next, chain `61997`, RPC `https://studio-next.genlayer.com/api`, and the canonical Uphold contract `0x23786A52b62DC489A5f69653dedD68d1fc56c231`.
 
 ## Frontend architecture
 
