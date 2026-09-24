@@ -81,8 +81,10 @@ Uphold combines economic skin in the game with authenticated web evidence and bo
 
 - GitHub: https://github.com/GIFTEDLOV/uphold
 - Live app: https://uphold-sable.vercel.app
-- Historical V1.1 contract: `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`
-- Deployment transaction: `0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f`
+- Current V1.2 contract explorer: https://explorer-studio-dev.genlayer.com/address/0x5C2C0827B08C720787673dE325a36886e8Ec8645
+- Current V1.2 contract address: `0x5C2C0827B08C720787673dE325a36886e8Ec8645`
+- Current V1.2 deployment transaction: `0x4605905ffcfc3e9c070f857b0fde1a77976fbcae56330c3695b9f27e62a55356`
+- GitHub release: https://github.com/GIFTEDLOV/uphold/releases/tag/v1.2.0
 - Demo video: not yet created
 
 ## Demo sequence
