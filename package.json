@@ -9,10 +9,11 @@
     "build": "cd frontend && npm run build",
     "start": "cd frontend && npm run start",
     "lint": "cd frontend && npm run lint",
-    "test:fees": "python3 -m pytest tests/integration/test_football_bets.py::test_fee_profile_create_bet --fee-profile frontend/fee-profile.football-legacy.json -v -s",
+    "test:fees": "gltest tests/integration/test_uphold_fee_profile.py --network localnet --chain-type localnet --fee-profile artifacts/uphold-fee-profile.ci.json --fee-profile-headroom 1.25 -v -s",
     "deploy": "genlayer deploy"
   },
   "devDependencies": {
+    "genlayer": "0.40.0-rc.3",
     "genlayer-js": "2.0.0-rc.1"
   }
 }

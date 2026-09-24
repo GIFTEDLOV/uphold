@@ -1,86 +1,71 @@
 {
-  "version": 3,
-  "network": "studio-next",
-  "measuredAt": "2026-09-18T04:30:54.428400Z",
-  "source": "successful finalized release-candidate deployment and live lifecycle receipts",
-  "contractPath": "contracts/uphold.py",
-  "contractAddress": "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
-  "contractSha256": "090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8",
-  "headroomBps": 12000,
-  "feeQuotePolicy": "Studio Next network-default estimateTransactionFees({})",
+  "version": 1,
+  "network": "studio-dev",
+  "measuredAt": "2026-09-24T09:43:19Z",
+  "chainId": 61997,
   "deploy": {
-    "txHash": "0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f",
-    "feeValue": "100000000000010352",
-    "recommendedFeeValue": "120000000000012423",
-    "rawReceiptPath": "deployments/studio-next/uphold-hardening.json"
+    "leaderTimeunitsAllocation": "125",
+    "validatorTimeunitsAllocation": "250",
+    "executionBudgetPerRound": "98823125000000",
+    "totalMessageFees": "0",
+    "rotationsPerRound": "3"
   },
   "methods": {
-    "create_commitment": {
-      "txHash": "0x99dbe6d38bfd12ba38566d5d19faf0b26d2547559c0bd5a07e3e3566ea758328",
-      "feeValue": "100000000000010352",
-      "recommendedFeeValue": "104904000000000",
-      "observed": {"primaryFeeSpent": "87223500000823", "totalEstimatedFee": "87184000000000", "totalStudioMeteredFee": "87420000000000", "genvmExecution": "87459500000000", "totalRefunded": "99912776500009529"},
-      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/real-positive-v2-create.json"
+    "adjudicate_contest": {
+      "leaderTimeunitsAllocation": "125",
+      "validatorTimeunitsAllocation": "250",
+      "executionBudgetPerRound": "99461250000000",
+      "totalMessageFees": "0",
+      "rotationsPerRound": "3"
     },
     "check_commitment": {
-      "txHash": "0xa435018c7e6bef1bb33245b2d2fb1c21af94858f9706ff6a7abdae354432b389",
-      "feeValue": "100000000000010352",
-      "recommendedFeeValue": "104740800000000",
-      "observed": {"primaryFeeSpent": "87078250000823", "totalEstimatedFee": "87048000000000", "totalStudioMeteredFee": "87284000000000", "genvmExecution": "87314250000000", "totalRefunded": "99912921750009529"},
-      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/real-positive-v2-check.json"
-    },
-    "increase_stake": {
-      "txHash": "0xfdbbbefb9738f203f9b0634a23976f48454b73952d5734ec5c6956a39c93c43e",
-      "feeValue": "100000000000010352",
-      "recommendedFeeValue": "94622400000000",
-      "observed": {"primaryFeeSpent": "78645000000823", "totalEstimatedFee": "78628000000000", "totalStudioMeteredFee": "78852000000000", "genvmExecution": "78869000000000", "totalRefunded": "99921355000009529"},
-      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/real-positive-v2-increase.json"
-    },
-    "extend_commitment": {
-      "txHash": "0xbbd945983a6b539a18f1c4c252a175f3dc56580273157ab54a7f9a537e0d8df5",
-      "feeValue": "100000000000010352",
-      "recommendedFeeValue": "94622400000000",
-      "observed": {"primaryFeeSpent": "78643500000823", "totalEstimatedFee": "78628000000000", "totalStudioMeteredFee": "78852000000000", "genvmExecution": "78867500000000", "totalRefunded": "99921356500009529"},
-      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/real-positive-v2-extend.json"
+      "leaderTimeunitsAllocation": "125",
+      "validatorTimeunitsAllocation": "250",
+      "executionBudgetPerRound": "108847812500000",
+      "totalMessageFees": "0",
+      "rotationsPerRound": "3"
     },
     "contest_breach": {
-      "txHash": "0xe54a5920438fd9a0a29f94d439d08b5f8ef566f4e40108a7e3449df20386de7c",
-      "feeValue": "100000000000010352",
-      "recommendedFeeValue": "97209600000000",
-      "observed": {"primaryFeeSpent": "80818000000823", "totalEstimatedFee": "80784000000000", "totalStudioMeteredFee": "81008000000000", "genvmExecution": "81042000000000", "totalRefunded": "99919182000009529"},
-      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/b-contest.json"
+      "leaderTimeunitsAllocation": "125",
+      "validatorTimeunitsAllocation": "250",
+      "executionBudgetPerRound": "101022500000000",
+      "totalMessageFees": "0",
+      "rotationsPerRound": "3"
     },
-    "adjudicate_contest": {
-      "txHash": "0xd746c5f17ee46f23e5fd9eb9318accc7eeae7db8e03bba04c4174c5337772bfb",
-      "feeValue": "100000000000010352",
-      "recommendedFeeValue": "95726400000000",
-      "observed": {"primaryFeeSpent": "79569000000823", "totalEstimatedFee": "79540000000000", "totalStudioMeteredFee": "79772000000000", "genvmExecution": "79801000000000", "totalRefunded": "99920431000009529"},
-      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/b-adjudication.json"
-    },
-    "settle_breach": {
-      "txHash": "0xca2469ca75a0d177fc3f04e30c41bdc1a09de00bf49b80aac182b530755cf4e4",
-      "feeValue": "100000000000010352",
-      "recommendedFeeValue": "152448000000000",
-      "observed": {"primaryFeeSpent": "126335250000823", "totalEstimatedFee": "126304000000000", "totalStudioMeteredFee": "127040000000000", "genvmExecution": "127071250000000", "totalRefunded": "99873664750009529"},
-      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/b-settlement-2.json"
+    "create_commitment": {
+      "leaderTimeunitsAllocation": "125",
+      "validatorTimeunitsAllocation": "250",
+      "executionBudgetPerRound": "109029375000000",
+      "totalMessageFees": "0",
+      "rotationsPerRound": "3"
     },
     "expire_commitment": {
-      "txHash": "0xcee107918318115bbacf6a1b13f38cec9a5bfca7827ab3c6b0c2058eedfc92f9",
-      "feeValue": "100000000000010352",
-      "recommendedFeeValue": "152448000000000",
-      "observed": {"primaryFeeSpent": "126315000000823", "totalEstimatedFee": "126304000000000", "totalStudioMeteredFee": "127040000000000", "genvmExecution": "127051000000000", "totalRefunded": "99873685000009529"},
-      "rawReceiptPath": "evidence/studio-next/hardening-live-operations/c-expiry.json"
+      "leaderTimeunitsAllocation": "125",
+      "validatorTimeunitsAllocation": "250",
+      "executionBudgetPerRound": "157893750000000",
+      "totalMessageFees": "0",
+      "rotationsPerRound": "3"
+    },
+    "extend_commitment": {
+      "leaderTimeunitsAllocation": "125",
+      "validatorTimeunitsAllocation": "250",
+      "executionBudgetPerRound": "98304375000000",
+      "totalMessageFees": "0",
+      "rotationsPerRound": "3"
+    },
+    "increase_stake": {
+      "leaderTimeunitsAllocation": "125",
+      "validatorTimeunitsAllocation": "250",
+      "executionBudgetPerRound": "98306250000000",
+      "totalMessageFees": "0",
+      "rotationsPerRound": "3"
+    },
+    "settle_breach": {
+      "leaderTimeunitsAllocation": "125",
+      "validatorTimeunitsAllocation": "250",
+      "executionBudgetPerRound": "157919062500000",
+      "totalMessageFees": "0",
+      "rotationsPerRound": "3"
     }
-  },
-  "uncertifiedMethods": [],
-  "fallback": "Use Studio Next network-default estimateTransactionFees({}) if a future method profile is absent.",
-  "externalTransferLimitation": "PAYOUT_PENDING and REFUND_PENDING are contract-level states; completion of the external EOA transfer is observed off-contract.",
-  "provenance": {
-    "deploymentTx": "0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f",
-    "contractAddress": "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
-    "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
-    "realPositiveCommitment": "live-proof-v2-20260918",
-    "controlledFixtureRepository": "https://github.com/GIFTEDLOV/uphold-lifecycle-fixture"
-  },
-  "noFootballValues": true
+  }
 }

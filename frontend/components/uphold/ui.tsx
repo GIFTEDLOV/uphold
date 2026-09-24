@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowUpRight, CircleAlert, ExternalLink, ShieldCheck } from "lucide-react";
-import { getNetworkMismatchMessage, isStudioNextNetwork, UPHOLD_NETWORK } from "@/lib/uphold/config";
+import { getNetworkMismatchMessage, isStudioDevNetwork, UPHOLD_NETWORK } from "@/lib/uphold/config";
 import { switchToGenLayerNetwork } from "@/lib/genlayer/client";
 import { useWallet } from "@/lib/genlayer/wallet";
 import type { CommitmentStatus, SemanticClassification } from "@/lib/uphold/types";
@@ -45,7 +45,7 @@ export function SetupState({ compact = false }: { compact?: boolean }) {
       <div className="setup-icon"><CircleAlert size={18} /></div>
       <div>
         <p className="setup-title">Uphold contract not configured</p>
-        <p className="setup-copy">This local build is ready for Studio Next, but no deployed contract address has been supplied yet. Chain data and writes stay disabled until Phase 4.</p>
+        <p className="setup-copy">This local build is ready for Studio-dev, but no deployed contract address has been supplied yet. Chain data and writes stay disabled until the V1.2 deployment.</p>
       </div>
       <Link href="/transparency#deployment" className="inline-link">Setup notes <ArrowUpRight size={14} /></Link>
     </div>
@@ -54,7 +54,7 @@ export function SetupState({ compact = false }: { compact?: boolean }) {
 
 export function NetworkPill() {
   const wallet = useWallet();
-  const isReady = wallet.isConnected && wallet.isOnCorrectNetwork && isStudioNextNetwork();
+  const isReady = wallet.isConnected && wallet.isOnCorrectNetwork && isStudioDevNetwork();
   const handleSwitch = async () => {
     try { await switchToGenLayerNetwork(); } catch { /* WalletProvider surfaces the actionable error. */ }
   };

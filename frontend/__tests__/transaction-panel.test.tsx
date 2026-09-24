@@ -23,7 +23,7 @@ function renderPanel(
     <GenLayerTransactionPanel
       kit={kit}
       tx={tx}
-      network="GenLayer Studio Next"
+      network="GenLayer Studio-dev"
       theme="dark"
       trackUntil="decided"
       onDone={onDone}

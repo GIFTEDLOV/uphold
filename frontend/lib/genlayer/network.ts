@@ -1,9 +1,7 @@
 import { studioDevnet } from "genlayer-js/chains";
 
-// The released SDK has no Studio Next preset yet. Preserve its Consensus v0.6
-// configuration while selecting the developer-facing Studio Next deployment.
-const DEFAULT_RPC_URL = "https://studio-next.genlayer.com/api";
-const DEFAULT_CHAIN_NAME = "GenLayer Studio Next";
+const DEFAULT_RPC_URL = "https://studio-dev.genlayer.com/api";
+const DEFAULT_CHAIN_NAME = "GenLayer Studio-dev";
 
 export interface GenLayerNetworkOverrides {
   chainId?: string;

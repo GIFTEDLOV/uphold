@@ -1,33 +1,146 @@
-name: Uphold CI
+name: Uphold V1.2 CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, uphold/app]
   pull_request:
     branches: [main]
 
-jobs:
-  lint-contracts:
-    name: Lint Contracts
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install -r requirements.txt
-      - run: genvm-lint check contracts/uphold.py
+permissions:
+  contents: read
 
-  test-direct:
-    name: Direct Mode Tests
+concurrency:
+  group: uphold-v12-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: contracts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
       - run: pip install -r requirements.txt
-      - name: Run Direct Mode tests
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node tools/validate_release_family.mjs
+      - run: genvm-lint check contracts/uphold.py
+      - run: genvm-lint schema contracts/uphold.py
+      - run: genvm-lint typecheck contracts/uphold.py
+      - name: Run full Direct Mode suite
         env:
           PYTHONPATH: .
-        run: pytest tests/direct/ -v
+        run: pytest tests/direct -q
+      - name: Verify source hash
+        shell: bash
+        run: test "$(sha256sum contracts/uphold.py | awk '{print toupper($1)}')" = "$(python - <<'PY'
+import json
+from pathlib import Path
+print(json.loads(Path('docs/genlayer-release-family.json').read_text())['contract']['sourceSha256'])
+PY
+)"
+      - name: Validate live proof package
+        if: hashFiles('deployments/studio-dev/v1.2/proof-index.json') != ''
+        run: node tools/validate_proof_package.mjs
+      - name: Tracked-file secret scan
+        run: node tools/secret_scan.mjs
+
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node tools/validate_release_family.mjs
+      - run: node tools/validate_fee_profile.mjs frontend/fee-profile.json
+      - name: Validate live proof package
+        if: hashFiles('deployments/studio-dev/v1.2/proof-index.json') != ''
+        run: node tools/validate_proof_package.mjs
+      - run: npm test --workspace frontend
+      - run: npm run lint --workspace frontend
+      - run: npm run build --workspace frontend
+
+  integration:
+    name: integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Start reproducible five-validator GLSim
+        shell: bash
+        run: |
+          python tools/run_glsim.py --port 4000 --validators 5 --chain-id 61997 --no-browser > glsim.log 2>&1 &
+          echo $! > glsim.pid
+          python - <<'PY'
+          import time
+          import requests
+          for _ in range(60):
+              try:
+                  if requests.get('http://127.0.0.1:4000/health', timeout=1).ok:
+                      break
+              except requests.RequestException:
+                  time.sleep(1)
+          else:
+              raise SystemExit('GLSim did not become ready')
+          PY
+      - name: Run consensus integration suite
+        env:
+          PYTHONPATH: .
+        run: gltest tests/integration/test_uphold_v12.py tests/integration/test_uphold_fee_profile.py -q -s --network localnet --chain-type localnet --fee-profile artifacts/uphold-v12-test-profile.json --fee-profile-headroom 1.25
+      - name: Validate generated simulator profile
+        run: node tools/validate_fee_profile.mjs artifacts/uphold-v12-test-profile.json
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-proof
+          path: |
+            artifacts/uphold-v12-test-profile.json
+            glsim.log
+
+  browser-e2e:
+    name: browser-e2e
+    runs-on: ubuntu-latest
+    needs: [frontend]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config frontend/playwright.config.ts --workers=1
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-e2e-report
+          path: |
+            artifacts/playwright
+            artifacts/playwright-report
+
+  security:
+    name: security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node tools/validate_release_family.mjs
+      - run: node tools/validate_fee_profile.mjs frontend/fee-profile.json
+      - name: Reject tracked secrets and stale active deployment config
+        run: node tools/secret_scan.mjs
+        shell: bash
+        continue-on-error: false

@@ -101,7 +101,7 @@ export function useUpholdTransaction() {
       return false;
     }
     if (!wallet.isOnCorrectNetwork) {
-      const error = { domain: "PRECONDITION" as const, message: "Switch to GenLayer Studio Next before signing." };
+      const error = { domain: "PRECONDITION" as const, message: "Switch to GenLayer Studio-dev before signing." };
       setState({ stage: "error", error });
       return false;
     }

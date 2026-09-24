@@ -28,4 +28,9 @@ describe("published GenLayer dependencies", () => {
     expect(lock.packages[""].devDependencies["genlayer-js"])
       .toBe(root.devDependencies["genlayer-js"]);
   });
+
+  it("pins the CLI RC and keeps repository license metadata consistent", () => {
+    expect(root.devDependencies.genlayer).toBe("0.40.0-rc.3");
+    expect(frontend.license).toBe("MIT");
+  });
 });

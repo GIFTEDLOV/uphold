@@ -8,13 +8,13 @@ const PLACEHOLDER_ADDRESSES = new Set([
 ]);
 
 export const UPHOLD_NETWORK = {
-  name: "GenLayer Studio Next",
-  rpcUrl: "https://studio-next.genlayer.com/api",
+  name: "GenLayer Studio-dev",
+  rpcUrl: "https://studio-dev.genlayer.com/api",
   chainId: 61997,
   explorerUrl: "https://explorer-studio-dev.genlayer.com/",
 } as const;
 
-/** Certified Studio Next measurements are recorded in fee-profile.json. */
+/** Official measured Studio-dev profile is passed to Transaction Kit. */
 export const UPHOLD_FEE_PROFILE_PRESENT = true;
 
 export function getUpholdContractAddress(): `0x${string}` | null {
@@ -28,7 +28,7 @@ export function isUpholdConfigured(): boolean {
   return getUpholdContractAddress() !== null;
 }
 
-export function isStudioNextNetwork(): boolean {
+export function isStudioDevNetwork(): boolean {
   return (
     GENLAYER_CHAIN_ID === UPHOLD_NETWORK.chainId &&
     GENLAYER_CHAIN.rpcUrls.default.http[0] === UPHOLD_NETWORK.rpcUrl
@@ -39,3 +39,6 @@ export function getNetworkMismatchMessage(chainId: string | null): string {
   if (!chainId) return `Connect a wallet on ${UPHOLD_NETWORK.name}.`;
   return `Your wallet is on chain ${chainId}; Uphold requires ${UPHOLD_NETWORK.name} (${UPHOLD_NETWORK.chainId}).`;
 }
+
+/** Backward-compatible symbol for consumers that have not migrated yet. */
+export const isStudioNextNetwork = isStudioDevNetwork;

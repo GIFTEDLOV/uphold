@@ -29,7 +29,7 @@ describe("Uphold contract boundary", () => {
     expect(getUpholdContractAddress()).toBe(actor);
   });
 
-  it("keeps the shared network pinned to Studio Next", () => {
+  it("keeps the shared network pinned to Studio-dev", () => {
     expect(isStudioNextNetwork()).toBe(true);
   });
 

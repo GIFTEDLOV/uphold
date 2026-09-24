@@ -5,6 +5,7 @@ import {
   GENLAYER_CHAIN_ID_HEX,
   GENLAYER_NETWORK,
 } from "../lib/genlayer/network";
+import feeProfile from "../fee-profile.json";
 
 const mocks = vi.hoisted(() => ({
   createClient: vi.fn(() => ({ readContract: vi.fn() })),
@@ -13,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("genlayer-js", () => ({
   createClient: mocks.createClient,
+  TransactionHashVariant: { LATEST_FINAL: "latest-final" },
 }));
 
 vi.mock("@genlayer/transaction-kit", async (importOriginal) => ({
@@ -60,6 +62,7 @@ describe("network consumers", () => {
       account,
       chain: GENLAYER_CHAIN,
       provider: expect.objectContaining({ request: providerRequest }),
+      suggestions: feeProfile,
     });
   });
 
