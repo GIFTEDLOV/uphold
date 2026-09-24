@@ -1,0 +1,88 @@
+{
+  "capturedAt": "2026-09-24T11:55:44.449Z",
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "method": "eth_getCode",
+  "blockTag": "latest",
+  "lookups": {
+    "uphold": {
+      "address": "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5",
+      "request": {
+        "jsonrpc": "2.0",
+        "method": "eth_getCode",
+        "params": [
+          "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5",
+          "latest"
+        ],
+        "id": 1
+      },
+      "httpStatus": 200,
+      "response": {
+        "jsonrpc": "2.0",
+        "result": "0x",
+        "id": 1
+      },
+      "codeIsEmpty": true
+    },
+    "probe": {
+      "address": "0x604556b09fD8642E5a5394C6d7De093b7D90A042",
+      "request": {
+        "jsonrpc": "2.0",
+        "method": "eth_getCode",
+        "params": [
+          "0x604556b09fD8642E5a5394C6d7De093b7D90A042",
+          "latest"
+        ],
+        "id": 1
+      },
+      "httpStatus": 200,
+      "response": {
+        "jsonrpc": "2.0",
+        "result": "0x",
+        "id": 1
+      },
+      "codeIsEmpty": true
+    }
+  },
+  "additionalBlockTag": "finalized",
+  "finalizedLookups": {
+    "uphold": {
+      "address": "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5",
+      "request": {
+        "jsonrpc": "2.0",
+        "method": "eth_getCode",
+        "params": [
+          "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5",
+          "finalized"
+        ],
+        "id": 2
+      },
+      "httpStatus": 200,
+      "response": {
+        "jsonrpc": "2.0",
+        "result": "0x",
+        "id": 2
+      },
+      "codeIsEmpty": true
+    },
+    "probe": {
+      "address": "0x604556b09fD8642E5a5394C6d7De093b7D90A042",
+      "request": {
+        "jsonrpc": "2.0",
+        "method": "eth_getCode",
+        "params": [
+          "0x604556b09fD8642E5a5394C6d7De093b7D90A042",
+          "finalized"
+        ],
+        "id": 2
+      },
+      "httpStatus": 200,
+      "response": {
+        "jsonrpc": "2.0",
+        "result": "0x",
+        "id": 2
+      },
+      "codeIsEmpty": true
+    }
+  }
+}
