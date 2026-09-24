@@ -155,6 +155,85 @@ Complete request/response evidence is attached in the schema and code-lookup
 JSON files in artifacts/runner-probe/.
 ```
 
+## Final header-fix schema attempt
+
+The contract was changed only by inserting one blank line between the
+dependency header and the adjacent Pyright directive. The corrected source
+SHA-256 is:
+
+`5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401`
+
+The historical V1.1 source has the dependency header followed immediately by
+the module docstring. The V1.2 candidate had a second contiguous leading
+comment line containing the Pyright directive. The corrected exact Uphold
+source now returns a schema, which confirms that this header-separation change
+removed the malformed runner-descriptor failure for Uphold.
+
+`ROOT_CAUSE_CONFIRMED=YES`
+`HEADER_FIX_ONLY=YES`
+`RUNNER_HASH=py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng`
+
+### Corrected 5jyc disposable probe
+
+The in-memory probe used the requested form:
+
+```python
+# { "Depends": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng" }
+
+import genlayer as gl
+
+class RunnerProbe(gl.Contract):
+    def __init__(self):
+        pass
+```
+
+Studio-dev loaded the 5jyc runner, but the probe failed before schema
+generation with:
+
+`AttributeError: module 'genlayer' has no attribute 'Contract'. Did you mean: 'contract'?`
+
+This is a probe-source/API compatibility failure, not the earlier
+`runner malformed` response. Because the required zero-cost probe schema did
+not succeed, the release stop condition applies. No alternate probe syntax was
+attempted and no deployment was authorized.
+
+Evidence: `schema-final-5jyc-probe.json`.
+
+### Corrected exact Uphold schema
+
+The exact corrected `contracts/uphold.py` source returned a successful schema:
+
+- Total methods: `15`
+- Views: `7`
+- Writes: `8`
+- Constructor: present with no parameters
+
+Evidence: `schema-final-uphold-v12.json`.
+
+The 1jb runner remains unsupported by this hosted Studio-dev schema path and
+was not used for the corrected source. The 5jyc runner remains the only active
+candidate; the schema proof for the exact Uphold source passed, but the
+required minimal-probe proof did not.
+
+### SDK cross-check status
+
+The required SDK cross-check was not run after the corrected probe failure.
+`SDK_SCHEMA_PASS=NOT_RUN_STOP_CONDITION`.
+
+The earlier SDK evidence in `sdk-schema-crosscheck.json` belongs to the prior
+diagnostic source set and is preserved unchanged.
+
+### Release disposition
+
+`RUNNER_FAILURE_CLASSIFICATION=ZERO_COST_PROBE_SOURCE_COMPATIBILITY_BLOCK`
+`RELEASE_READY=NO`
+`DEPLOYMENT_ATTEMPTED_AFTER_HEADER_FIX=NO`
+
+The corrected Uphold schema is evidence that the header-format fix addresses
+the original malformed runner descriptor. The release cannot proceed because
+the separately required corrected 5jyc probe did not return a schema, and the
+user-mandated stop condition forbids deployment or further release gates.
+
 ## Corrected Studio RPC semantics
 
 The official `genlayer-studio` `main` branch was inspected at source revision
