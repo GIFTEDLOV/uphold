@@ -38,12 +38,13 @@ jobs:
         run: pytest tests/direct -q
       - name: Verify source hash
         shell: bash
-        run: test "$(sha256sum contracts/uphold.py | awk '{print toupper($1)}')" = "$(python - <<'PY'
-import json
-from pathlib import Path
-print(json.loads(Path('docs/genlayer-release-family.json').read_text())['contract']['sourceSha256'])
-PY
-)"
+        run: |
+          test "$(sha256sum contracts/uphold.py | awk '{print toupper($1)}')" = "$(python - <<'PY'
+          import json
+          from pathlib import Path
+          print(json.loads(Path('docs/genlayer-release-family.json').read_text())['contract']['sourceSha256'])
+          PY
+          )"
       - name: Validate live proof package
         if: hashFiles('deployments/studio-dev/v1.2/proof-index.json') != ''
         run: node tools/validate_proof_package.mjs
@@ -140,7 +141,7 @@ PY
           node-version: "22"
       - run: node tools/validate_release_family.mjs
       - run: node tools/validate_fee_profile.mjs frontend/fee-profile.json
-      - name: Reject tracked secrets and stale active deployment config
+      - name: Reject tracked secrets
         run: node tools/secret_scan.mjs
         shell: bash
         continue-on-error: false
