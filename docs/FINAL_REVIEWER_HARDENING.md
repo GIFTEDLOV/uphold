@@ -2,6 +2,10 @@
 
 This audit distinguishes protocol behavior from frontend presentation and points to the direct regression suite. The original stale-contest finding was confirmed, fixed, deployed in the release candidate, and exercised through controlled A/B/C lifecycle evidence.
 
+## V1.2 release boundary
+
+The V1.2 candidate adds prompt-injection hardening and the exact v0.6 RC toolchain. Local Direct Mode, GLSim consensus, and CI gates pass, but the single canonical Studio-dev deployment attempt finalized with `FINISHED_WITH_ERROR` and `invalid_contract runner malformed`. Consequently, the V1.2 candidate has no deployed address, source readback, qualification, or production promotion. The live evidence referenced below is historical V1.1 evidence and controlled fixture evidence, not V1.2 proof.
+
 ## Findings
 
 | Failure class | Classification | Evidence |
@@ -21,7 +25,7 @@ The candidate contract makes `contest_breach(commitment_id)` capture `commitment
 
 The behavioral test matrix, candidate deployment proof, controlled adversarial lifecycle proof, and row-by-row live reviewer matrix are included below. The real IANA positive proof remains separate from controlled fixture evidence.
 
-## Final candidate audit
+## Historical V1.1 candidate audit
 
 The hardened candidate is `0x23786A52b62DC489A5f69653dedD68d1fc56c231`, deployed by
 `0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f`, with

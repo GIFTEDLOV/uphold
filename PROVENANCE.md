@@ -1,8 +1,29 @@
 # Uphold release provenance
 
-This file records the current public Uphold release. Historical deployments are retained below for auditability and are not current targets.
+This file records the blocked V1.2 release attempt and preserves the complete historical V1.1 production evidence. No V1.2 address, frontend promotion, Vercel deployment, GitHub release, or branch-protection change is claimed after the failed hosted execution.
 
-## Canonical contract
+## Current V1.2 candidate — blocked
+
+- Branch: uphold/app
+- Final source commit: 1e1c22ab6180329154f4a432e80ab308982dbe96
+- Contract source: contracts/uphold.py
+- Candidate source SHA-256: EC4BD059AC218BA3E9151EE34C6B41F8810B371FF95F9A153B1D0BCB98EBB71C
+- Contract version: live-snapshot-v1.2
+- Network: GenLayer Studio-dev
+- RPC: https://studio-dev.genlayer.com/api
+- Chain ID: 61997
+- Deployment attempt: 0x06e758820d433baa29061b7dd432042dcefd8ec40749b53982bafa9cd9841f86
+- Deployment status: FINALIZED
+- Execution: FINISHED_WITH_ERROR
+- Receipt error: invalid_contract runner malformed
+- Contract address: none
+- Evidence: deployments/studio-dev/v1.2/manifest.pending.json
+- Exact RC family: docs/genlayer-release-family.json
+- GitHub CI: run 35990628506, success on all five jobs
+
+The candidate passed local and reproducible CI gates, but the canonical hosted runner was not compatible with this deployment attempt. Resolve and independently audit runner compatibility before any new release attempt. The first deployment transaction must not be retried blindly.
+
+## Historical V1.1 contract
 
 - Branch: uphold/app
 - Source commit: 536346f00f158f374f6e5e28112a0fc06a9065a4
@@ -15,7 +36,7 @@ This file records the current public Uphold release. Historical deployments are 
 - Chain ID: 61997
 - Runner dependency: py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng
 
-## Evidence
+## Historical V1.1 evidence
 
 - Deployment proof: deployments/studio-next/uphold-hardening.json
 - Live lifecycle proof: evidence/studio-next/uphold-hardening-live-proof.json
@@ -25,7 +46,7 @@ This file records the current public Uphold release. Historical deployments are 
 
 The real positive proof covers creation, an authenticated baseline snapshot, a successful check classified HOLDS, a later authenticated snapshot, a stake increase, expiry extension, ledger invariants, and address records. Controlled adversarial A/B/C evidence additionally covers fresh contest capture, upheld and rejected contest adjudication, payout-pending, and refund-pending states. These controlled results are not presented as natural production breach evidence.
 
-## Public frontend configuration
+## Historical V1.1 frontend configuration
 
 The public build is configured with:
 
@@ -37,7 +58,7 @@ NEXT_PUBLIC_GENLAYER_SYMBOL=GEN
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x23786A52b62DC489A5f69653dedD68d1fc56c231
 ~~~
 
-## Public release configuration
+## Existing production configuration
 
 - GitHub repository: https://github.com/GIFTEDLOV/uphold
 - Release source commit before final production metadata: 22dca3e5a09f699d6b39a5374c2c559f855a65ef
@@ -45,7 +66,7 @@ NEXT_PUBLIC_CONTRACT_ADDRESS=0x23786A52b62DC489A5f69653dedD68d1fc56c231
 - Vercel project ID: `prj_YqhtNLEgwPPj7nhGoamGr6vbMd67`
 - Vercel root directory: `frontend`
 - Production URL: https://uphold-sable.vercel.app
-- Final production deployment ID, immutable URL, and deployed Git SHA are recorded in the final release audit after the metadata release commit.
+- Existing production remains https://uphold-sable.vercel.app and was not changed by the blocked V1.2 attempt.
 
 The production project is the new Uphold project and is not the historical UptimeBond project. The final metadata commit and its resulting Vercel deployment are reported in the release audit.
 

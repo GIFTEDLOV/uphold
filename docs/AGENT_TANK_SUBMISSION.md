@@ -4,6 +4,10 @@
 
 Uphold
 
+## Release status
+
+The V1.2 candidate targets GenLayer Studio-dev, chain `61997`, with the exact Consensus v0.6 / Studio v0.123 RC family and prompt-injection hardening. Local and CI gates pass, but the single hosted deployment attempt finalized with `FINISHED_WITH_ERROR` and `invalid_contract runner malformed`; no V1.2 address is claimed. The live lifecycle evidence below is explicitly historical V1.1 evidence.
+
 ## Track and category
 
 - Track: Agentic Commerce Infrastructure
@@ -37,11 +41,11 @@ public source
 
 ## Architecture
 
-See [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) for system components, trust boundaries, state transitions, accounting, contest flow, transaction safety, and Studio Next context.
+See [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) for system components, trust boundaries, state transitions, accounting, contest flow, transaction safety, and the current Studio-dev / historical Studio Next separation.
 
-## Live proof
+## Historical V1.1 live proof
 
-The real Studio Next proof uses the hardened contract `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`:
+The historical Studio Next proof uses the hardened V1.1 contract `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`:
 
 - Commitment: `live-proof-v2-20260918`
 - Source: https://www.iana.org/help/example-domains
@@ -70,14 +74,14 @@ Uphold combines economic skin in the game with authenticated web evidence and bo
 ## Known limitations
 
 - Natural public-source breach and settlement were not organically demonstrated; controlled A/B/C lifecycle evidence is included separately.
-- Studio Next does not fully prove production Ghost/EVM semantics.
+- The historical Studio Next environment does not fully prove production Ghost/EVM semantics.
 - External payout completion remains observed off-contract.
 
 ## Links
 
 - GitHub: https://github.com/GIFTEDLOV/uphold
 - Live app: https://uphold-sable.vercel.app
-- Contract: `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`
+- Historical V1.1 contract: `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`
 - Deployment transaction: `0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f`
 - Demo video: not yet created
 

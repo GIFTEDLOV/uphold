@@ -13,7 +13,9 @@ Uphold turns a public promise into a bounded, auditable commitment. The contract
 | Public source | The external page whose current content is captured; no authentication or JavaScript dependency is required by the live proof source. |
 | Snapshot storage | Contract state containing the source URL, capture metadata, SHA-256, exact byte length, normalized content and semantic result. |
 
-The authoritative deployed instance is the Studio Next release candidate promoted locally at `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on chain `61997`, using `https://studio-next.genlayer.com/api`. The deployed source is identified by SHA-256 `090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8` and reports version `live-snapshot-v1.1`.
+The current V1.2 candidate targets canonical GenLayer Studio-dev at `https://studio-dev.genlayer.com/api`, chain `61997`, and has source SHA-256 `EC4BD059AC218BA3E9151EE34C6B41F8810B371FF95F9A153B1D0BCB98EBB71C`. Its single hosted deployment attempt finalized with `FINISHED_WITH_ERROR` / `invalid_contract runner malformed`, so no V1.2 address is authoritative and no frontend promotion was made.
+
+The historical V1.1 deployment remains preserved at `0x23786A52b62DC489A5f69653dedD68d1fc56c231` on the historical Studio Next alias. Its source SHA-256 is `090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8` and it reports version `live-snapshot-v1.1`.
 
 ## Trust boundaries
 
@@ -97,9 +99,9 @@ PRECONDITION READ
 
 Polling ambiguity never authorizes a second broadcast. A transaction hash is preserved and reconciled. Finality and execution success are separate checks, and expected state readback establishes the observed result.
 
-## Studio Next deployment context
+## Historical V1.1 deployment context
 
-The canonical release is deployed on GenLayer Studio Next, chain `61997`, with the `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` runner dependency. The deployment transaction is `0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f4`; the source commit is `536346f00f158f374f6e5e28112a0fc06a9065a4`.
+The historical V1.1 release was deployed on the Studio Next alias, chain `61997`, with the `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` runner dependency. The deployment transaction is `0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f4`; the source commit is `536346f00f158f374f6e5e28112a0fc06a9065a4`.
 
 ## Verification artifacts
 
