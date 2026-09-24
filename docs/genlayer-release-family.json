@@ -31,8 +31,20 @@
   },
   "runner": {
     "dependency": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
-    "decision": "retained",
-    "basis": "Local lint/schema/typecheck accept the header, but the first canonical Studio-dev deployment finalized with invalid_contract runner malformed. No replacement runner has been validated; deployment and promotion are blocked pending independent runner compatibility resolution."
+    "decision": "not-resolved",
+    "officialDocumentedRunner": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+    "probe": {
+      "source": "artifacts/runner-probe/studio-dev-runner-probe.py",
+      "sourceSha256": "B9F5A1F7E9B7B9D26C811F25E7FC475965DC1C51C516FF10EF92BA8722A0C392",
+      "transaction": "0x414d53befcc5bd9acc37b82b0053cb447d679e7077663f8a16f8568699b51abf",
+      "status": "FINALIZED",
+      "execution": "FINISHED_WITH_ERROR",
+      "address": null,
+      "readback": null,
+      "result": "FAIL",
+      "failure": "invalid_contract runner malformed"
+    },
+    "basis": "The official write-contract skill documents 1jb45... as the pinned network runner, but its minimal Studio-dev probe also finalized with invalid_contract runner malformed. The active Uphold candidate remains unchanged and no runner replacement is proven."
   },
   "contract": {
     "name": "Uphold",

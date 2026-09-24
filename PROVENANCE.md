@@ -23,6 +23,18 @@ This file records the blocked V1.2 release attempt and preserves the complete hi
 
 The candidate passed local and reproducible CI gates, but the canonical hosted runner was not compatible with this deployment attempt. Resolve and independently audit runner compatibility before any new release attempt. The first deployment transaction must not be retried blindly.
 
+## Current official runner probe — failed
+
+The current official `write-contract` skill documents `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6`. A disposable one-view probe using that exact header passed local `genvm-lint check`, schema, and typecheck, but its single Studio-dev deployment finalized with `FINISHED_WITH_ERROR` and `invalid_contract runner malformed`:
+
+- Probe source: `artifacts/runner-probe/studio-dev-runner-probe.py`
+- Probe SHA-256: `B9F5A1F7E9B7B9D26C811F25E7FC475965DC1C51C516FF10EF92BA8722A0C392`
+- Probe transaction: `0x414d53befcc5bd9acc37b82b0053cb447d679e7077663f8a16f8568699b51abf`
+- Raw receipt: `artifacts/runner-probe/manifest.pending.json`
+- Probe address/readback: none
+
+The active Uphold source and runner were not changed after this failure. No random runner substitution or third Uphold deployment was attempted.
+
 ## Historical V1.1 contract
 
 - Branch: uphold/app
