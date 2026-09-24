@@ -49,7 +49,7 @@
   "contract": {
     "name": "Uphold",
     "version": "live-snapshot-v1.2",
-    "sourceSha256": "EC4BD059AC218BA3E9151EE34C6B41F8810B371FF95F9A153B1D0BCB98EBB71C"
+    "sourceSha256": "5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401"
   },
   "prohibited": [
     "latest",
