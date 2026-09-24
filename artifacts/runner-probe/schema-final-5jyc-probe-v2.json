@@ -1,0 +1,47 @@
+{
+  "capturedAt": "2026-09-24T16:10:06.011Z",
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "label": "corrected-5jyc-probe-v2",
+  "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+  "sourceSha256": "5323957A89D1DF013AC8331E72AFBEF6DB93FAC7B099E065C1FDC70DD579036C",
+  "sourceBytes": 274,
+  "encoding": "0x + UTF-8 source hex",
+  "method": "gen_getContractSchemaForCode",
+  "request": {
+    "jsonrpc": "2.0",
+    "method": "gen_getContractSchemaForCode",
+    "params": [
+      "0x23207b2022446570656e6473223a202270792d67656e6c617965723a356a796367653471386b32333436326a746230623966796579317339717a393238737a326e627264396d67347378716732716e6722207d0a0a696d706f72742067656e6c6179657220617320676c0a0a636c6173732052756e6e657250726f626528676c2e636f6e74726163742e436f6e7472616374293a0a20202020646566205f5f696e69745f5f2873656c66293a0a2020202020202020706173730a0a2020202040676c2e7075626c69632e766965770a202020206465662070696e672873656c6629202d3e207374723a0a202020202020202072657475726e20225550484f4c445f52554e4e45525f50524f42455f4f4b220a"
+    ],
+    "id": 1
+  },
+  "httpStatus": 200,
+  "response": {
+    "jsonrpc": "2.0",
+    "result": {
+      "ctor": {
+        "params": [],
+        "kwparams": {}
+      },
+      "methods": {
+        "ping": {
+          "params": [],
+          "kwparams": {},
+          "readonly": true,
+          "ret": "string"
+        }
+      }
+    },
+    "id": 1
+  },
+  "schema": {
+    "returned": true,
+    "methodCount": 1,
+    "viewCount": 1,
+    "writeCount": 0,
+    "methods": [
+      "ping"
+    ]
+  }
+}

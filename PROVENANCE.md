@@ -1,5 +1,29 @@
 # Uphold release provenance
 
+## Current V1.2 candidate — predeployment schema-qualified
+
+- Branch: uphold/app
+- Contract source: contracts/uphold.py
+- Corrected source SHA-256: 5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401
+- Contract version: live-snapshot-v1.2
+- Network: GenLayer Studio-dev
+- RPC: https://studio-dev.genlayer.com/api
+- Chain ID: 61997
+- Runner dependency: py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng
+- Raw schema: PASS, 15 methods / 7 views / 8 writes
+- SDK schema: PASS with genlayer-js 2.0.0-rc.1
+- Diagnostic probe v2: PASS, 1 view method
+- Deployment: pending predeployment gates
+- Evidence: artifacts/runner-probe/schema-final-uphold-v12.json, artifacts/runner-probe/sdk-schema-crosscheck-final.json
+
+The runner header fix is one blank line after the dependency declaration. GenVM
+consumed the former adjacent Pyright comment as part of the leading runner
+descriptor, producing `invalid_contract runner malformed`. The historical V1.1
+header had no adjacent Pyright comment and remained valid. The exact corrected
+Uphold source now returns the full schema, which is the authoritative
+predeployment runner/source proof. The 1jb runner remains incompatible with
+the hosted Studio-dev environment and is not used.
+
 This file records the blocked V1.2 release attempt and preserves the complete historical V1.1 production evidence. No V1.2 address, frontend promotion, Vercel deployment, GitHub release, or branch-protection change is claimed after the failed hosted execution.
 
 ## Current V1.2 candidate — blocked

@@ -4,7 +4,14 @@ Checked 2026-09-24 against the official GenLayer documentation and published pac
 
 The active network is canonical GenLayer Studio-dev: `https://studio-dev.genlayer.com/api`, chain ID `61997`, JS chain `studioDevnet`, and CLI alias `studio-dev`. Studio-dev is the release-candidate preview; the stable Studionet alias and RPC are not used by Uphold V1.2.
 
-The official `write-contract` skill currently documents `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6` as the pinned network runner. A minimal Studio-dev probe using that exact header passed local lint/schema/typecheck but also finalized with `invalid_contract runner malformed` on the hosted RPC. The active Uphold candidate remains unchanged on `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng`; no runner is currently proven compatible and V1.2 promotion remains blocked.
+The official `write-contract` skill documents `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6`, but that runner remains incompatible with the current hosted Studio-dev environment and is not used by Uphold. The active Uphold runner is `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng`. The corrected exact Uphold source passes canonical Studio-dev `gen_getContractSchemaForCode` with 15 methods, 7 views, and 8 writes, and the pinned `genlayer-js 2.0.0-rc.1` SDK cross-check passes the equivalent schema. The 5jyc diagnostic probe v2 also passes with `gl.contract.Contract`.
+
+The original hosted deployment failure was caused by contiguous leading comment
+parsing: the adjacent Pyright directive was consumed into the runner descriptor
+and made it malformed. The only contract change is the blank line separating
+the dependency header from that directive. The first 5jyc probe failure was a
+probe-source error (`from genlayer import *` while using `gl`); the second was
+also probe-source-specific (`gl.Contract` instead of `gl.contract.Contract`).
 
 Primary guidance reviewed:
 

@@ -363,3 +363,53 @@ This evidence does not authorize deployment. Please confirm the Studio-hosted
 runner/source compatibility expected for 1jb and the legacy import semantics
 of 5jyc. Complete JSON request/response evidence is attached.
 ```
+
+## Authoritative corrected probe and source proof
+
+The probe-source issue is resolved for evidence purposes by using the actual
+5jyc API surface:
+
+```python
+class RunnerProbe(gl.contract.Contract):
+```
+
+with `import genlayer as gl` and the required blank line after the dependency
+header. The corrected probe v2 returned a schema from canonical Studio-dev:
+
+- Result: PASS
+- Methods: `1`
+- Views: `1`
+- Writes: `0`
+- Method: `ping`
+
+Evidence: `schema-final-5jyc-probe-v2.json`.
+
+The exact corrected `contracts/uphold.py` source returned the authoritative
+schema:
+
+- Result: PASS
+- Methods: `15`
+- Views: `7`
+- Writes: `8`
+- Constructor: present with no parameters
+
+Evidence: `schema-final-uphold-v12.json`.
+
+The pinned `genlayer-js 2.0.0-rc.1` `getContractSchemaForCode()` call against
+the same exact source also returned `15 / 7 / 8`:
+
+`SDK_SCHEMA_PASS=YES`
+
+Evidence: `sdk-schema-crosscheck-final.json`.
+
+The original V1.2 failure is now confirmed as a header-format defect: GenVM
+consumed contiguous leading comment lines into the runner descriptor, so the
+adjacent Pyright directive made the descriptor malformed. The historical V1.1
+header did not contain that adjacent directive. The first 5jyc probe failure
+was caused by `from genlayer import *` combined with `gl` references; the
+second was caused by `gl.Contract` instead of `gl.contract.Contract`. Neither
+was an Uphold source failure. The exact corrected Uphold schema is the
+authoritative predeployment proof.
+
+`UPHOLD_RUNNER_AND_SOURCE_SCHEMA_RESOLUTION=PASS`
+`RELEASE_DEPLOYMENT_GATE=OPEN_PENDING_ALL_OTHER_GATES`
