@@ -4,7 +4,7 @@ Checked 2026-09-24 against the official GenLayer documentation and published pac
 
 The active network is canonical GenLayer Studio-dev: `https://studio-dev.genlayer.com/api`, chain ID `61997`, JS chain `studioDevnet`, and CLI alias `studio-dev`. Studio-dev is the release-candidate preview; the stable Studionet alias and RPC are not used by Uphold V1.2.
 
-The contract retains the concrete V1.1 runner header `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng`. `genvm-lint check`, schema extraction, and typecheck are the compatibility gates for that decision.
+The contract retains the concrete runner header `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` pending independent compatibility resolution. Local lint/schema/typecheck and GLSim gates pass, but the first canonical Studio-dev deployment attempt was finalized with `invalid_contract runner malformed`; this runner is therefore not proven compatible with the hosted v0.6 RC environment and V1.2 promotion is blocked.
 
 Primary guidance reviewed:
 

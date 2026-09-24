@@ -32,7 +32,7 @@
   "runner": {
     "dependency": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
     "decision": "retained",
-    "basis": "The selected v0.6 RC linter accepts the pinned header; no official v0.6 migration guidance requires replacing this concrete runner hash."
+    "basis": "Local lint/schema/typecheck accept the header, but the first canonical Studio-dev deployment finalized with invalid_contract runner malformed. No replacement runner has been validated; deployment and promotion are blocked pending independent runner compatibility resolution."
   },
   "contract": {
     "name": "Uphold",

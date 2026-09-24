@@ -30,7 +30,19 @@ if (existsSync(completedPath)) throw new Error("A completed V1.2 deployment mani
 if (profile.network !== "studio-dev" || Number(profile.chainId) !== chainId) throw new Error("Fee profile is not the canonical Studio-dev profile.");
 
 const requireProject = createRequire(path.resolve(root, "package.json"));
-const keytar = requireProject("keytar");
+let keytar;
+try {
+  keytar = requireProject("keytar");
+} catch {
+  const globalGenlayerPackage = path.join(
+    process.env.APPDATA ?? process.env.XDG_DATA_HOME ?? ".",
+    "npm",
+    "node_modules",
+    "genlayer",
+    "package.json",
+  );
+  keytar = createRequire(globalGenlayerPackage)("keytar");
+}
 const accountName = process.env.GENLAYER_ACCOUNT_NAME ?? "agentpact-requester";
 const privateKey = await keytar.getPassword("genlayer-cli", `account:${accountName}`);
 if (!privateKey) throw new Error(`Active local account '${accountName}' is not unlocked in the OS keychain.`);
@@ -105,7 +117,7 @@ const manifest = {
   createdAt: new Date().toISOString(),
 };
 save(pendingPath, manifest);
-console.log(JSON.stringify({ DEPLOYER_ADDRESS: signer, ACCOUNT_NAME: accountName, RPC: rpc, CHAIN_ID: chainId, CONTRACT_SHA256: sourceSha256, ESTIMATED_FEE_VALUE: feeValue.toString(), ESTIMATED_FEE_DISTRIBUTION: estimate.distribution }, null, 2));
+console.log(JSON.stringify({ DEPLOYER_ADDRESS: signer, ACCOUNT_NAME: accountName, RPC: rpc, CHAIN_ID: chainId, CONTRACT_SHA256: sourceSha256, ESTIMATED_FEE_VALUE: feeValue.toString(), ESTIMATED_FEE_DISTRIBUTION: safe(estimate.distribution) }, null, 2));
 
 let txHash;
 try {
