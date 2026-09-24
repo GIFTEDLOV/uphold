@@ -5,6 +5,17 @@ escrows GEN behind it, and names a beneficiary. The protocol records the source
 evidence and only changes economic state after deterministic authorization and
 bounded validator agreement.
 
+## Release status
+
+The current deployed source is `live-snapshot-v1.2` on canonical GenLayer
+Studio-dev (`https://studio-dev.genlayer.com/api`, chain `61997`) at
+`0x5C2C0827B08C720787673dE325a36886e8Ec8645`. Its source SHA-256 is
+`5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401`.
+The deployment finalized with `FINISHED_WITH_RETURN`; source/schema parity and
+the controlled qualification are recorded in `deployments/studio-dev/v1.2/`.
+The earlier malformed-header attempt remains historical failure evidence. The
+V1.1 address and lifecycle evidence remain historical.
+
 ## Live-snapshot evidence
 
 Protocol evidence is captured from the exact HTTPS source URL registered in
@@ -76,6 +87,6 @@ and fills those aliases with the live capture timestamp. Wayback, CDX, and the
 Availability API are optional off-chain research or recovery tools only; they are
 not required by `create_commitment`, `check_commitment`, contest, or adjudication.
 
-The protocol advertises version `live-snapshot-v1.0`. The previous empty live
-deployment and earlier archive-based experiments remain historical provenance;
-they are not silently rewritten.
+The V1.2 candidate advertises version `live-snapshot-v1.2`. The deployed V1.1
+instance (`0x23786A52b62DC489A5f69653dedD68d1fc56c231`) and earlier archive-based
+experiments remain historical provenance; they are not silently rewritten.

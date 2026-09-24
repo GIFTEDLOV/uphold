@@ -1,0 +1,237 @@
+{
+  "capturedAt": "2026-09-24T16:10:06.019Z",
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "sdk": "genlayer-js",
+  "sdkVersion": "2.0.0-rc.1",
+  "method": "getContractSchemaForCode",
+  "underlyingStudioMethod": "gen_getContractSchemaForCode",
+  "sourceSha256": "5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401",
+  "sourceBytes": 55588,
+  "result": {
+    "ctor": {
+      "params": [],
+      "kwparams": {}
+    },
+    "methods": {
+      "adjudicate_contest": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": false,
+        "ret": "string",
+        "payable": false
+      },
+      "check_commitment": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": false,
+        "ret": "string",
+        "payable": false
+      },
+      "commitment_history": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": true,
+        "ret": "array"
+      },
+      "contest_breach": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": false,
+        "ret": "string",
+        "payable": false
+      },
+      "contract_info": {
+        "params": [],
+        "kwparams": {},
+        "readonly": true,
+        "ret": "dict"
+      },
+      "create_commitment": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ],
+          [
+            "title",
+            "string"
+          ],
+          [
+            "category",
+            "string"
+          ],
+          [
+            "source_url",
+            "string"
+          ],
+          [
+            "commitment_text",
+            "string"
+          ],
+          [
+            "beneficiary",
+            "string"
+          ],
+          [
+            "baseline_archive_timestamp",
+            "string"
+          ],
+          [
+            "expires_at",
+            "string"
+          ],
+          [
+            "contest_window_seconds",
+            "int"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": false,
+        "ret": "string",
+        "payable": true
+      },
+      "expire_commitment": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": false,
+        "ret": "string",
+        "payable": false
+      },
+      "extend_commitment": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ],
+          [
+            "new_expiry",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": false,
+        "ret": "string",
+        "payable": false
+      },
+      "get_address_record": {
+        "params": [
+          [
+            "address",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": true,
+        "ret": "dict"
+      },
+      "get_commitment": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": true,
+        "ret": "dict"
+      },
+      "get_commitment_ids": {
+        "params": [
+          [
+            "limit",
+            "int"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": true,
+        "ret": "array"
+      },
+      "get_ledger": {
+        "params": [],
+        "kwparams": {},
+        "readonly": true,
+        "ret": "dict"
+      },
+      "get_limits": {
+        "params": [],
+        "kwparams": {},
+        "readonly": true,
+        "ret": "dict"
+      },
+      "increase_stake": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": false,
+        "ret": "string",
+        "payable": true
+      },
+      "settle_breach": {
+        "params": [
+          [
+            "commitment_id",
+            "string"
+          ]
+        ],
+        "kwparams": {},
+        "readonly": false,
+        "ret": "string",
+        "payable": false
+      }
+    }
+  },
+  "schema": {
+    "returned": true,
+    "methodCount": 15,
+    "viewCount": 7,
+    "writeCount": 8,
+    "methods": [
+      "adjudicate_contest",
+      "check_commitment",
+      "commitment_history",
+      "contest_breach",
+      "contract_info",
+      "create_commitment",
+      "expire_commitment",
+      "extend_commitment",
+      "get_address_record",
+      "get_commitment",
+      "get_commitment_ids",
+      "get_ledger",
+      "get_limits",
+      "increase_stake",
+      "settle_breach"
+    ]
+  },
+  "error": null
+}

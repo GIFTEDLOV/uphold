@@ -1,0 +1,62 @@
+{
+  "releaseFamily": "consensus-v0.6",
+  "guidanceCheckedAt": "2026-09-24",
+  "officialGuidance": {
+    "consensusMigration": "https://docs.genlayer.com/developers/consensus-v06-migration",
+    "networks": "https://docs.genlayer.com/developers/networks",
+    "fees": "https://docs.genlayer.com/developers/decentralized-applications/fees-and-transaction-kit",
+    "feeProfiling": "https://docs.genlayer.com/developers/decentralized-applications/fee-profiling-and-estimation",
+    "transactionKit": "https://docs.genlayer.com/developers/decentralized-applications/transaction-kit-integration",
+    "readingData": "https://docs.genlayer.com/developers/frontend-and-sdk-integration/reading-data-from-intelligent-contracts",
+    "transactionExecution": "https://docs.genlayer.com/understand-genlayer-protocol/core-concepts/transactions/transaction-execution",
+    "promptInjection": "https://docs.genlayer.com/developers/intelligent-contracts/security-and-best-practices/prompt-injection",
+    "skills": "https://github.com/genlayerlabs/skills/tree/main/plugins/genlayer-dev/skills"
+  },
+  "versions": {
+    "studio": "v0.123 RC",
+    "genlayer-js": "2.0.0-rc.1",
+    "genlayer-py": "0.19.0rc2",
+    "genlayer-test": "0.30.0rc2",
+    "genvm-linter": "0.11.1rc2",
+    "genlayer-cli": "0.40.0-rc.3",
+    "transaction-kit": "0.1.0-rc.2",
+    "transaction-kit-react": "0.1.0-rc.2"
+  },
+  "network": {
+    "name": "GenLayer Studio-dev",
+    "cliAlias": "studio-dev",
+    "jsChain": "studioDevnet",
+    "rpc": "https://studio-dev.genlayer.com/api",
+    "chainId": 61997
+  },
+  "runner": {
+    "dependency": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+    "decision": "schema-proven-and-deployed",
+    "officialDocumentedRunner": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+    "probe": {
+      "source": "artifacts/runner-probe/studio-dev-runner-probe.py",
+      "sourceSha256": "B9F5A1F7E9B7B9D26C811F25E7FC475965DC1C51C516FF10EF92BA8722A0C392",
+      "transaction": "0x414d53befcc5bd9acc37b82b0053cb447d679e7077663f8a16f8568699b51abf",
+      "status": "FINALIZED",
+      "execution": "FINISHED_WITH_ERROR",
+      "address": null,
+      "readback": null,
+      "result": "FAIL",
+      "failure": "invalid_contract runner malformed"
+    },
+    "basis": "The exact corrected Uphold source and a corrected gl.contract.Contract probe returned schemas from canonical Studio-dev. The successful V1.2 deployment finalized with FINISHED_WITH_RETURN. The 1jb runner remains unsupported by the hosted Studio-dev environment and is not used."
+  },
+  "contract": {
+    "name": "Uphold",
+    "version": "live-snapshot-v1.2",
+    "sourceSha256": "5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401"
+  },
+  "prohibited": [
+    "latest",
+    "dev branches",
+    "floating git refs",
+    "caret ranges for core protocol packages",
+    "py-genlayer:test",
+    "py-genlayer:latest"
+  ]
+}

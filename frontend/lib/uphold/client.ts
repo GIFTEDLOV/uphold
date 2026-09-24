@@ -1,4 +1,6 @@
 import { createGenLayerClient } from "@/lib/genlayer/client";
+import { TransactionHashVariant } from "genlayer-js/types";
+import { E2E_FIXTURES_ENABLED, e2eRead } from "./e2e-fixtures";
 import { getUpholdContractAddress } from "./config";
 import {
   normalizeAddressRecord,
@@ -22,11 +24,13 @@ function createReadClient() {
 }
 
 async function read(functionName: string, args: unknown[] = []): Promise<unknown> {
+  if (E2E_FIXTURES_ENABLED) return e2eRead(functionName);
   const client = createReadClient() as any;
   return client.readContract({
     address: requireUpholdAddress(),
     functionName,
     args,
+    transactionHashVariant: TransactionHashVariant.LATEST_FINAL,
   });
 }
 

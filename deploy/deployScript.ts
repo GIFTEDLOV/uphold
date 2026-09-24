@@ -7,6 +7,7 @@ import type {
   GenLayerTransaction,
   TransactionHash,
 } from "genlayer-js/types";
+import { TransactionHashVariant } from "genlayer-js/types";
 
 const requireFromProject = createRequire(
   path.resolve(process.cwd(), "package.json"),
@@ -17,22 +18,23 @@ const { isSuccessful } = requireFromProject("genlayer-js") as {
 
 export const DEPLOYMENT_CONTRACT_PATH = "contracts/uphold.py";
 export const EXPECTED_CONTRACT_SHA256 =
-  "090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8";
-export const EXPECTED_RPC = "https://studio-next.genlayer.com/api";
+  "5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401";
+export const EXPECTED_RPC = "https://studio-dev.genlayer.com/api";
 export const EXPECTED_CHAIN_ID = 61997;
 
-const deploymentDir = path.resolve(process.cwd(), "deployments/studio-next");
+const deploymentDir = path.resolve(process.cwd(), "deployments/studio-dev/v1.2");
 // Keep the superseded deployment manifests immutable. This release gets its
 // own provenance pair so a second, corrected deployment is still one-shot.
 const pendingManifestPath = path.join(
   deploymentDir,
-  "uphold-hardening.pending.json",
+  "manifest.corrected.pending.json",
 );
 const completedManifestPath = path.join(
   deploymentDir,
-  "uphold-hardening.json",
+  "manifest.json",
 );
 const contractPath = path.resolve(process.cwd(), DEPLOYMENT_CONTRACT_PATH);
+const feeProfilePath = path.resolve(process.cwd(), "frontend/fee-profile.json");
 
 type JsonRecord = Record<string, unknown>;
 
@@ -50,6 +52,22 @@ const writeManifest = (manifest: JsonRecord): void => {
 
 const sha256 = (bytes: Uint8Array): string =>
   createHash("sha256").update(bytes).digest("hex").toUpperCase();
+
+const profileEstimateOptions = (entry: Record<string, any>) => {
+  const rotationsPerRound = BigInt(entry.rotationsPerRound ?? "0");
+  const appealRounds = BigInt(entry.appealRounds ?? "0");
+  return {
+    leaderTimeunitsAllocation: BigInt(entry.leaderTimeunitsAllocation),
+    validatorTimeunitsAllocation: BigInt(entry.validatorTimeunitsAllocation),
+    executionBudgetPerRound: BigInt(entry.executionBudgetPerRound),
+    totalMessageFees: BigInt(entry.totalMessageFees ?? "0"),
+    appealRounds,
+    rotations: Array.from(
+      { length: Number(appealRounds) + 1 },
+      () => rotationsPerRound,
+    ),
+  };
+};
 
 export const verifyUpholdSourceSha = (sourceBytes: Uint8Array): string => {
   const contractSha256 = sha256(sourceBytes);
@@ -169,20 +187,27 @@ export default async function main(client: GenLayerClient<any>): Promise<void> {
   }
 
   const feePolicy = await client.getCurrentFeePolicy();
-  const estimate = await client.estimateTransactionFees({});
+  const feeProfile = JSON.parse(readFileSync(feeProfilePath, "utf8")) as Record<string, any>;
+  const estimate = await client.estimateTransactionFees(
+    profileEstimateOptions(feeProfile.deploy),
+  );
   const feeValue = BigInt(estimate.feeValue);
   if (feeValue <= 0n) throw new Error("Live deployment fee quote is zero");
   if (balanceWei <= feeValue) throw new Error("Insufficient balance for deployment fee");
 
   const manifest: JsonRecord = {
-    network: "GenLayer Studio Next",
+    network: "GenLayer Studio-dev",
     rpc: EXPECTED_RPC,
     chainId: EXPECTED_CHAIN_ID,
     contractPath: DEPLOYMENT_CONTRACT_PATH,
     contractSha256,
     cliVersion: "0.40.0-rc.3",
     genlayerJsVersion: "2.0.0-rc.1",
+    genlayerPyVersion: "0.19.0rc2",
+    genlayerTestVersion: "0.30.0rc2",
+    genvmLinterVersion: "0.11.1rc2",
     transactionKitVersion: "0.1.0-rc.2",
+    runner: "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
     deploymentAttempt: 1,
     supersedes: "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
     historicalSupersededDeployment: "0x96671389548f170A6f02BC3017495d157d827599",
@@ -195,7 +220,8 @@ export default async function main(client: GenLayerClient<any>): Promise<void> {
     nonceLatest: latestNonce,
     noncePending: pendingNonce,
     unknownPendingTx: "NOT_OBSERVED; RPC pending-pool enumeration unavailable",
-    quoteSource: "network-default",
+    quoteSource: "developer-profile-plus-live-policy",
+    feeProfileSha256: sha256(new Uint8Array(readFileSync(feeProfilePath))),
     feePolicy,
     estimatedFeeValue: feeValue,
     estimatedFeeDistribution: estimate.distribution,
@@ -284,6 +310,7 @@ export default async function main(client: GenLayerClient<any>): Promise<void> {
     address: contractAddress as any,
     functionName: "contract_info",
     args: [],
+    transactionHashVariant: TransactionHashVariant.LATEST_FINAL,
   });
   if (readback === undefined || readback === null) {
     manifest.status = "FINALIZED_SUCCESSFUL_READBACK_UNAVAILABLE";

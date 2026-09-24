@@ -1,0 +1,60 @@
+[
+  {
+    "capturedAt": "2026-09-24T11:54:51.165Z",
+    "rpc": "https://studio-dev.genlayer.com/api",
+    "chainId": 61997,
+    "label": "failed-uphold",
+    "tx": "0x06e758820d433baa29061b7dd432042dcefd8ec40749b53982bafa9cd9841f86",
+    "candidateAddress": "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5",
+    "method": "gen_getContractCode",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "gen_getContractCode",
+      "params": [
+        {
+          "address": "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5",
+          "status": "finalized"
+        }
+      ],
+      "id": 1
+    },
+    "httpStatus": 200,
+    "response": {
+      "jsonrpc": "2.0",
+      "error": {
+        "code": -32603,
+        "message": "(psycopg2.ProgrammingError) can't adapt type 'dict'\n[SQL: SELECT jsonb_typeof(current_state.data) AS data_kind, jsonb_typeof(current_state.data[%(data_1)s]) AS state_kind, (current_state.data[%(data_2)s][%(param_1)s]) ->> CASE WHEN (current_state.genvm_executor_selector = %(genvm_executor_selector_1)s OR (current_state.genvm_executor_selector LIKE %(genvm_executor_selector_2)s || '%%')) THEN %(param_2)s ELSE %(param_3)s END AS nested, (current_state.data[%(data_3)s]) ->> CASE WHEN (current_state.genvm_executor_selector = %(genvm_executor_selector_1)s OR (current_state.genvm_executor_selector LIKE %(genvm_executor_selector_2)s || '%%')) THEN %(param_2)s ELSE %(param_3)s END AS flat \nFROM current_state \nWHERE current_state.id = %(id_1)s]\n[parameters: {'data_1': 'state', 'data_2': 'state', 'param_1': 'accepted', 'genvm_executor_selector_1': 're:^v0\\\\.2\\\\.', 'genvm_executor_selector_2': 'v0.2.', 'param_2': '4a4jQSeS32tqmPt8mDlwH7iwK2/H7QIoEPeDRklGhec=', 'param_3': 'ugBWMHRazzAUqvFi6ZMwQDAsoL7z9W/i1zwKCPgsYQs=', 'data_3': 'state', 'id_1': {'address': '0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5', 'status': 'finalized'}}]\n(Background on this error at: https://sqlalche.me/e/20/f405)"
+      },
+      "id": 1
+    }
+  },
+  {
+    "capturedAt": "2026-09-24T11:54:51.416Z",
+    "rpc": "https://studio-dev.genlayer.com/api",
+    "chainId": 61997,
+    "label": "failed-probe",
+    "tx": "0x414d53befcc5bd9acc37b82b0053cb447d679e7077663f8a16f8568699b51abf",
+    "candidateAddress": "0x604556b09fD8642E5a5394C6d7De093b7D90A042",
+    "method": "gen_getContractCode",
+    "request": {
+      "jsonrpc": "2.0",
+      "method": "gen_getContractCode",
+      "params": [
+        {
+          "address": "0x604556b09fD8642E5a5394C6d7De093b7D90A042",
+          "status": "finalized"
+        }
+      ],
+      "id": 2
+    },
+    "httpStatus": 200,
+    "response": {
+      "jsonrpc": "2.0",
+      "error": {
+        "code": -32603,
+        "message": "(psycopg2.ProgrammingError) can't adapt type 'dict'\n[SQL: SELECT jsonb_typeof(current_state.data) AS data_kind, jsonb_typeof(current_state.data[%(data_1)s]) AS state_kind, (current_state.data[%(data_2)s][%(param_1)s]) ->> CASE WHEN (current_state.genvm_executor_selector = %(genvm_executor_selector_1)s OR (current_state.genvm_executor_selector LIKE %(genvm_executor_selector_2)s || '%%')) THEN %(param_2)s ELSE %(param_3)s END AS nested, (current_state.data[%(data_3)s]) ->> CASE WHEN (current_state.genvm_executor_selector = %(genvm_executor_selector_1)s OR (current_state.genvm_executor_selector LIKE %(genvm_executor_selector_2)s || '%%')) THEN %(param_2)s ELSE %(param_3)s END AS flat \nFROM current_state \nWHERE current_state.id = %(id_1)s]\n[parameters: {'data_1': 'state', 'data_2': 'state', 'param_1': 'accepted', 'genvm_executor_selector_1': 're:^v0\\\\.2\\\\.', 'genvm_executor_selector_2': 'v0.2.', 'param_2': '4a4jQSeS32tqmPt8mDlwH7iwK2/H7QIoEPeDRklGhec=', 'param_3': 'ugBWMHRazzAUqvFi6ZMwQDAsoL7z9W/i1zwKCPgsYQs=', 'data_3': 'state', 'id_1': {'address': '0x604556b09fD8642E5a5394C6d7De093b7D90A042', 'status': 'finalized'}}]\n(Background on this error at: https://sqlalche.me/e/20/f405)"
+      },
+      "id": 2
+    }
+  }
+]

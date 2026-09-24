@@ -5,7 +5,7 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Uphold — Put money behind your word",
-  description: "Evidence-backed commitment bonds on GenLayer Studio Next.",
+  description: "Evidence-backed commitment bonds on GenLayer Studio-dev.",
   manifest: "/site.webmanifest",
   icons: {
     icon: [

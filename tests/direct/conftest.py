@@ -3,6 +3,29 @@
 import json
 
 
+if __import__("os").name == "nt":
+    # gltest 0.30.0rc2 keeps the temporary stdin handle open while loading a
+    # contract. Windows cannot unlink an open handle; retain only these small
+    # gltest stdin files until the process exits so the same suite runs locally
+    # and in the Linux CI runner.
+    import os
+    import tempfile
+
+    _unlink = os.unlink
+    _temp_root = os.path.normcase(os.path.abspath(tempfile.gettempdir()))
+
+    def _unlink_gltest_temp(path, *args, **kwargs):
+        candidate = os.path.normcase(os.path.abspath(os.fspath(path)))
+        if candidate.startswith(_temp_root) and os.path.basename(candidate).startswith("tmp"):
+            try:
+                return _unlink(path, *args, **kwargs)
+            except PermissionError:
+                return None
+        return _unlink(path, *args, **kwargs)
+
+    os.unlink = _unlink_gltest_temp
+
+
 def to_hex(addr_bytes):
     """Convert address bytes to checksummed hex matching contract output.
 

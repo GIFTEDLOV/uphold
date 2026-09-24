@@ -1,0 +1,30 @@
+{
+  "capturedAt": "2026-09-24T11:54:14.736Z",
+  "startedAt": "2026-09-24T11:54:14.134Z",
+  "case": "1jb-studio-dev",
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "method": "gen_getContractSchema",
+  "codeSha256": "B9F5A1F7E9B7B9D26C811F25E7FC475965DC1C51C516FF10EF92BA8722A0C392",
+  "codeBytes": 267,
+  "request": {
+    "jsonrpc": "2.0",
+    "method": "gen_getContractSchema",
+    "params": [
+      {
+        "code": "IyB7ICJEZXBlbmRzIjogInB5LWdlbmxheWVyOjFqYjQ1YWE4eW5oMmE5Yzl4bjNiN3FxaDhzbTVxOTNod2ZwN2pxbXdzZmhoOGpwejA5aDYiIH0KCmZyb20gZ2VubGF5ZXIgaW1wb3J0ICoKCgpjbGFzcyBSdW5uZXJQcm9iZShnbC5Db250cmFjdCk6CiAgICBkZWYgX19pbml0X18oc2VsZik6CiAgICAgICAgcGFzcwoKICAgIEBnbC5wdWJsaWMudmlldwogICAgZGVmIHBpbmcoc2VsZikgLT4gc3RyOgogICAgICAgIHJldHVybiAiVVBIT0xEX1JVTk5FUl9QUk9CRV9PSyIK"
+      }
+    ],
+    "id": 1
+  },
+  "httpStatus": 200,
+  "response": {
+    "jsonrpc": "2.0",
+    "error": {
+      "code": -32603,
+      "message": "(psycopg2.ProgrammingError) can't adapt type 'dict'\n[SQL: SELECT current_state.id AS current_state_id, current_state.data AS current_state_data, current_state.balance AS current_state_balance, current_state.genvm_executor_selector AS current_state_genvm_executor_selector, current_state.updated_at AS current_state_updated_at \nFROM current_state \nWHERE current_state.id = %(id_1)s]\n[parameters: {'id_1': {'code': 'IyB7ICJEZXBlbmRzIjogInB5LWdlbmxheWVyOjFqYjQ1YWE4eW5oMmE5Yzl4bjNiN3FxaDhzbTVxOTNod2ZwN2pxbXdzZmhoOGpwejA5aDYiIH0KCmZyb20gZ2VubGF5ZXIgaW1wb3J0 ... (68 characters truncated) ... X18oc2VsZik6CiAgICAgICAgcGFzcwoKICAgIEBnbC5wdWJsaWMudmlldwogICAgZGVmIHBpbmcoc2VsZikgLT4gc3RyOgogICAgICAgIHJldHVybiAiVVBIT0xEX1JVTk5FUl9QUk9CRV9PSyIK'}}]\n(Background on this error at: https://sqlalche.me/e/20/f405)"
+    },
+    "id": 1
+  },
+  "fetchError": null
+}

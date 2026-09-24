@@ -2,6 +2,10 @@
 
 This audit distinguishes protocol behavior from frontend presentation and points to the direct regression suite. The original stale-contest finding was confirmed, fixed, deployed in the release candidate, and exercised through controlled A/B/C lifecycle evidence.
 
+## V1.2 release boundary
+
+The V1.2 release adds prompt-injection hardening and the exact v0.6 RC toolchain. Local Direct Mode, GLSim consensus, and CI gates pass. The corrected one-line runner-header separation deployed successfully on canonical Studio-dev at `0x5C2C0827B08C720787673dE325a36886e8Ec8645` with `FINALIZED / FINISHED_WITH_RETURN`; source parity, schema parity, and the controlled V1.2 qualification are recorded in `deployments/studio-dev/v1.2/`. The earlier malformed-header attempt and the V1.1 live evidence remain historical.
+
 ## Findings
 
 | Failure class | Classification | Evidence |
@@ -21,7 +25,7 @@ The candidate contract makes `contest_breach(commitment_id)` capture `commitment
 
 The behavioral test matrix, candidate deployment proof, controlled adversarial lifecycle proof, and row-by-row live reviewer matrix are included below. The real IANA positive proof remains separate from controlled fixture evidence.
 
-## Final candidate audit
+## Historical V1.1 candidate audit
 
 The hardened candidate is `0x23786A52b62DC489A5f69653dedD68d1fc56c231`, deployed by
 `0x50c4b9ba6daa08e23eee1926bafc9fddc2b23d9c2afed971cc4fb26e16348a3f`, with

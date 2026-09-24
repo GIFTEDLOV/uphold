@@ -13,7 +13,7 @@
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="PROVENANCE.md">Deployment</a> ·
   <a href="evidence/studio-next/uphold-hardening-live-proof.json">Verification</a> ·
-  <a href="https://explorer-studio-dev.genlayer.com/address/0x23786A52b62DC489A5f69653dedD68d1fc56c231">Contract</a>
+  <a href="https://explorer-studio-dev.genlayer.com/address/0x5C2C0827B08C720787673dE325a36886e8Ec8645">V1.2 Contract</a>
 </p>
 
 ![Uphold landing page](docs/assets/readme/01-landing.png)
@@ -30,16 +30,17 @@ The contract keeps the boundary explicit: validators provide evidence capture an
 | --- | --- |
 | Track | Agentic Commerce Infrastructure |
 | Category | Project |
-| Network | GenLayer Studio Next |
+| Network | GenLayer Studio-dev |
 | Chain ID | 61997 |
-| Canonical contract | 0x23786A52b62DC489A5f69653dedD68d1fc56c231 |
+| V1.2 contract | `0x5C2C0827B08C720787673dE325a36886e8Ec8645` |
+| Historical V1.1 proof | The following live-proof row and address references are historical only |
 | Evidence model | Live public source → independent validator capture → immutable authenticated snapshot |
 | Judgment model | Bounded semantic comparison over authenticated stored snapshots |
 | Verdict set | HOLDS · WEAKENED · ABSENT · INDETERMINATE |
 | Stake asset | GEN |
 | Transaction safety | Persisted same-hash reconciliation; no blind rebroadcast |
 | Frontend | Next.js 16 · React 19 · TypeScript |
-| Live proof state | ACTIVE · two authenticated snapshots · HOLDS · 0.002 GEN |
+| Live proof state | V1.2 qualification: ACTIVE · authenticated baseline + HOLDS check · 0.001 GEN |
 
 ## Contents
 
@@ -56,8 +57,9 @@ The contract keeps the boundary explicit: validators provide evidence capture an
 - [Breach and contest model](#breach-and-contest-model)
 - [Accounting model](#accounting-model)
 - [Transaction safety](#transaction-safety)
-- [Final verified deployment](#final-verified-deployment)
-- [End-to-end live proof](#end-to-end-live-proof)
+- [Current V1.2 release status](#current-v12-release-status)
+- [Historical V1.1 deployment](#historical-v11-deployment)
+- [Historical end-to-end live proof](#historical-end-to-end-live-proof)
 - [Security properties](#security-properties)
 - [Application](#application)
 - [Technology](#technology)
@@ -246,11 +248,27 @@ PRECONDITION READ
 
 The SDK distinguishes finalization from successful execution. If polling becomes ambiguous, the same hash is preserved and reconciled. A timeout, transient RPC failure, or unexpected classification never triggers a blind retry.
 
-## Final verified deployment
+## Current V1.2 release status
+
+V1.2 is deployed and qualified on canonical GenLayer Studio-dev (`https://studio-dev.genlayer.com/api`, chain `61997`) using the exact Consensus v0.6 / Studio v0.123 RC family. The corrected source separates the runner dependency comment from the adjacent Pyright directive; no protocol logic changed.
 
 | Field | Value |
 | --- | --- |
-| Network | GenLayer Studio Next |
+| Contract | 0x5C2C0827B08C720787673dE325a36886e8Ec8645 |
+| Corrected source SHA-256 | 5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401 |
+| Deployment transaction | 0x4605905ffcfc3e9c070f857b0fde1a77976fbcae56330c3695b9f27e62a55356 |
+| Deployment result | FINALIZED / FINISHED_WITH_RETURN |
+| Schema / parity | 15 methods, 7 views, 8 writes / PASS |
+| Qualification | Create + authenticated baseline + positive HOLDS check + LATEST_FINAL readback / PASS |
+| Proof package | deployments/studio-dev/v1.2/ |
+
+The earlier malformed-header deployment (`0x06e758…1f86`) remains historical failure evidence in `manifest.pending.json`; it is not the canonical deployment.
+
+## Historical V1.1 deployment
+
+| Field | Value |
+| --- | --- |
+| Network | GenLayer Studio Next (historical alias) |
 | Chain ID | 61997 |
 | RPC | https://studio-next.genlayer.com/api |
 | Contract | 0x23786A52b62DC489A5f69653dedD68d1fc56c231 |
@@ -260,9 +278,9 @@ The SDK distinguishes finalization from successful execution. If polling becomes
 | Contract version | live-snapshot-v1.1 |
 | Runner | py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng |
 
-The deployed source was read back and matched byte-for-byte. Deployment proof is retained in deployments/studio-next/uphold-hardening.json. The previous v1.0 deployment remains preserved as historical evidence.
+The deployed source was read back and matched byte-for-byte. This is historical V1.1 evidence retained in deployments/studio-next/uphold-hardening.json; it is not the current V1.2 target.
 
-## End-to-end live proof
+## Historical end-to-end live proof
 
 The headline real-world proof is commitment `live-proof-v2-20260918` against https://www.iana.org/help/example-domains. Its baseline and later snapshots both contain 6639 bytes, share SHA-256 `6fde51fc02d67b032e17adfe1ae5c67daf2c01bed20f533b7754ee32e14c4bc9`, and the later semantic result is `HOLDS`.
 
@@ -309,7 +327,7 @@ The fixture repository and every state commit are recorded in the machine-readab
 
 ## Application
 
-The application is a read-through view over the real Studio Next contract. It exposes the overview, public commitment explorer, detail/evidence timeline, activity history, Uphold Record, and transparency methodology.
+The application is a read-through view over the qualified V1.2 contract when an address is configured. Historical V1.1 evidence remains clearly labeled and is not used as active configuration.
 
 ### Dashboard
 
@@ -331,10 +349,10 @@ The transparency page explains what validators decide and what deterministic con
 
 ## Technology
 
-- Uphold intelligent contract in Python with GenLayer v0.6 rc5 compatibility
+- Uphold intelligent contract in Python with the pinned Consensus v0.6 / Studio v0.123 RC family
 - Next.js 16 App Router, React 19, TypeScript, and Tailwind CSS
 - genlayer-js and Transaction Kit RC2 for reads, fee quotes, wallet submission, reconciliation, and state confirmation
-- Studio Next RPC at https://studio-next.genlayer.com/api
+- Studio-dev RPC at https://studio-dev.genlayer.com/api
 - No backend, database, fake indexer, or fabricated chain statistics
 
 ## Verification and testing
@@ -343,15 +361,18 @@ The final verified regression baseline is:
 
 | Gate | Result |
 | --- | --- |
-| Frontend tests | 34/34 PASS |
-| Uphold Direct Mode | 77/77 PASS |
-| Total Direct Mode | 123/123 PASS |
+| Frontend tests | 36/36 PASS |
+| Uphold Direct Mode | 80/80 PASS |
+| Total Direct Mode | 126/126 PASS |
 | AST lint | PASS |
 | Semantic validation | PASS |
 | GenVM lint | PASS |
 | Typecheck/lint | PASS |
 | Production build | PASS |
-| Contract SHA-256 | 090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8 |
+| Corrected Contract SHA-256 | 5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401 |
+| GLSim integration | 4/4 PASS |
+| Browser E2E | 12/12 PASS |
+| Proof validator | PASS |
 
 Useful local checks:
 
@@ -372,7 +393,8 @@ tests/direct/                    Direct Mode and evidence regression tests
 frontend/app/                   Next.js routes
 frontend/components/uphold/     Uphold application UI
 frontend/lib/uphold/             typed client, actions, normalization, hooks
-frontend/fee-profile.json       measured Studio Next fee profile
+frontend/fee-profile.json       official measured Studio-dev fee profile
+deployments/studio-dev/v1.2/    canonical V1.2 deployment and qualification proof
 docs/assets/readme/             real release screenshots
 evidence/studio-next/            deployment and lifecycle proof
 deployments/studio-next/         deployment manifests and receipts
@@ -392,12 +414,12 @@ Copy-Item frontend/.env.example frontend/.env
 npm run dev
 ~~~
 
-The public defaults target Studio Next and the canonical contract. The frontend reads chain state and never fabricates commitment, transaction, or evidence data.
+The public defaults target Studio-dev. Set `NEXT_PUBLIC_CONTRACT_ADDRESS` to the canonical V1.2 address for a local production-like build.
 
 ## Verify Uphold in 5 minutes
 
 1. Clone https://github.com/GIFTEDLOV/uphold and enter the repository.
-2. Confirm contracts/uphold.py hashes to 090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8.
+2. Confirm contracts/uphold.py hashes to 5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401.
 3. Run npm ci and npm run dev.
 4. Open Explore and the live-proof-v2-20260918 detail page.
 5. Compare the visible HOLDS result, 0.002 GEN stake, snapshot history, and expiry with evidence/studio-next/uphold-hardening-live-proof.json.
@@ -408,10 +430,10 @@ For a deeper audit, compare the deployed source and deployment transaction in PR
 
 - Controlled adversarial breach, contest, payout-pending, and refund-pending paths are live-demonstrated; no natural production breach is claimed.
 - External EOA payout/refund completion has no contract-level receipt and remains observed off-contract.
-- Studio Next does not fully prove production Ghost/EVM semantics.
+- The historical Studio Next environment does not fully prove production Ghost/EVM semantics.
 - External payout completion remains observed off-contract.
-- The production UI is verified through HTTP, bundle, and RPC read checks; interactive browser automation was unavailable in this environment.
+- The production UI is verified through HTTP and browser smoke; no external security audit is claimed.
 
 ## Status
 
-Uphold is publicly released on GitHub with a verified Studio Next contract, an end-to-end real positive lifecycle proof, and separately labeled controlled adversarial lifecycle evidence. The canonical public application is [uphold-sable.vercel.app](https://uphold-sable.vercel.app). No natural-production breach is claimed.
+Uphold V1.2 is released on Studio-dev and promoted to [uphold-sable.vercel.app](https://uphold-sable.vercel.app). Historical V1.1 proof and the failed malformed-header attempt remain preserved. No natural-production breach or external transfer receipt is claimed.

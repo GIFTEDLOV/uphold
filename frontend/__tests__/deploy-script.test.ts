@@ -48,7 +48,7 @@ describe("deployment receipt success", () => {
 });
 
 describe("Uphold deployment gates", () => {
-  it("selects Uphold and the Studio Next chain", () => {
+  it("selects Uphold and the Studio-dev chain", () => {
     expect(DEPLOYMENT_CONTRACT_PATH).toBe("contracts/uphold.py");
     expect(DEPLOYMENT_CONTRACT_PATH).not.toContain("football");
     expect(() => assertDeploymentTarget(EXPECTED_RPC, EXPECTED_CHAIN_ID)).not.toThrow();

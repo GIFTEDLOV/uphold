@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-09-24T12:36:20.226Z",
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "method": "gen_getContractCode",
+  "studioParamsShape": "params: [address]",
+  "lookups": {
+    "failed-uphold": {
+      "tx": "0x06e758820d433baa29061b7dd432042dcefd8ec40749b53982bafa9cd9841f86",
+      "candidateAddress": "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5",
+      "request": {
+        "jsonrpc": "2.0",
+        "method": "gen_getContractCode",
+        "params": [
+          "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5"
+        ],
+        "id": 1
+      },
+      "httpStatus": 200,
+      "response": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32001,
+          "message": "Contract 0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5 not found",
+          "data": {
+            "contract_address": "0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5"
+          }
+        },
+        "id": 1
+      },
+      "returnedCode": null,
+      "returnedCodeIsEmpty": false
+    },
+    "failed-probe": {
+      "tx": "0x414d53befcc5bd9acc37b82b0053cb447d679e7077663f8a16f8568699b51abf",
+      "candidateAddress": "0x604556b09fD8642E5a5394C6d7De093b7D90A042",
+      "request": {
+        "jsonrpc": "2.0",
+        "method": "gen_getContractCode",
+        "params": [
+          "0x604556b09fD8642E5a5394C6d7De093b7D90A042"
+        ],
+        "id": 1
+      },
+      "httpStatus": 200,
+      "response": {
+        "jsonrpc": "2.0",
+        "error": {
+          "code": -32001,
+          "message": "Contract 0x604556b09fD8642E5a5394C6d7De093b7D90A042 not found",
+          "data": {
+            "contract_address": "0x604556b09fD8642E5a5394C6d7De093b7D90A042"
+          }
+        },
+        "id": 1
+      },
+      "returnedCode": null,
+      "returnedCodeIsEmpty": false
+    }
+  }
+}
