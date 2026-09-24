@@ -1,0 +1,34 @@
+{
+  "capturedAt": "2026-09-24T12:35:15.630Z",
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "method": "gen_getContractSchemaForCode",
+  "encoding": "0x + UTF-8 source hex",
+  "label": "1jb",
+  "runner": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+  "sourceSha256": "B9F5A1F7E9B7B9D26C811F25E7FC475965DC1C51C516FF10EF92BA8722A0C392",
+  "sourceBytes": 267,
+  "request": {
+    "jsonrpc": "2.0",
+    "method": "gen_getContractSchemaForCode",
+    "params": [
+      "0x23207b2022446570656e6473223a202270792d67656e6c617965723a316a623435616138796e683261396339786e33623771716838736d3571393368776670376a716d7773666868386a707a3039683622207d0a0a66726f6d2067656e6c6179657220696d706f7274202a0a0a0a636c6173732052756e6e657250726f626528676c2e436f6e7472616374293a0a20202020646566205f5f696e69745f5f2873656c66293a0a2020202020202020706173730a0a2020202040676c2e7075626c69632e766965770a202020206465662070696e672873656c6629202d3e207374723a0a202020202020202072657475726e20225550484f4c445f52554e4e45525f50524f42455f4f4b220a"
+    ],
+    "id": 1
+  },
+  "httpStatus": 200,
+  "response": {
+    "jsonrpc": "2.0",
+    "error": {
+      "code": -32603,
+      "message": "('execution failed', {'stdout': '', 'stderr': '', 'genvm_log': [{'ts': '1790253317303', 'target': 'genvm_common', 'message': 'logging initialized', 'version': 'v0.3.0-rc7-x86_64-linux-release', 'file': 'crates/common/src/lib.rs:66', 'level': 'info'}, {'ts': '1790253317315', 'target': 'genvm::exe::run', 'message': 'genvm id', 'genvm_id': '1196', 'file': 'src/exe/run.rs:368', 'level': 'info'}, {'ts': '1790253317325', 'target': 'genvm::rt::supervisor::actions', 'message': 'runner load', 'runner': 'chain:0x0000000000000000000000000000000000000000:d:q805cc3mbb7k055ay5hek4sg80r2s85yyftpzrpq7g50hy1cc45g', 'runner_load_cost': '4096', 'size': '267', 'status': 'charged', 'file': 'src/rt/supervisor/actions.rs:357', 'level': 'info'}, {'ts': '1790253317326', 'target': 'genvm', 'message': 'metrics', 'metrics': {'hosts': [{'time': 6092}, {'time': 0}], 'llm_module': {'calls': 0, 'time': 0}, 'supervisor': {'compilation_time': 0, 'compiled_modules': 0, 'precompile_hits': 0}, 'web_module': {'calls': 0, 'time': 0}}, 'file': 'src/lib.rs:611', 'level': 'info'}], 'result': '{\"kind\": \"VM_ERROR\", \"message\": \"invalid_contract runner malformed\"}'})"
+    },
+    "id": 1
+  },
+  "schema": {
+    "returned": false,
+    "methodCount": 0,
+    "viewCount": 0,
+    "writeCount": 0
+  }
+}

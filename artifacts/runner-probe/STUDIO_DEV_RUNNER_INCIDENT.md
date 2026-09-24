@@ -154,3 +154,133 @@ runner archives for these exact identifiers. No further transaction was sent.
 Complete request/response evidence is attached in the schema and code-lookup
 JSON files in artifacts/runner-probe/.
 ```
+
+## Corrected Studio RPC semantics
+
+The official `genlayer-studio` `main` branch was inspected at source revision
+`c94072951e483510329670aa427fba3fa6944f45` on 2026-09-24. The inspected
+implementation is available at:
+
+`https://github.com/genlayerlabs/genlayer-studio/tree/c94072951e483510329670aa427fba3fa6944f45`
+
+The inspected Studio implementation registers:
+
+- `gen_getContractSchema(contract_address)` for an address lookup.
+- `gen_getContractSchemaForCode(contract_code_hex)` for source-code schema.
+- `gen_getContractCode(contract_address)` with a bare address parameter.
+
+The Studio frontend service calls `gen_getContractSchemaForCode` with one code
+argument and `gen_getContractCode` with one address argument. The alignment
+plan documents this as a Studio/Node RPC semantic divergence: Studio uses
+`gen_getContractSchemaForCode(hex_or_utf8)` while the public Node surface uses
+`gen_getContractSchema({code: base64})` for source code.
+
+The previous `gen_getContractSchema` request used the public Node object shape
+against the Studio handler. Its `can't adapt type 'dict'` response was caused
+by that RPC-surface divergence and is not a valid runner-resolution test. It is
+preserved above as historical diagnostic evidence, not treated as user error.
+
+The pinned `genlayer-js` `2.0.0-rc.1` cross-check uses the Studio equivalent
+`getContractSchemaForCode(source)`, which internally calls
+`gen_getContractSchemaForCode` with Studio hex encoding.
+
+## Corrected `gen_getContractSchemaForCode` results
+
+All three corrected requests used `params: ["0x" + UTF-8 source hex]` against
+`https://studio-dev.genlayer.com/api`, chain `61997`. Complete requests and
+responses are in:
+
+- `schema-for-code-1jb-studio-dev.json`
+- `schema-for-code-5jyc-studio-dev.json`
+- `schema-for-code-uphold-v12-studio-dev.json`
+- `schema-for-code-summary.json`
+
+| Input | HTTP | Result | Methods | Views | Writes | Exact diagnostic |
+| --- | ---: | --- | ---: | ---: | ---: | --- |
+| 1jb minimal probe | 200 | FAIL | 0 | 0 | 0 | `invalid_contract runner malformed` |
+| 5jyc minimal probe | 200 | FAIL | 0 | 0 | 0 | `NameError: name 'gl' is not defined` after `py-genlayer:5jyc...` runner-load event |
+| Exact Uphold V1.2 source, 1jb header | 200 | FAIL | 0 | 0 | 0 | `invalid_contract runner malformed` |
+
+The 5jyc response is materially different from a runner-malformed response:
+its GenVM log explicitly contains a charged and cached
+`py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng` runner-load
+event before the Python traceback. This is evidence that the Studio schema
+execution path reached that runner, but the exact probe source did not produce
+a schema under it. No deployment compatibility is inferred from this result.
+
+## SDK cross-check
+
+`genlayer-js 2.0.0-rc.1` was called read-only through
+`getContractSchemaForCode` for the same three exact source strings. The SDK
+matched the raw Studio results:
+
+| Input | SDK result | SDK method/view/write count |
+| --- | --- | ---: |
+| 1jb minimal probe | FAIL: `invalid_contract runner malformed` | `0 / 0 / 0` |
+| 5jyc minimal probe | FAIL: `NameError: name 'gl' is not defined` | `0 / 0 / 0` |
+| Exact Uphold V1.2 source | FAIL: `invalid_contract runner malformed` | `0 / 0 / 0` |
+
+Full SDK errors and source hashes are persisted in
+`sdk-schema-crosscheck.json`.
+
+## Corrected Studio contract-code lookups
+
+Using the corrected Studio shape `gen_getContractCode` with
+`params: [address]`:
+
+| Candidate | HTTP | Result |
+| --- | ---: | --- |
+| `0xeFCD758f43C16eE2eCF4361934F6DE0AD7F019C5` | 200 | JSON-RPC `-32001`: Contract not found |
+| `0x604556b09fD8642E5a5394C6d7De093b7D90A042` | 200 | JSON-RPC `-32001`: Contract not found |
+
+Complete corrected-shape evidence is in
+`studio-code-lookups-correct-shape.json`. These remain receipt candidate
+addresses only and are not deployed-contract addresses.
+
+## Corrected classification
+
+`RUNNER_FAILURE_CLASSIFICATION=STUDIO_RPC_RUNNER_COMPATIBILITY_SPLIT`
+
+The corrected diagnostic does not exactly match Cases A-E:
+
+- 1jb fails at the Studio GenVM boundary with `invalid_contract runner malformed`.
+- 5jyc reaches a runner-load event, then the exact minimal probe fails with a
+  Python `NameError` before schema generation.
+- The exact Uphold source fails with the 1jb runner-malformed result.
+
+Therefore the evidence supports a split between the two runner/source
+combinations, not a successful schema for either input. No deployment is
+authorized by this diagnostic.
+
+## Corrected copy-ready support report
+
+```text
+Subject: Corrected Studio schema diagnostics distinguish 1jb runner failure from 5jyc runner load
+
+Network: Studio-dev, chain 61997, https://studio-dev.genlayer.com/api
+Studio source revision inspected: c94072951e483510329670aa427fba3fa6944f45
+
+The Studio-specific read-only method is gen_getContractSchemaForCode with
+params: ["0x" + UTF-8 source hex]. The previous Node-style
+gen_getContractSchema params: [{code: base64}] test is preserved but was
+inconclusive because Studio interpreted the object as a database address.
+
+Corrected results:
+
+1. 1jb minimal probe:
+   JSON-RPC -32603, invalid_contract runner malformed.
+2. 5jyc minimal probe:
+   GenVM log shows py-genlayer:5jyc... loaded; execution then fails with
+   NameError: name 'gl' is not defined in the exact probe source.
+3. Exact Uphold V1.2 source with 1jb header:
+   JSON-RPC -32603, invalid_contract runner malformed.
+
+The pinned genlayer-js 2.0.0-rc.1 getContractSchemaForCode cross-check matches
+all three raw RPC results. The two failed receipt candidate addresses return
+gen_getContractCode -32001 Contract not found using Studio's params: [address]
+shape, and eth_getCode returns 0x at latest and finalized.
+
+This evidence does not authorize deployment. Please confirm the Studio-hosted
+runner/source compatibility expected for 1jb and the legacy import semantics
+of 5jyc. Complete JSON request/response evidence is attached.
+```
