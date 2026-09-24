@@ -21,8 +21,10 @@ const requiredFields = [
   "rotationsPerRound",
 ];
 
-if (profile.version !== 1 || profile.network !== "studio-dev" || profile.chainId !== 61997) {
-  throw new Error("fee profile must be official v1 for studio-dev chain 61997");
+const canonical = profile.network === "studio-dev" && Number(profile.chainId) === 61997;
+const reproducibleLocalnet = profile.network === "localnet" && Number(profile.chainId) === 61127;
+if (profile.version !== 1 || (!canonical && !reproducibleLocalnet)) {
+  throw new Error("fee profile must be official v1 for Studio-dev 61997 or reproducible localnet 61127");
 }
 if (!profile.deploy || !profile.methods || Object.keys(profile.methods).sort().join() !== requiredMethods.slice().sort().join()) {
   throw new Error("fee profile must contain deploy plus every Uphold V1.2 write method");
@@ -34,4 +36,4 @@ for (const [name, entry] of Object.entries({ deploy: profile.deploy, ...profile.
   }
   if ("feeValue" in entry || "recommendedFeeValue" in entry) throw new Error(`${name} persists live feeValue`);
 }
-console.log(`FEE_PROFILE_VALID=PASS methods=${requiredMethods.length}`);
+console.log(`FEE_PROFILE_VALID=PASS network=${profile.network} chainId=${profile.chainId} methods=${requiredMethods.length}`);
