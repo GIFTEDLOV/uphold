@@ -4,7 +4,7 @@ This audit distinguishes protocol behavior from frontend presentation and points
 
 ## V1.2 release boundary
 
-The V1.2 candidate adds prompt-injection hardening and the exact v0.6 RC toolchain. Local Direct Mode, GLSim consensus, and CI gates pass, but the single canonical Studio-dev deployment attempt finalized with `FINISHED_WITH_ERROR` and `invalid_contract runner malformed`. Consequently, the V1.2 candidate has no deployed address, source readback, qualification, or production promotion. The live evidence referenced below is historical V1.1 evidence and controlled fixture evidence, not V1.2 proof.
+The V1.2 release adds prompt-injection hardening and the exact v0.6 RC toolchain. Local Direct Mode, GLSim consensus, and CI gates pass. The corrected one-line runner-header separation deployed successfully on canonical Studio-dev at `0x5C2C0827B08C720787673dE325a36886e8Ec8645` with `FINALIZED / FINISHED_WITH_RETURN`; source parity, schema parity, and the controlled V1.2 qualification are recorded in `deployments/studio-dev/v1.2/`. The earlier malformed-header attempt and the V1.1 live evidence remain historical.
 
 ## Findings
 

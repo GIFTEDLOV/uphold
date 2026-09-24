@@ -7,12 +7,14 @@ bounded validator agreement.
 
 ## Release status
 
-The current source candidate is `live-snapshot-v1.2` and targets GenLayer
-Studio-dev (`https://studio-dev.genlayer.com/api`, chain `61997`). Its source
-SHA-256 is `EC4BD059AC218BA3E9151EE34C6B41F8810B371FF95F9A153B1D0BCB98EBB71C`.
-The first and only hosted deployment attempt finalized with
-`FINISHED_WITH_ERROR` / `invalid_contract runner malformed`, so no V1.2 address
-is authoritative. The V1.1 address and lifecycle evidence remain historical.
+The current deployed source is `live-snapshot-v1.2` on canonical GenLayer
+Studio-dev (`https://studio-dev.genlayer.com/api`, chain `61997`) at
+`0x5C2C0827B08C720787673dE325a36886e8Ec8645`. Its source SHA-256 is
+`5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401`.
+The deployment finalized with `FINISHED_WITH_RETURN`; source/schema parity and
+the controlled qualification are recorded in `deployments/studio-dev/v1.2/`.
+The earlier malformed-header attempt remains historical failure evidence. The
+V1.1 address and lifecycle evidence remain historical.
 
 ## Live-snapshot evidence
 

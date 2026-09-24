@@ -1,0 +1,86 @@
+{
+  "release": "Uphold V1.2",
+  "result": "PASS",
+  "network": "GenLayer Studio-dev",
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "contractAddress": "0x5C2C0827B08C720787673dE325a36886e8Ec8645",
+  "deploymentTx": "0x4605905ffcfc3e9c070f857b0fde1a77976fbcae56330c3695b9f27e62a55356",
+  "sourceSha256": "5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401",
+  "runner": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
+  "sourceReadback": {
+    "path": "source-readback.json",
+    "parity": "PASS",
+    "sourceSha256": "5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401"
+  },
+  "schema": {
+    "path": "schema.json",
+    "parity": "PASS",
+    "methods": [
+      "adjudicate_contest",
+      "check_commitment",
+      "commitment_history",
+      "contest_breach",
+      "contract_info",
+      "create_commitment",
+      "expire_commitment",
+      "extend_commitment",
+      "get_address_record",
+      "get_commitment",
+      "get_commitment_ids",
+      "get_ledger",
+      "get_limits",
+      "increase_stake",
+      "settle_breach"
+    ],
+    "schemaCounts": {
+      "total": 15,
+      "views": 7,
+      "writes": 8
+    }
+  },
+  "schemaCounts": {
+    "total": 15,
+    "views": 7,
+    "writes": 8
+  },
+  "contractInfo": {
+    "path": "contract-info-readback.json",
+    "name": "Uphold",
+    "version": "live-snapshot-v1.2",
+    "transactionHashVariant": "LATEST_FINAL"
+  },
+  "qualification": {
+    "path": "qualification.json",
+    "result": "PASS",
+    "transactionHashes": {
+      "create_commitment": "0xfe16647235f9eb22c11dbd1371930b3236d0e593b3dd38844ae42e2b1afde539",
+      "check_commitment": "0x7d368422cbc47b24fd16dfed4ca34df683c6e03424676d5bf613d9b0569db1da"
+    },
+    "transactionHashVariant": "LATEST_FINAL"
+  },
+  "feeProfile": {
+    "path": "../../frontend/fee-profile.json",
+    "sha256": "F4A85DF9AB5DDB2F19A8F7B303594B1876DCE552DEF3EABDE0D7AC7D787EDB3E",
+    "validation": "PASS",
+    "methodCount": 8
+  },
+  "historical": {
+    "v11Address": "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
+    "v11SourceSha256": "090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8",
+    "failedV12Deployment": {
+      "transaction": "0x06e758820d433baa29061b7dd432042dcefd8ec40749b53982bafa9cd9841f86",
+      "error": "invalid_contract runner malformed",
+      "path": "manifest.pending.json"
+    },
+    "failedOfficialRunnerProbe": {
+      "transaction": "0x414d53befcc5bd9acc37b82b0053cb447d679e7077663f8a16f8568699b51abf",
+      "error": "invalid_contract runner malformed",
+      "path": "../../../artifacts/runner-probe/manifest.pending.json"
+    }
+  },
+  "disclosures": {
+    "controlledFixture": "The source is the public example.com reference page and the qualification is a controlled release fixture; it is not natural breach evidence.",
+    "externalSettlement": "Contract records pending external EOA transfers; completion has no contract-level receipt and is not claimed here."
+  }
+}

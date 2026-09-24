@@ -13,6 +13,16 @@ the dependency header from that directive. The first 5jyc probe failure was a
 probe-source error (`from genlayer import *` while using `gl`); the second was
 also probe-source-specific (`gl.Contract` instead of `gl.contract.Contract`).
 
+The corrected probe v2 and exact Uphold source both returned schemas, and the
+exact source then deployed successfully with `FINALIZED / FINISHED_WITH_RETURN`
+at `0x5C2C0827B08C720787673dE325a36886e8Ec8645`.
+
+The deployment source hash is `5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401`.
+The only contract-source difference from the previous V1.2 candidate is the
+blank line separating the runner header from the Pyright directive. The failed
+deployment transaction `0x06e758820d433baa29061b7dd432042dcefd8ec40749b53982bafa9cd9841f86`
+is retained as historical evidence.
+
 Primary guidance reviewed:
 
 - [Consensus v0.6 Migration](https://docs.genlayer.com/developers/consensus-v06-migration)

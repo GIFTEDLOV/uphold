@@ -13,7 +13,7 @@
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="PROVENANCE.md">Deployment</a> ·
   <a href="evidence/studio-next/uphold-hardening-live-proof.json">Verification</a> ·
-  <a href="https://explorer-studio-dev.genlayer.com/address/0x23786A52b62DC489A5f69653dedD68d1fc56c231">Contract</a>
+  <a href="https://explorer-studio-dev.genlayer.com/address/0x5C2C0827B08C720787673dE325a36886e8Ec8645">V1.2 Contract</a>
 </p>
 
 ![Uphold landing page](docs/assets/readme/01-landing.png)
@@ -32,7 +32,7 @@ The contract keeps the boundary explicit: validators provide evidence capture an
 | Category | Project |
 | Network | GenLayer Studio-dev |
 | Chain ID | 61997 |
-| V1.2 contract | Not created: first deployment finalized with execution error |
+| V1.2 contract | `0x5C2C0827B08C720787673dE325a36886e8Ec8645` |
 | Historical V1.1 proof | The following live-proof row and address references are historical only |
 | Evidence model | Live public source → independent validator capture → immutable authenticated snapshot |
 | Judgment model | Bounded semantic comparison over authenticated stored snapshots |
@@ -40,7 +40,7 @@ The contract keeps the boundary explicit: validators provide evidence capture an
 | Stake asset | GEN |
 | Transaction safety | Persisted same-hash reconciliation; no blind rebroadcast |
 | Frontend | Next.js 16 · React 19 · TypeScript |
-| Live proof state | ACTIVE · two authenticated snapshots · HOLDS · 0.002 GEN |
+| Live proof state | V1.2 qualification: ACTIVE · authenticated baseline + HOLDS check · 0.001 GEN |
 
 ## Contents
 
@@ -250,17 +250,19 @@ The SDK distinguishes finalization from successful execution. If polling becomes
 
 ## Current V1.2 release status
 
-The V1.2 candidate is pinned to the Consensus v0.6 / Studio v0.123 RC family and targets canonical GenLayer Studio-dev (`https://studio-dev.genlayer.com/api`, chain `61997`). Local lint, schema, typecheck, Direct Mode, GLSim consensus, fee-profile, frontend, and browser gates pass. The single authorized deployment attempt reached `FINALIZED` but returned `FINISHED_WITH_ERROR` with `invalid_contract runner malformed`; no V1.2 address exists and the frontend was not promoted.
+V1.2 is deployed and qualified on canonical GenLayer Studio-dev (`https://studio-dev.genlayer.com/api`, chain `61997`) using the exact Consensus v0.6 / Studio v0.123 RC family. The corrected source separates the runner dependency comment from the adjacent Pyright directive; no protocol logic changed.
 
 | Field | Value |
 | --- | --- |
-| Candidate source SHA-256 | EC4BD059AC218BA3E9151EE34C6B41F8810B371FF95F9A153B1D0BCB98EBB71C |
-| Deployment attempt | 0x06e758820d433baa29061b7dd432042dcefd8ec40749b53982bafa9cd9841f86 |
-| Execution | FINISHED_WITH_ERROR |
-| Failure | invalid_contract runner malformed |
-| Evidence | deployments/studio-dev/v1.2/manifest.pending.json |
+| Contract | 0x5C2C0827B08C720787673dE325a36886e8Ec8645 |
+| Corrected source SHA-256 | 5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401 |
+| Deployment transaction | 0x4605905ffcfc3e9c070f857b0fde1a77976fbcae56330c3695b9f27e62a55356 |
+| Deployment result | FINALIZED / FINISHED_WITH_RETURN |
+| Schema / parity | 15 methods, 7 views, 8 writes / PASS |
+| Qualification | Create + authenticated baseline + positive HOLDS check + LATEST_FINAL readback / PASS |
+| Proof package | deployments/studio-dev/v1.2/ |
 
-Promotion, Vercel deployment, GitHub release, and branch protection are intentionally not claimed after this failed execution. The historical V1.1 evidence below remains the only live production proof.
+The earlier malformed-header deployment (`0x06e758…1f86`) remains historical failure evidence in `manifest.pending.json`; it is not the canonical deployment.
 
 ## Historical V1.1 deployment
 
@@ -325,7 +327,7 @@ The fixture repository and every state commit are recorded in the machine-readab
 
 ## Application
 
-The application is a read-through view over the historical V1.1 contract when an address is configured. The V1.2 build keeps writes disabled until a successful Studio-dev deployment is independently qualified.
+The application is a read-through view over the qualified V1.2 contract when an address is configured. Historical V1.1 evidence remains clearly labeled and is not used as active configuration.
 
 ### Dashboard
 
@@ -367,7 +369,10 @@ The final verified regression baseline is:
 | GenVM lint | PASS |
 | Typecheck/lint | PASS |
 | Production build | PASS |
-| Candidate Contract SHA-256 | EC4BD059AC218BA3E9151EE34C6B41F8810B371FF95F9A153B1D0BCB98EBB71C |
+| Corrected Contract SHA-256 | 5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401 |
+| GLSim integration | 4/4 PASS |
+| Browser E2E | 12/12 PASS |
+| Proof validator | PASS |
 
 Useful local checks:
 
@@ -389,6 +394,7 @@ frontend/app/                   Next.js routes
 frontend/components/uphold/     Uphold application UI
 frontend/lib/uphold/             typed client, actions, normalization, hooks
 frontend/fee-profile.json       official measured Studio-dev fee profile
+deployments/studio-dev/v1.2/    canonical V1.2 deployment and qualification proof
 docs/assets/readme/             real release screenshots
 evidence/studio-next/            deployment and lifecycle proof
 deployments/studio-next/         deployment manifests and receipts
@@ -408,12 +414,12 @@ Copy-Item frontend/.env.example frontend/.env
 npm run dev
 ~~~
 
-The public defaults target Studio-dev. The frontend reads chain state and never fabricates commitment, transaction, or evidence data; the local build remains addressless until V1.2 deployment succeeds.
+The public defaults target Studio-dev. Set `NEXT_PUBLIC_CONTRACT_ADDRESS` to the canonical V1.2 address for a local production-like build.
 
 ## Verify Uphold in 5 minutes
 
 1. Clone https://github.com/GIFTEDLOV/uphold and enter the repository.
-2. Confirm contracts/uphold.py hashes to EC4BD059AC218BA3E9151EE34C6B41F8810B371FF95F9A153B1D0BCB98EBB71C.
+2. Confirm contracts/uphold.py hashes to 5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401.
 3. Run npm ci and npm run dev.
 4. Open Explore and the live-proof-v2-20260918 detail page.
 5. Compare the visible HOLDS result, 0.002 GEN stake, snapshot history, and expiry with evidence/studio-next/uphold-hardening-live-proof.json.
@@ -426,8 +432,8 @@ For a deeper audit, compare the deployed source and deployment transaction in PR
 - External EOA payout/refund completion has no contract-level receipt and remains observed off-contract.
 - The historical Studio Next environment does not fully prove production Ghost/EVM semantics.
 - External payout completion remains observed off-contract.
-- The production UI is verified through HTTP, bundle, and RPC read checks; interactive browser automation was unavailable in this environment.
+- The production UI is verified through HTTP and browser smoke; no external security audit is claimed.
 
 ## Status
 
-Uphold's historical V1.1 production proof is preserved on GitHub. The V1.2 candidate is blocked pending runner compatibility resolution after its hosted deployment returned `FINISHED_WITH_ERROR`; the existing public application remains the unpromoted V1.1 deployment at [uphold-sable.vercel.app](https://uphold-sable.vercel.app). No natural-production breach is claimed.
+Uphold V1.2 is released on Studio-dev and promoted to [uphold-sable.vercel.app](https://uphold-sable.vercel.app). Historical V1.1 proof and the failed malformed-header attempt remain preserved. No natural-production breach or external transfer receipt is claimed.

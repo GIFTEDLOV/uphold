@@ -11,9 +11,12 @@ const chainId = 61997;
 const sourcePath = path.resolve(root, "contracts/uphold.py");
 const profilePath = path.resolve(root, "frontend/fee-profile.json");
 const deploymentDir = path.resolve(root, "deployments/studio-dev/v1.2");
-const pendingPath = path.join(deploymentDir, "manifest.pending.json");
+// Preserve manifest.pending.json as the historical failed V1.2 attempt.
+// The corrected header deployment gets its own one-shot reconciliation file.
+const pendingPath = path.join(deploymentDir, "manifest.corrected.pending.json");
 const completedPath = path.join(deploymentDir, "manifest.json");
 const runner = "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng";
+const expectedSourceSha256 = "5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401";
 const safe = (value) => JSON.parse(JSON.stringify(value, (_key, item) => typeof item === "bigint" ? item.toString() : item));
 const save = (file, value) => writeFileSync(file, `${JSON.stringify(safe(value), null, 2)}\n`, "utf8");
 const sha256 = (value) => createHash("sha256").update(value).digest("hex").toUpperCase();
@@ -28,6 +31,7 @@ if (existsSync(pendingPath)) {
 }
 if (existsSync(completedPath)) throw new Error("A completed V1.2 deployment manifest already exists; refusing a second deployment.");
 if (profile.network !== "studio-dev" || Number(profile.chainId) !== chainId) throw new Error("Fee profile is not the canonical Studio-dev profile.");
+if (sourceSha256 !== expectedSourceSha256) throw new Error(`Unexpected corrected Uphold source SHA-256: ${sourceSha256}`);
 
 const requireProject = createRequire(path.resolve(root, "package.json"));
 let keytar;
@@ -98,7 +102,7 @@ const manifest = {
   genlayerCliVersion: "0.40.0-rc.3",
   transactionKitVersion: "0.1.0-rc.2",
   transactionKitReactVersion: "0.1.0-rc.2",
-  deploymentAttempt: 1,
+  deploymentAttempt: 2,
   supersedes: "0x23786A52b62DC489A5f69653dedD68d1fc56c231",
   historicalV11SourceSha256: "090BA710374AC156B8D2CA72001E20F1CDA8482F5530A7C8570357F847D2A1F8",
   deployer: signer,

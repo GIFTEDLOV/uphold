@@ -31,7 +31,7 @@
   },
   "runner": {
     "dependency": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng",
-    "decision": "not-resolved",
+    "decision": "schema-proven-and-deployed",
     "officialDocumentedRunner": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
     "probe": {
       "source": "artifacts/runner-probe/studio-dev-runner-probe.py",
@@ -44,7 +44,7 @@
       "result": "FAIL",
       "failure": "invalid_contract runner malformed"
     },
-    "basis": "The official write-contract skill documents 1jb45... as the pinned network runner, but its minimal Studio-dev probe also finalized with invalid_contract runner malformed. The active Uphold candidate remains unchanged and no runner replacement is proven."
+    "basis": "The exact corrected Uphold source and a corrected gl.contract.Contract probe returned schemas from canonical Studio-dev. The successful V1.2 deployment finalized with FINISHED_WITH_RETURN. The 1jb runner remains unsupported by the hosted Studio-dev environment and is not used."
   },
   "contract": {
     "name": "Uphold",

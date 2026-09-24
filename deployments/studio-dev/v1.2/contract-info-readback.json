@@ -1,0 +1,33 @@
+{
+  "network": "GenLayer Studio-dev",
+  "rpc": "https://studio-dev.genlayer.com/api",
+  "chainId": 61997,
+  "contractAddress": "0x5C2C0827B08C720787673dE325a36886e8Ec8645",
+  "deploymentTx": "0x4605905ffcfc3e9c070f857b0fde1a77976fbcae56330c3695b9f27e62a55356",
+  "transactionHashVariant": "LATEST_FINAL",
+  "contractInfo": {
+    "breach_rule": "two distinct consecutive qualified negative captures",
+    "contest_outage_recovery": "one consensus-observed external capture failure may extend the effective contest deadline by a bounded 900 seconds; no semantic negative is created",
+    "contest_rule": "the promisor may request one fresh authenticated capture of the locked source; adjudication is bound to its immutable contest snapshot",
+    "evidence_discovery": "Wayback/CDX/Availability are optional off-chain research and recovery only",
+    "evidence_provider": "Live public source via gl.nondet.web.get",
+    "name": "Uphold",
+    "redirect_behavior": "gl.nondet.web exposes status and body here; final URL and headers are not assumed visible",
+    "semantic_classifications": [
+      "HOLDS",
+      "WEAKENED",
+      "ABSENT",
+      "INDETERMINATE"
+    ],
+    "semantic_verification": "independent validators classify the same authenticated baseline and live snapshot; only classification is consensus-critical",
+    "settlement_confirmation": "external Studio/client observation; no contract-level receipt is available",
+    "source_claim": "the wallet stakes behind the exact commitment text and locked HTTPS source; content authentication does not prove domain ownership or legal identity",
+    "transfer_mechanism": "finalized EOA external message",
+    "version": "live-snapshot-v1.2"
+  },
+  "expected": {
+    "name": "Uphold",
+    "version": "live-snapshot-v1.2"
+  },
+  "result": "PASS"
+}

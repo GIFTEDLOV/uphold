@@ -27,7 +27,7 @@ const deploymentDir = path.resolve(process.cwd(), "deployments/studio-dev/v1.2")
 // own provenance pair so a second, corrected deployment is still one-shot.
 const pendingManifestPath = path.join(
   deploymentDir,
-  "manifest.pending.json",
+  "manifest.corrected.pending.json",
 );
 const completedManifestPath = path.join(
   deploymentDir,

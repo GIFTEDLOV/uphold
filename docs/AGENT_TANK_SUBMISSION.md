@@ -6,7 +6,7 @@ Uphold
 
 ## Release status
 
-The V1.2 candidate targets GenLayer Studio-dev, chain `61997`, with the exact Consensus v0.6 / Studio v0.123 RC family and prompt-injection hardening. Local and CI gates pass, but the single hosted deployment attempt finalized with `FINISHED_WITH_ERROR` and `invalid_contract runner malformed`; no V1.2 address is claimed. The live lifecycle evidence below is explicitly historical V1.1 evidence.
+V1.2 is deployed and qualified on GenLayer Studio-dev, chain `61997`, with the exact Consensus v0.6 / Studio v0.123 RC family and prompt-injection hardening. The canonical address is `0x5C2C0827B08C720787673dE325a36886e8Ec8645`, source SHA-256 is `5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401`, and deployment is `FINALIZED / FINISHED_WITH_RETURN`. The earlier malformed-header attempt and all V1.1 lifecycle evidence remain explicitly historical.
 
 ## Track and category
 
@@ -41,7 +41,7 @@ public source
 
 ## Architecture
 
-See [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) for system components, trust boundaries, state transitions, accounting, contest flow, transaction safety, and the current Studio-dev / historical Studio Next separation.
+See [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) for system components, trust boundaries, state transitions, accounting, contest flow, transaction safety, and the current Studio-dev / historical Studio Next separation. Machine-readable V1.2 deployment evidence is in [`deployments/studio-dev/v1.2/`](../deployments/studio-dev/v1.2/).
 
 ## Historical V1.1 live proof
 
@@ -98,6 +98,6 @@ Uphold combines economic skin in the game with authenticated web evidence and bo
 9. Activity
 10. Transparency
 11. GitHub proof
-12. Studio Next contract
+12. Current Studio-dev V1.2 contract
 
-No breach or settlement live proof is claimed in this submission.
+No natural breach or external settlement receipt is claimed in this submission; controlled fixture evidence is labeled as controlled.

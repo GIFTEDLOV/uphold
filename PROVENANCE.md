@@ -1,6 +1,6 @@
 # Uphold release provenance
 
-## Current V1.2 candidate — predeployment schema-qualified
+## Current V1.2 release — deployed and qualified
 
 - Branch: uphold/app
 - Contract source: contracts/uphold.py
@@ -13,7 +13,12 @@
 - Raw schema: PASS, 15 methods / 7 views / 8 writes
 - SDK schema: PASS with genlayer-js 2.0.0-rc.1
 - Diagnostic probe v2: PASS, 1 view method
-- Deployment: pending predeployment gates
+- Deployment: `0x4605905ffcfc3e9c070f857b0fde1a77976fbcae56330c3695b9f27e62a55356`
+- Contract address: `0x5C2C0827B08C720787673dE325a36886e8Ec8645`
+- Deployment result: `FINALIZED` / `FINISHED_WITH_RETURN`
+- Source parity: PASS
+- Schema parity: PASS — 15 methods / 7 views / 8 writes
+- Qualification: PASS — create, authenticated baseline, positive `HOLDS` check, immutable history, ledger and address readback
 - Evidence: artifacts/runner-probe/schema-final-uphold-v12.json, artifacts/runner-probe/sdk-schema-crosscheck-final.json
 
 The runner header fix is one blank line after the dependency declaration. GenVM
@@ -24,9 +29,9 @@ Uphold source now returns the full schema, which is the authoritative
 predeployment runner/source proof. The 1jb runner remains incompatible with
 the hosted Studio-dev environment and is not used.
 
-This file records the blocked V1.2 release attempt and preserves the complete historical V1.1 production evidence. No V1.2 address, frontend promotion, Vercel deployment, GitHub release, or branch-protection change is claimed after the failed hosted execution.
+The one-line header correction is the only contract-source change from the prior V1.2 candidate. This file preserves the failed deployment and probe records below as troubleshooting history, while the canonical V1.2 proof package is `deployments/studio-dev/v1.2/`.
 
-## Current V1.2 candidate — blocked
+## Historical failed V1.2 attempt
 
 - Branch: uphold/app
 - Final source commit: 1e1c22ab6180329154f4a432e80ab308982dbe96
@@ -45,9 +50,9 @@ This file records the blocked V1.2 release attempt and preserves the complete hi
 - Exact RC family: docs/genlayer-release-family.json
 - GitHub CI: run 35990628506, success on all five jobs
 
-The candidate passed local and reproducible CI gates, but the canonical hosted runner was not compatible with this deployment attempt. Resolve and independently audit runner compatibility before any new release attempt. The first deployment transaction must not be retried blindly.
+The deployment failed because GenVM consumed the adjacent Pyright comment as part of the contiguous runner descriptor. The corrected source inserted one blank line, retained the same 5jyc runner, and deployed successfully. The failed transaction was never retried.
 
-## Current official runner probe — failed
+## Historical official runner probe — failed
 
 The current official `write-contract` skill documents `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6`. A disposable one-view probe using that exact header passed local `genvm-lint check`, schema, and typecheck, but its single Studio-dev deployment finalized with `FINISHED_WITH_ERROR` and `invalid_contract runner malformed`:
 
@@ -57,7 +62,7 @@ The current official `write-contract` skill documents `py-genlayer:1jb45aa8ynh2a
 - Raw receipt: `artifacts/runner-probe/manifest.pending.json`
 - Probe address/readback: none
 
-The active Uphold source and runner were not changed after this failure. No random runner substitution or third Uphold deployment was attempted.
+The 1jb runner remains unsupported by the hosted Studio-dev environment and is not used by V1.2. The corrected 5jyc probe and exact Uphold source both return schemas; the exact source schema is the authoritative release gate.
 
 ## Historical V1.1 contract
 

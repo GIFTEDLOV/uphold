@@ -412,4 +412,25 @@ was an Uphold source failure. The exact corrected Uphold schema is the
 authoritative predeployment proof.
 
 `UPHOLD_RUNNER_AND_SOURCE_SCHEMA_RESOLUTION=PASS`
-`RELEASE_DEPLOYMENT_GATE=OPEN_PENDING_ALL_OTHER_GATES`
+`RELEASE_DEPLOYMENT_GATE=PASS`
+
+## Corrected V1.2 deployment outcome
+
+The exact corrected Uphold source was deployed once after the schema and local
+release gates passed. The same 5jyc runner was retained; no runner hash change
+was made.
+
+- Contract: `0x5C2C0827B08C720787673dE325a36886e8Ec8645`
+- Deployment transaction: `0x4605905ffcfc3e9c070f857b0fde1a77976fbcae56330c3695b9f27e62a55356`
+- Status: `FINALIZED`
+- Execution: `FINISHED_WITH_RETURN`
+- Source parity: `PASS`
+- Live schema: `15` methods / `7` views / `8` writes
+- `contract_info`: `Uphold`, `live-snapshot-v1.2`
+- Qualification: `PASS` using create plus one positive check and `LATEST_FINAL` readbacks
+
+The first V1.2 deployment remains historical failure evidence: the contiguous
+runner-comment defect produced `invalid_contract runner malformed`. The 1jb
+runner remains unsupported by the hosted Studio-dev environment and is not
+used. The corrected 5jyc probe v2 and exact Uphold source are the authoritative
+schema evidence for this release.

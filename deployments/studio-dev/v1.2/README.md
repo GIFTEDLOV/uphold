@@ -1,28 +1,46 @@
-# Uphold V1.2 deployment attempt — blocked
+# Uphold V1.2 — canonical Studio-dev proof
 
-This directory preserves the first and only V1.2 deployment attempt. The transaction reached `FINALIZED`, but execution returned `FINISHED_WITH_ERROR`; therefore this is not a V1.2 deployment proof package and must not be promoted.
+This is the canonical V1.2 deployment package. It is separate from the
+historical V1.1 package and preserves the failed V1.2 attempt without treating
+it as a deployment.
 
-- Network: GenLayer Studio-dev, chain `61997`
+- Network: GenLayer Studio-dev
 - RPC: `https://studio-dev.genlayer.com/api`
-- Transaction: `0x06e758820d433baa29061b7dd432042dcefd8ec40749b53982bafa9cd9841f86`
-- Final status: `FINALIZED`
-- Execution: `FINISHED_WITH_ERROR`
-- Receipt result: `MAJORITY_AGREE`
-- Contract address: none
-- Source SHA-256: `EC4BD059AC218BA3E9151EE34C6B41F8810B371FF95F9A153B1D0BCB98EBB71C`
-- Receipt contract error: `invalid_contract runner malformed`
+- Chain ID: `61997`
+- Contract: `0x5C2C0827B08C720787673dE325a36886e8Ec8645`
+- Version: `live-snapshot-v1.2`
+- Source SHA-256: `5A8AE2923E28BF78E2F6E85688DE62FD9A0EFAB619C9E1EA3469A43F7BD95401`
+- Runner: `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng`
+- Deployment transaction: `0x4605905ffcfc3e9c070f857b0fde1a77976fbcae56330c3695b9f27e62a55356`
+- Deployment result: `FINALIZED` / `FINISHED_WITH_RETURN`
 
-No V1.2 source readback, schema parity, qualification, frontend promotion, Vercel production deployment, GitHub release, or branch protection change is valid after this failure. Do not submit a second deployment from this release attempt. Resolve and independently audit the runner compatibility before restarting the release.
+## Parity and qualification
 
-The complete raw receipt and fee settlement are retained in `manifest.pending.json`. The historical V1.1 deployment remains unchanged elsewhere in the repository.
+`source-readback.json` proves byte/source SHA parity. `schema.json` proves 15
+methods, 7 views, and 8 writes. `contract-info-readback.json` proves the final
+`contract_info` name and version using `LATEST_FINAL`. `qualification.json`
+records the create and positive check transactions, authenticated baseline,
+immutable history, ledger conservation, address record, and final-state
+readbacks. The qualification source is a controlled `example.com` fixture; it
+is not natural breach evidence.
 
-The official current network runner was separately probed and failed before any Uphold redeployment:
+## Fee profile
 
-- Documented runner: `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6`
-- Probe transaction: `0x414d53befcc5bd9acc37b82b0053cb447d679e7077663f8a16f8568699b51abf`
-- Probe source SHA-256: `B9F5A1F7E9B7B9D26C811F25E7FC475965DC1C51C516FF10EF92BA8722A0C392`
-- Probe result: `FINALIZED` / `FINISHED_WITH_ERROR`
-- Probe failure: `invalid_contract runner malformed`
-- Probe evidence: `artifacts/runner-probe/manifest.pending.json`
+The official measured fee profile is `../../frontend/fee-profile.json` with
+SHA-256 `F4A85DF9AB5DDB2F19A8F7B303594B1876DCE552DEF3EABDE0D7AC7D787EDB3E`.
+It is validated in CI and uses resource allocation fields rather than a live
+fee value as a reusable suggestion.
 
-Per the runner-probe stop condition, no third Uphold deployment was attempted.
+## Historical records retained
+
+- `manifest.pending.json` — failed original V1.2 deployment with the malformed
+  contiguous runner-comment header, `FINALIZED / FINISHED_WITH_ERROR`, and
+  `invalid_contract runner malformed`.
+- `manifest.corrected.pending.json` — one-shot corrected deployment record.
+- `../../../artifacts/runner-probe/` — failed 1jb diagnostics, corrected 5jyc
+  probe v2, and exact-source schema evidence.
+- Historical V1.1 address: `0x23786A52b62DC489A5f69653dedD68d1fc56c231`.
+
+The external EOA transfer boundary remains an honest limitation: the contract
+records pending payout/refund requests, but no contract-level external receipt
+is claimed here.

@@ -1,6 +1,8 @@
-# Studio-dev runner probe — failed
+# Studio-dev runner probes — historical diagnostics
 
-This is a disposable compatibility probe, not an Uphold deployment.
+These are disposable compatibility probes, not Uphold deployments. The first
+1jb probe is preserved as a failed historical diagnostic. The corrected 5jyc
+probe v2 below is the successful schema-only probe used for release evidence.
 
 - Runner: `py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6`
 - Source: `studio-dev-runner-probe.py`
@@ -13,5 +15,16 @@ This is a disposable compatibility probe, not an Uphold deployment.
 - Contract address: none
 - `ping()` readback: none
 - Failure: `invalid_contract runner malformed`
+
+## Corrected 5jyc probe v2
+
+- Runner: `py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng`
+- Source: `schema-final-5jyc-probe-v2.json`
+- Method: `gen_getContractSchemaForCode` with UTF-8 hex source
+- Result: `PASS`, one view method (`ping`)
+- Writes: none; no probe deployment was made
+
+The exact corrected Uphold source is the authoritative release gate and
+returned 15 methods, 7 views, and 8 writes before its successful deployment.
 
 The raw receipt, fee quote, settlement, and validator result are preserved in `manifest.pending.json`. The probe stop condition prohibits another runner or Uphold deployment in this run.
