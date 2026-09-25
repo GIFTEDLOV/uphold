@@ -9,7 +9,7 @@
 <p align="center">GEN-backed commitments with authenticated live-source evidence and bounded semantic judgment on GenLayer.</p>
 
 <p align="center">
-  <a href="https://uphold-sable.vercel.app">Live App</a> ·
+  <a href="https://genlayer-commitment-bond.vercel.app">Live App</a> ·
   <a href="docs/ARCHITECTURE.md">Architecture</a> ·
   <a href="PROVENANCE.md">Deployment</a> ·
   <a href="evidence/studio-next/uphold-hardening-live-proof.json">Verification</a> ·
@@ -436,4 +436,4 @@ For a deeper audit, compare the deployed source and deployment transaction in PR
 
 ## Status
 
-Uphold V1.2 is released on Studio-dev and promoted to [uphold-sable.vercel.app](https://uphold-sable.vercel.app). Historical V1.1 proof and the failed malformed-header attempt remain preserved. No natural-production breach or external transfer receipt is claimed.
+Uphold V1.2 is released on Studio-dev and available at [genlayer-commitment-bond.vercel.app](https://genlayer-commitment-bond.vercel.app). Historical V1.1 proof and the failed malformed-header attempt remain preserved. No natural-production breach or external transfer receipt is claimed.
