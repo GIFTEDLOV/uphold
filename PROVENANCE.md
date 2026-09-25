@@ -103,11 +103,11 @@ NEXT_PUBLIC_CONTRACT_ADDRESS=0x23786A52b62DC489A5f69653dedD68d1fc56c231
 
 - GitHub repository: https://github.com/GIFTEDLOV/uphold
 - Release source commit before final production metadata: 22dca3e5a09f699d6b39a5374c2c559f855a65ef
-- Vercel project: `uphold`
-- Vercel project ID: `prj_YqhtNLEgwPPj7nhGoamGr6vbMd67`
+- Vercel project: `genlayer-commitment-bond`
+- Vercel project ID: `prj_1gI3NBa3P3qtEX3sztFLv2XQhJJA`
 - Vercel root directory: `frontend`
-- Production URL: https://uphold-sable.vercel.app
-- Existing production remains https://uphold-sable.vercel.app and was not changed by the blocked V1.2 attempt.
+- Production URL: https://genlayer-commitment-bond.vercel.app
+- Retired flagged historical hostname: `uphold-sable.vercel.app` (the previous `uphold` Vercel project remains available only as rollback and is not a current app link).
 
 The production project is the new Uphold project and is not the historical UptimeBond project. The final metadata commit and its resulting Vercel deployment are reported in the release audit.
 
